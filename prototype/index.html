@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>OCTAVA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #EEF0EC;
+      --card: #FAFBF8;
+      --ink: #22328C;
+      --ink-soft: #56619E;
+      --line: #C5CBE0;
+      --pink: #FF4FA3;
+      --pink-tint: #FFC9E2;
+      --yellow: #FFE14D;
+      --aqua: #74D3EA;
+      --dots: #22328C;
+      --on-accent: #22328C;
+      --blend: multiply;
+      --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+      --body: "Instrument Sans", system-ui, sans-serif;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #10173A;
+        --card: #18214D;
+        --ink: #E8EBF8;
+        --ink-soft: #A7B0DA;
+        --line: #33407A;
+        --pink-tint: #5A2A57;
+        --blend: normal;
+        color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #10173A;
+      --card: #18214D;
+      --ink: #E8EBF8;
+      --ink-soft: #A7B0DA;
+      --line: #33407A;
+      --pink-tint: #5A2A57;
+      --blend: normal;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); white-space: nowrap;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      height: 100dvh;
+      max-height: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: calc(12px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+    }
+
+    /* Header and band lineup */
+    .masthead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .wordmark {
+      margin: 0;
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: 32px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+    .where { font-size: 14px; color: var(--ink-soft); }
+
+    .lineup-title { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+    .slots {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .slot {
+      border: 2px dashed var(--line);
+      border-radius: 10px;
+      padding: 5px 4px 6px;
+      text-align: center;
+    }
+    .slot.filled { border-style: solid; border-color: var(--ink); background: var(--card); }
+    .slot.just-filled { animation: slot-fill 0.7s ease-out; }
+    @keyframes slot-fill {
+      0% { background: var(--pink); transform: scale(1.08); }
+      100% { background: var(--card); transform: none; }
+    }
+    .slot-role { display: block; font-size: 13px; font-weight: 700; }
+    .slot-who {
+      display: block;
+      font-size: 12px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Card deck */
+    .deck { position: relative; flex: 1; min-height: 0; }
+    .card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      border: 2px solid var(--ink);
+      border-radius: 20px;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .card.top { z-index: 2; cursor: grab; }
+    .card.behind { transform: translateY(10px) scale(0.96); }
+    .card.dragging { cursor: grabbing; }
+    .card.settle { transition: transform 0.25s ease-out; }
+    .card.fly { transition: transform 0.35s ease-in; }
+
+    .portrait {
+      position: relative;
+      flex: 1;
+      min-height: 110px;
+      background: var(--tone);
+      overflow: hidden;
+    }
+    .portrait::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, var(--dots) 32%, transparent 36%);
+      background-size: 9px 9px;
+      -webkit-mask-image: radial-gradient(ellipse at var(--fx) var(--fy), transparent 12%, #000 88%);
+      mask-image: radial-gradient(ellipse at var(--fx) var(--fy), transparent 12%, #000 88%);
+    }
+    .stamp {
+      position: absolute;
+      top: 18px;
+      padding: 0 12px;
+      border: 4px solid var(--ink);
+      border-radius: 10px;
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: 44px;
+      line-height: 1.1;
+      opacity: 0;
+    }
+    .stamp-jam { left: 16px; transform: rotate(-12deg); background: var(--pink); color: var(--on-accent); border-color: var(--on-accent); }
+    .stamp-pass { right: 16px; transform: rotate(12deg); background: var(--card); color: var(--ink); }
+
+    .info {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 0 18px 16px;
+    }
+    .instrument {
+      margin: -0.4em 0 0;
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: 76px;
+      line-height: 0.85;
+      mix-blend-mode: var(--blend);
+    }
+    .who { margin: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .who strong { font-size: 19px; }
+    .who span { font-size: 14px; color: var(--ink-soft); text-align: right; }
+    .fit {
+      align-self: flex-start;
+      margin: 0;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--pink-tint);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .fit[hidden] { display: none; }
+
+    .clip { display: flex; align-items: center; gap: 10px; }
+    .play {
+      flex: none;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--card);
+      cursor: pointer;
+    }
+    .play svg { width: 16px; height: 16px; fill: currentColor; }
+    .wave { flex: 1; height: 32px; display: flex; align-items: center; gap: 2px; }
+    .wave i { flex: 1; height: calc(var(--h) * 100%); border-radius: 2px; background: var(--line); }
+    .wave i.on { background: var(--pink); }
+    .time { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+    .genres, .looking { margin: 0; font-size: 15px; }
+    .looking { color: var(--ink-soft); }
+
+    .empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 24px;
+      border: 2px dashed var(--line);
+      border-radius: 20px;
+    }
+    .empty h2 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 48px; line-height: 0.95; }
+    .empty p { margin: 0; color: var(--ink-soft); }
+
+    /* Actions */
+    .actions { display: flex; justify-content: center; gap: 14px; }
+    .act {
+      flex: 1;
+      max-width: 180px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .act svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+    .act:disabled { opacity: 0.4; cursor: default; }
+    .pass { background: var(--card); color: var(--ink); }
+    .jam { background: var(--pink); color: var(--on-accent); border-color: var(--pink); }
+    .hint { display: none; margin: -4px 0 0; text-align: center; font-size: 13px; color: var(--ink-soft); }
+    @media (hover: hover) and (pointer: fine) { .hint { display: block; } }
+
+    /* Match dialog and toast */
+    dialog {
+      width: calc(100vw - 32px);
+      max-width: 380px;
+      padding: 24px;
+      border: 2px solid var(--ink);
+      border-radius: 20px;
+      background: var(--card);
+      color: var(--ink);
+    }
+    dialog::backdrop { background: rgba(16, 23, 58, 0.6); }
+    .match-title { margin: 0 0 10px; font-family: var(--display); font-weight: 900; font-size: 46px; line-height: 0.95; }
+    .match-body { margin: 0 0 20px; }
+    .match-actions { display: flex; flex-direction: column; gap: 10px; }
+    .match-actions .act { max-width: none; flex: none; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(100px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      max-width: calc(100vw - 32px);
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 15px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+
+    @media (max-height: 700px) {
+      .instrument { font-size: 60px; }
+      .looking { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .card.settle, .card.fly, .toast { transition: none; }
+      .slot.just-filled { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <h1 class="wordmark">OCTAVA</h1>
+      <span class="where">Tbilisi, within 10 km</span>
+    </header>
+
+    <section aria-labelledby="lineup-title">
+      <h2 class="lineup-title" id="lineup-title">Your band</h2>
+      <ul class="slots" id="slots"></ul>
+    </section>
+
+    <section class="deck" id="deck" aria-label="Musicians near you"></section>
+
+    <div class="actions">
+      <button class="act pass" id="pass-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        Pass
+      </button>
+      <button class="act jam" id="jam-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+        Jam
+      </button>
+    </div>
+    <p class="hint">Drag the card, or use the left and right arrow keys</p>
+  </div>
+
+  <dialog id="match" aria-labelledby="match-title">
+    <h2 class="match-title" id="match-title"></h2>
+    <p class="match-body" id="match-body"></p>
+    <div class="match-actions">
+      <button class="act jam" id="say-hi" type="button">Say hi</button>
+      <button class="act pass" id="keep-swiping" type="button">Keep swiping</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="sr-only" id="announcer" aria-live="polite"></div>
+
+  <script>
+    // Drums riffs: 1 = kick, 2 = snare, 0 = rest. Other riffs are MIDI notes, null = rest.
+    const PEOPLE = [
+      { name: "Nika", age: 24, instrument: "Drums", area: "Vera", km: 1.2, genres: ["post-punk", "math rock"],
+        looking: "A band that rehearses twice a week and actually plays shows.", likesYou: true,
+        riff: [1, 1, 2, 0, 1, 1, 2, 2] },
+      { name: "Mariam", age: 27, instrument: "Bass", area: "Sololaki", km: 2.4, genres: ["funk", "neo-soul"],
+        looking: "Groove-first people. I have a car and a key to a rehearsal room.", likesYou: false,
+        riff: [40, null, 52, 40, 43, 45, null, 47] },
+      { name: "Luka", age: 22, instrument: "Vocals", area: "Saburtalo", km: 4.1, genres: ["alt rock", "grunge"],
+        looking: "I write lyrics in Georgian and English. I need a band to make them loud.", likesYou: true,
+        riff: [64, 67, 69, 67, 64, 62, 64, null] },
+      { name: "Tamar", age: 30, instrument: "Keys", area: "Vake", km: 3.0, genres: ["jazz", "synth-pop"],
+        looking: "Classically trained, recovering. I want to play over a drum machine.", likesYou: true,
+        riff: [60, 64, 67, 71, 72, 71, 67, 64] },
+      { name: "Giorgi", age: 26, instrument: "Drums", area: "Didube", km: 6.5, genres: ["metal", "hardcore"],
+        looking: "Double kick, my own kit, no excuses.", likesYou: false,
+        riff: [1, 1, 1, 2, 1, 1, 1, 2] },
+      { name: "Ana", age: 25, instrument: "Vocals", area: "Mtatsminda", km: 1.8, genres: ["indie folk", "dream pop"],
+        looking: "Harmonies are my favourite part of any song.", likesYou: false,
+        riff: [67, 69, 71, 74, 71, 69, 67, 64] },
+      { name: "Dato", age: 29, instrument: "Bass", area: "Nadzaladevi", km: 5.2, genres: ["post-rock", "shoegaze"],
+        looking: "Long songs, lots of pedals, quiet and then very loud.", likesYou: true,
+        riff: [38, null, 38, 45, 43, null, 41, 40] },
+      { name: "Salome", age: 23, instrument: "Keys", area: "Avlabari", km: 2.9, genres: ["city pop", "disco"],
+        looking: "I want our first gig to be on a rooftop in June.", likesYou: false,
+        riff: [72, 69, 65, 69, 72, 74, 72, 69] },
+    ];
+    const TONES = ["var(--pink)", "var(--yellow)", "var(--aqua)"];
+    const STEP = 0.25; // seconds per riff note
+
+    const band = [
+      { role: "Guitar", who: "You" },
+      { role: "Drums", who: null },
+      { role: "Bass", who: null },
+      { role: "Vocals", who: null },
+      { role: "Keys", who: null },
+    ];
+    let queue = PEOPLE.slice();
+    let busy = false;
+
+    const $ = (id) => document.getElementById(id);
+    const deck = $("deck");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+    function hash(str) {
+      let h = 2166136261;
+      for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+      return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0) % 1000) / 1000;
+    }
+    function listJoin(items) {
+      return items.length < 2 ? items.join("") : items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+    }
+    function openSlot(role) {
+      return band.find((s) => s.role === role && !s.who) || null;
+    }
+
+    // ---- Band lineup ----
+    function renderLineup(justFilled) {
+      $("slots").innerHTML = band.map((s) => `
+        <li class="slot${s.who ? " filled" : ""}${s.role === justFilled ? " just-filled" : ""}">
+          <span class="slot-role">${esc(s.role)}</span>
+          <span class="slot-who">${s.who ? esc(s.who) : "Open"}</span>
+        </li>`).join("");
+    }
+
+    // ---- Cards ----
+    const PLAY_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2l10 6-10 6z"/></svg>';
+    const STOP_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="1"/></svg>';
+
+    function makeCard(p) {
+      const rand = hash(p.name);
+      const tone = TONES[PEOPLE.indexOf(p) % TONES.length];
+      const bars = Array.from({ length: 36 }, () => `<i style="--h:${(0.2 + rand() * 0.8).toFixed(2)}"></i>`).join("");
+      const el = document.createElement("article");
+      el.className = "card";
+      el.setAttribute("aria-label", `${p.name}, ${p.age}, ${p.instrument.toLowerCase()}`);
+      el.style.setProperty("--tone", tone);
+      el.innerHTML = `
+        <div class="portrait" style="--fx:${Math.round(30 + rand() * 50)}%;--fy:${Math.round(20 + rand() * 40)}%">
+          <span class="stamp stamp-jam" aria-hidden="true">Jam</span>
+          <span class="stamp stamp-pass" aria-hidden="true">Pass</span>
+        </div>
+        <div class="info">
+          <h2 class="instrument">${esc(p.instrument)}</h2>
+          <p class="who"><strong>${esc(p.name)}, ${p.age}</strong><span>${esc(p.area)}, ${p.km} km away</span></p>
+          <p class="fit" hidden></p>
+          <div class="clip">
+            <button class="play" type="button" aria-label="Play ${esc(p.name)}'s riff">${PLAY_ICON}</button>
+            <div class="wave" aria-hidden="true">${bars}</div>
+            <span class="time">0:0${Math.round(p.riff.length * STEP)}</span>
+          </div>
+          <p class="genres">Plays ${esc(listJoin(p.genres))}</p>
+          <p class="looking">“${esc(p.looking)}”</p>
+        </div>`;
+      el.querySelector(".play").addEventListener("click", () => toggleRiff(el, p));
+      return el;
+    }
+
+    function updateFit(el, p) {
+      const fit = el.querySelector(".fit");
+      const open = openSlot(p.instrument);
+      fit.hidden = !open;
+      fit.textContent = open ? `Fits your open ${p.instrument.toLowerCase()} slot` : "";
+    }
+
+    function makeTop(el, p) {
+      el.classList.remove("behind");
+      el.classList.add("top");
+      el.inert = false;
+      el.removeAttribute("aria-hidden");
+      updateFit(el, p);
+      attachDrag(el);
+    }
+
+    function makeBehind(el, p) {
+      el.classList.add("behind");
+      el.inert = true;
+      el.setAttribute("aria-hidden", "true");
+      updateFit(el, p);
+    }
+
+    function renderDeck() {
+      deck.innerHTML = "";
+      if (!queue.length) return renderEmpty();
+      setActionsEnabled(true);
+      if (queue[1]) {
+        const behind = makeCard(queue[1]);
+        makeBehind(behind, queue[1]);
+        deck.append(behind);
+      }
+      const top = makeCard(queue[0]);
+      makeTop(top, queue[0]);
+      deck.append(top);
+    }
+
+    function renderEmpty() {
+      setActionsEnabled(false);
+      deck.innerHTML = `
+        <div class="empty">
+          <h2>You've heard everyone nearby</h2>
+          <p>You've seen every musician within 10 km. New people join every week.</p>
+          <button class="act pass" type="button" id="start-over">Start over</button>
+        </div>`;
+      $("start-over").addEventListener("click", () => {
+        queue = PEOPLE.slice();
+        renderDeck();
+        deck.querySelector(".card.top .play").focus();
+      });
+    }
+
+    function setActionsEnabled(on) {
+      $("pass-btn").disabled = !on;
+      $("jam-btn").disabled = !on;
+    }
+
+    // ---- Dragging ----
+    function setDrag(el, dx, dy) {
+      el.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 18}deg)`;
+      el.querySelector(".stamp-jam").style.opacity = Math.max(0, Math.min(1, dx / 90));
+      el.querySelector(".stamp-pass").style.opacity = Math.max(0, Math.min(1, -dx / 90));
+    }
+
+    function attachDrag(el) {
+      let startX = 0, startY = 0, dx = 0, pointer = null;
+      el.addEventListener("pointerdown", (e) => {
+        if (busy || e.target.closest("button") || pointer !== null) return;
+        pointer = e.pointerId;
+        el.setPointerCapture(pointer);
+        startX = e.clientX;
+        startY = e.clientY;
+        dx = 0;
+        el.classList.remove("settle");
+        el.classList.add("dragging");
+      });
+      el.addEventListener("pointermove", (e) => {
+        if (e.pointerId !== pointer) return;
+        dx = e.clientX - startX;
+        setDrag(el, dx, (e.clientY - startY) * 0.2);
+      });
+      const end = (e) => {
+        if (e.pointerId !== pointer) return;
+        pointer = null;
+        el.classList.remove("dragging");
+        if (Math.abs(dx) > Math.min(110, deck.clientWidth * 0.28)) {
+          decide(dx > 0 ? "jam" : "pass");
+        } else {
+          el.classList.add("settle");
+          setDrag(el, 0, 0);
+        }
+      };
+      el.addEventListener("pointerup", end);
+      el.addEventListener("pointercancel", end);
+    }
+
+    // ---- Decisions ----
+    function decide(choice) {
+      const el = deck.querySelector(".card.top");
+      if (busy || !el) return;
+      busy = true;
+      stopRiff();
+      const p = queue[0];
+      const dir = choice === "jam" ? 1 : -1;
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        el.remove();
+        queue.shift();
+        const next = deck.querySelector(".card.behind");
+        if (next) {
+          next.classList.add("settle");
+          makeTop(next, queue[0]);
+          next.style.transform = "none";
+        }
+        if (queue[1]) {
+          const behind = makeCard(queue[1]);
+          makeBehind(behind, queue[1]);
+          deck.prepend(behind);
+        }
+        if (!queue.length) renderEmpty();
+        busy = false;
+        afterDecision(choice, p);
+      };
+
+      el.querySelector(choice === "jam" ? ".stamp-jam" : ".stamp-pass").style.opacity = 1;
+      if (reduceMotion.matches) return finish();
+      el.classList.remove("dragging", "settle");
+      el.classList.add("fly");
+      requestAnimationFrame(() => {
+        el.style.transform = `translate(${dir * deck.clientWidth * 1.4}px, 30px) rotate(${dir * 24}deg)`;
+      });
+      el.addEventListener("transitionend", finish, { once: true });
+      setTimeout(finish, 500);
+    }
+
+    function afterDecision(choice, p) {
+      if (choice === "pass") return announce(`Passed on ${p.name}.`);
+      if (p.likesYou) return showMatch(p);
+      toast(`You asked ${p.name} to jam`);
+    }
+
+    function showMatch(p) {
+      const slot = openSlot(p.instrument);
+      const role = p.instrument.toLowerCase();
+      if (slot) {
+        slot.who = p.name;
+        renderLineup(p.instrument);
+        const top = deck.querySelector(".card.top");
+        if (top) updateFit(top, queue[0]);
+      }
+      const holder = band.find((s) => s.role === p.instrument);
+      $("match-title").textContent = `${p.name} wants to jam too`;
+      $("match-body").textContent = slot
+        ? `${p.instrument} is now filled in your band. Say hi and plan a first rehearsal.`
+        : `${holder.who} already plays ${role} in your band, but you can still say hi.`;
+      const dialog = $("match");
+      dialog.dataset.name = p.name;
+      dialog.showModal();
+    }
+
+    $("say-hi").addEventListener("click", () => {
+      $("match").close();
+      toast(`You said hi to ${$("match").dataset.name}`);
+    });
+    $("keep-swiping").addEventListener("click", () => $("match").close());
+    $("pass-btn").addEventListener("click", () => decide("pass"));
+    $("jam-btn").addEventListener("click", () => decide("jam"));
+    document.addEventListener("keydown", (e) => {
+      if ($("match").open || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); decide("jam"); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); decide("pass"); }
+    });
+
+    // ---- Feedback ----
+    let toastTimer;
+    function toast(msg) {
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove("show"), 2400);
+    }
+    function announce(msg) {
+      $("announcer").textContent = msg;
+    }
+
+    // ---- Riff playback (synthesised, no audio files) ----
+    let actx = null;
+    let playing = null;
+    let noise = null;
+    const freq = (m) => 440 * Math.pow(2, (m - 69) / 12);
+
+    function noiseBuffer() {
+      if (noise) return noise;
+      noise = actx.createBuffer(1, actx.sampleRate * 0.2, actx.sampleRate);
+      const data = noise.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      return noise;
+    }
+
+    function voice(instrument, note, t) {
+      const g = actx.createGain();
+      g.connect(actx.destination);
+      if (instrument === "Drums") {
+        if (!note) return [];
+        if (note === 1) {
+          const o = actx.createOscillator();
+          o.frequency.setValueAtTime(150, t);
+          o.frequency.exponentialRampToValueAtTime(45, t + 0.15);
+          g.gain.setValueAtTime(0.9, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          o.connect(g);
+          o.start(t);
+          o.stop(t + 0.22);
+          return [o];
+        }
+        const s = actx.createBufferSource();
+        const hp = actx.createBiquadFilter();
+        s.buffer = noiseBuffer();
+        hp.type = "highpass";
+        hp.frequency.value = 1200;
+        s.connect(hp);
+        hp.connect(g);
+        g.gain.setValueAtTime(0.5, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        s.start(t);
+        s.stop(t + 0.16);
+        return [s];
+      }
+      if (note == null) return [];
+      const nodes = [];
+      const o = actx.createOscillator();
+      o.type = { Bass: "sawtooth", Vocals: "sine", Keys: "triangle" }[instrument] || "triangle";
+      o.frequency.value = freq(note);
+      let out = o;
+      if (instrument === "Bass") {
+        const lp = actx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 600;
+        o.connect(lp);
+        out = lp;
+      }
+      if (instrument === "Vocals") {
+        const lfo = actx.createOscillator();
+        const depth = actx.createGain();
+        lfo.frequency.value = 5.5;
+        depth.gain.value = 4;
+        lfo.connect(depth);
+        depth.connect(o.frequency);
+        lfo.start(t);
+        lfo.stop(t + STEP);
+        nodes.push(lfo);
+      }
+      out.connect(g);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(instrument === "Bass" ? 0.35 : 0.25, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + STEP * 0.95);
+      o.start(t);
+      o.stop(t + STEP);
+      nodes.push(o);
+      return nodes;
+    }
+
+    function toggleRiff(el, p) {
+      if (playing && playing.el === el) return stopRiff();
+      stopRiff();
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") actx.resume();
+      const t0 = actx.currentTime + 0.05;
+      const nodes = p.riff.flatMap((note, i) => voice(p.instrument, note, t0 + i * STEP));
+      const duration = p.riff.length * STEP;
+      const btn = el.querySelector(".play");
+      const bars = Array.from(el.querySelectorAll(".wave i"));
+      btn.innerHTML = STOP_ICON;
+      btn.setAttribute("aria-label", `Stop ${p.name}'s riff`);
+      const tick = () => {
+        const f = Math.min(1, Math.max(0, (actx.currentTime - t0) / duration));
+        const lit = Math.floor(f * bars.length);
+        bars.forEach((b, i) => b.classList.toggle("on", i < lit));
+        if (f < 1) playing.raf = requestAnimationFrame(tick);
+        else stopRiff();
+      };
+      playing = { el, p, nodes, btn, bars, raf: requestAnimationFrame(tick) };
+    }
+
+    function stopRiff() {
+      if (!playing) return;
+      const { raf, nodes, bars, btn, p } = playing;
+      playing = null;
+      cancelAnimationFrame(raf);
+      nodes.forEach((n) => { try { n.stop(); } catch (e) { /* already stopped */ } });
+      bars.forEach((b) => b.classList.remove("on"));
+      btn.innerHTML = PLAY_ICON;
+      btn.setAttribute("aria-label", `Play ${p.name}'s riff`);
+    }
+
+    renderLineup();
+    renderDeck();
+  </script>
+</body>
+</html>
