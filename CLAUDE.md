@@ -29,7 +29,7 @@ Stack (chosen by the owner): **Flutter** (Dart) for the iOS and Android app, and
 
 ## Commands
 
-Flutter is installed at `C:\src\flutter` (stable channel) and is on the user PATH. A shell started before PATH was updated needs the full path, `/c/src/flutter/bin/flutter`.
+Flutter is installed at `C:\src\flutter` (stable channel) and is on the user PATH. A shell started before PATH was updated needs the full path, `/c/src/flutter/bin/flutter`. An older Flutter (3.41, Dart 3.11) also exists at `C:\Users\lchemia\Documents\flutter` and can't build this project, which needs Dart ^3.13.5. If `flutter --version` shows 3.41, check VS Code's `dart.flutterSdkPath` setting, which should be `C:\src\flutter`; the Dart extension puts that SDK first on its terminals' PATH.
 
 ```
 flutter pub get                       # install dependencies
@@ -46,8 +46,9 @@ iOS can't be built on this Windows machine; it needs a Mac or a macOS CI runner.
 
 ## Code layout
 
-Supabase is not wired in yet. Musicians come from sample data, and all state lives in the swipe screen (`setState`). No state-management package has been chosen yet.
-- `lib/main.dart`: `OctavaApp` (MaterialApp with light and dark themes), which opens on `SwipeScreen`.
+The Supabase database is built and tested, and the app initialises the Supabase client, but no screen uses it yet. The swipe screen still uses sample data, and all state lives in it (`setState`). No state-management package has been chosen yet.
+- `lib/main.dart`: initialises Supabase, then runs `OctavaApp` (MaterialApp with light and dark themes), which opens on `SwipeScreen`.
+- `lib/config/supabase_config.dart`: project URL and publishable key. These are public by design; never add the secret/service_role key or the DB password.
 - `lib/screens/swipe_screen.dart`: holds the band lineup (`Map<String, String?>` of role → member), the card queue, and the drag offset, which one `AnimationController` animates for fly-off and snap-back. It also contains the match dialog, the empty state, and arrow-key shortcuts. A Jam on someone with `likesYou` is a match and fills their instrument's slot if it's open.
 - `lib/widgets/musician_card.dart`: the card. `HalftonePainter` draws the riso portrait (dots grow away from a per-musician spotlight); the instrument name overlaps the portrait with a multiply blend in light mode. The audio clip's play button is disabled until real clips exist.
 - `lib/widgets/band_lineup.dart`: the "Your band" slots, which flash pink when filled.
@@ -59,9 +60,22 @@ Supabase is not wired in yet. Musicians come from sample data, and all state liv
 
 App IDs: the store-facing ID is `com.octava.app` (Android `applicationId`, iOS `PRODUCT_BUNDLE_IDENTIFIER`). The Android Kotlin `namespace` stays `com.octava.octava`; it's internal only.
 
+## Backend (Supabase)
+
+Project ref `nbvcbhnaevkrnpbjhbbj` (Frankfurt). Claude Code reaches it through the Supabase MCP server in `.mcp.json`; the owner authenticates with `/mcp`. The schema lives in `supabase/migrations/`, with file names matching the versions applied remotely. Add changes as new migration files (apply with the MCP `apply_migration` tool, then save the same SQL locally under the version it gets). Don't edit applied migrations.
+
+How v1 fits together:
+- **Sign-up order:** auth user → `profile_private` (birth date; a trigger rejects anyone under 16; no update policy, so it can't be changed from the app) → `profiles` (its id references `profile_private`, so there's no profile without a birth date) → `profile_instruments`, `profile_links`, `audio_clips` (files in the private `clips` storage bucket at `<user id>/<file>`, played via signed URLs).
+- **Age groups:** 16–17 year olds and adults never see each other in v1. RLS on profiles, details and clip files uses `private.same_age_group()`. `get_deck` and `record_swipe` apply it too, and `private.can_message()` re-checks it on every message, so a teen pair stops chatting if one turns 18. Bands (v2) are where teens and adults will meet.
+- **Location:** `profiles.lat/lng` are rounded to 2 decimals (~1 km) by trigger and can't be read or written by clients (column grants). Set them with `set_my_location()`; distances come back from `get_deck` as whole km.
+- **Public API (RPC):** only `get_deck(max_km, instrument_ids, min_skill, genre_filter, goal_filter, frequency_filter, max_results)`, `record_swipe(target, decision)` (returns the match id on a mutual Jam, else null), and `set_my_location(lat, lng)`. Helpers live in the unexposed `private` schema; signed-in users can execute only the ones RLS policies call.
+- **Tables clients write directly:** profile tables (own rows), `messages` (insert in own match, if `can_message`), `blocks` (own), `reports` (insert only; read them in the dashboard). Swipes and matches are written only by `record_swipe`; either person can delete (unmatch) a match.
+- **Realtime:** `matches` and `messages` are in the `supabase_realtime` publication (RLS applies).
+- **Rule tests:** `supabase/tests/rules_check.sql` acts as fake users in one block and always ends with an exception, so it rolls itself back. All checks should read PASS. Re-run it after any schema or policy change, and also run the Supabase security and performance advisors.
+
 ## Keeping this file current
 
-When Supabase and real features land, document the architecture here: how auth, profiles, swipes and matches, chat and audio storage fit together, plus where the age and teen-chat rules are enforced (database policies, not only the app). Update "Product" and "Release plan" when the owner changes a decision.
+Keep "Backend" in step with new migrations. Update "Product" and "Release plan" when the owner changes a decision.
 
 ## Environment
 
