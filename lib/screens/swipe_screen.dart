@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import '../data/clip_repository.dart';
 import '../data/deck.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
@@ -24,7 +25,16 @@ class SwipeScreen extends StatefulWidget {
     this.onOpenMatches,
     this.onOpenChat,
     this.safety,
+    this.player,
+    this.onOpenProfile,
   });
+
+  /// Plays audio clips on cards. Without it the play buttons are disabled.
+  final ClipPlayer? player;
+
+  /// Shows a "Your profile" button when set. The lineup reloads afterwards,
+  /// since your main instrument may have changed.
+  final Future<void> Function()? onOpenProfile;
 
   /// Where people come from and swipes go.
   final DeckSource source;
@@ -158,6 +168,7 @@ class _SwipeScreenState extends State<SwipeScreen>
   Future<void> _decide(Decision decision) async {
     if (_busy || _queue.isEmpty) return;
     _busy = true;
+    widget.player?.stop();
     final musician = _queue.first;
     final direction = decision == Decision.jam ? 1.0 : -1.0;
     // Save while the card flies away. _attempt never throws, so a failure
@@ -325,6 +336,18 @@ class _SwipeScreenState extends State<SwipeScreen>
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (widget.onOpenProfile != null)
+                            IconButton(
+                              tooltip: 'Your profile',
+                              onPressed: () async {
+                                await widget.player?.stop();
+                                await widget.onOpenProfile!();
+                                if (mounted) _reload();
+                              },
+                              icon: const Icon(Icons.person_outline_rounded),
+                              color: colors.onSurfaceVariant,
+                              visualDensity: VisualDensity.compact,
+                            ),
                           if (widget.onOpenMatches != null)
                             IconButton(
                               tooltip: 'Matches',
@@ -467,6 +490,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                   onSafety: widget.safety == null
                       ? null
                       : () => _openSafety(top),
+                  player: widget.player,
                 ),
               ),
             ),

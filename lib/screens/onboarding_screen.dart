@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
 
+import '../data/clip_repository.dart';
 import '../data/profile_options.dart';
 import '../data/repositories.dart';
 import '../models/profile_draft.dart';
+import '../models/profile_link.dart';
 import '../theme.dart';
+import '../widgets/clips_section.dart';
+import 'card_preview_screen.dart';
 
-/// First-time setup: date of birth (once, can't be changed) and the musician
-/// profile that other people swipe on.
+/// The profile form. First-time setup asks for the date of birth (once, can't
+/// be changed); given [initial], it edits an existing profile instead and adds
+/// links and audio clips.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({
     super.key,
     required this.repository,
     required this.needsBirthDate,
     required this.onDone,
+    this.initial,
+    this.clips,
+    this.player,
   });
+
+  /// The current profile when editing; null during sign-up.
+  final ProfileDraft? initial;
+
+  /// Audio clips section, shown when editing.
+  final ClipRepository? clips;
+  final ClipPlayer? player;
 
   final ProfileRepository repository;
 
@@ -41,9 +56,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String? _frequency;
   final Set<String> _gear = {};
 
+  final List<ProfileLink> _links = [];
+  final _linkInput = TextEditingController();
+  String? _linkError;
+
   String? _instrumentError;
   String? _error;
   bool _saving = false;
+
+  bool get _editing => widget.initial != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.initial;
+    if (p == null) return;
+    _name.text = p.displayName;
+    _area.text = p.area;
+    _lookingFor.text = p.lookingFor;
+    _instruments.addAll(p.instruments);
+    _genres.addAll(p.genres);
+    _goals.addAll(p.goals);
+    _frequency = p.frequency;
+    _gear.addAll(p.gear);
+    _links.addAll(p.links);
+  }
+
+  void _addLink() {
+    final link = ProfileLink.fromInput(_linkInput.text);
+    setState(() {
+      if (link == null) {
+        _linkError = 'Paste a full web address, like youtube.com/watch?v=…';
+      } else if (_links.length >= 6) {
+        _linkError = 'You can add up to 6 links.';
+      } else {
+        if (!_links.contains(link)) _links.add(link);
+        _linkInput.clear();
+        _linkError = null;
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -51,6 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _area.dispose();
     _lookingFor.dispose();
     _birthDateText.dispose();
+    _linkInput.dispose();
     super.dispose();
   }
 
@@ -98,8 +151,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _submit() async {
+    // A link typed but not added with Enter or + would otherwise be lost.
+    if (_linkInput.text.trim().isNotEmpty) {
+      _addLink();
+    } else {
+      _linkError = null;
+    }
     final formOk = _formKey.currentState!.validate();
-    final valid = formOk && _instruments.isNotEmpty;
+    final valid =
+        formOk && _instruments.isNotEmpty && _linkInput.text.trim().isEmpty;
     setState(() {
       _instrumentError = _instruments.isEmpty
           ? 'Pick at least one instrument'
@@ -107,7 +167,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       // The problems may be scrolled out of view, so say so next to the button.
       _error = valid
           ? null
-          : 'Some answers are missing. Check the fields marked in red above.';
+          : (_linkError != null
+                ? 'Check the link: it isn\'t a web address we can use.'
+                : 'Some answers are missing. Check the fields marked in red above.');
     });
     if (!valid) return;
     if (_needsBirthDate && !await _confirmBirthDate()) return;
@@ -122,18 +184,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         // Saved for good; if the profile step fails, a retry skips this.
         setState(() => _needsBirthDate = false);
       }
-      await widget.repository.createProfile(
-        ProfileDraft(
-          displayName: _name.text,
-          area: _area.text,
-          lookingFor: _lookingFor.text,
-          instruments: Map.of(_instruments),
-          genres: List.of(_genres),
-          goals: Set.of(_goals),
-          frequency: _frequency,
-          gear: Set.of(_gear),
-        ),
+      final draft = ProfileDraft(
+        displayName: _name.text,
+        area: _area.text,
+        lookingFor: _lookingFor.text,
+        instruments: Map.of(_instruments),
+        genres: List.of(_genres),
+        goals: Set.of(_goals),
+        frequency: _frequency,
+        gear: Set.of(_gear),
+        links: List.of(_links),
       );
+      if (_editing) {
+        await widget.repository.updateProfile(draft);
+      } else {
+        await widget.repository.createProfile(draft);
+      }
       widget.onDone();
     } on UserFacingException catch (e) {
       if (mounted) setState(() => _error = e.message);
@@ -146,6 +212,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
+      appBar: _editing ? AppBar(backgroundColor: colors.surface) : null,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -156,7 +223,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
                 children: [
                   Text(
-                    'Set up your profile',
+                    _editing ? 'Your profile' : 'Set up your profile',
                     style: displayStyle(size: 44, color: colors.onSurface),
                   ),
                   const SizedBox(height: 8),
@@ -164,6 +231,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     'This is what other musicians see when they swipe.',
                     style: TextStyle(color: colors.onSurfaceVariant),
                   ),
+                  if (_editing) ...[
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => CardPreviewScreen(
+                              repository: widget.repository,
+                              player: widget.player,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.visibility_outlined),
+                        label: const Text('See your card'),
+                      ),
+                    ),
+                  ],
                   _Section('About you'),
                   TextFormField(
                     controller: _name,
@@ -338,6 +423,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       alignLabelWithHint: true,
                     ),
                   ),
+                  if (_editing) ...[
+                    _Section('Links'),
+                    TextField(
+                      controller: _linkInput,
+                      keyboardType: TextInputType.url,
+                      onSubmitted: (_) => _addLink(),
+                      decoration: InputDecoration(
+                        labelText: 'YouTube, TikTok, SoundCloud, Spotify…',
+                        hintText: 'Paste a link and press Enter',
+                        errorText: _linkError,
+                        suffixIcon: IconButton(
+                          tooltip: 'Add link',
+                          onPressed: _addLink,
+                          icon: const Icon(Icons.add_rounded),
+                        ),
+                      ),
+                    ),
+                    for (final link in _links)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.link_rounded),
+                        title: Text(link.label),
+                        subtitle: Text(
+                          link.url,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: IconButton(
+                          tooltip: 'Remove link',
+                          onPressed: () => setState(() {
+                            _links.remove(link);
+                          }),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                      ),
+                  ],
+                  if (_editing &&
+                      widget.clips != null &&
+                      widget.player != null) ...[
+                    _Section('Audio clips'),
+                    ClipsSection(clips: widget.clips!, player: widget.player!),
+                  ],
                   if (_error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -357,7 +484,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             dimension: 22,
                             child: CircularProgressIndicator(strokeWidth: 3),
                           )
-                        : const Text('Create profile'),
+                        : Text(_editing ? 'Save changes' : 'Create profile'),
                   ),
                 ],
               ),

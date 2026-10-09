@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Supabase, audio clips and links all need the internet (debug builds add this automatically). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="octava"
         android:name="${applicationName}"
@@ -40,6 +42,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Lets url_launcher open profile links (YouTube, TikTok, ...) in other apps. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
     </queries>
 </manifest>

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/chat_repository.dart';
+import '../data/clip_repository.dart';
 import '../data/deck.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../models/musician.dart';
 import 'auth_screen.dart';
 import 'chat_screen.dart';
+import 'edit_profile_screen.dart';
 import 'matches_screen.dart';
 import 'onboarding_screen.dart';
 import 'swipe_screen.dart';
@@ -34,6 +36,7 @@ class AuthGate extends StatelessWidget {
           deck: SupabaseDeck(client),
           chat: SupabaseChatRepository(client),
           safety: SupabaseSafetyRepository(client),
+          clips: SupabaseClipRepository(client),
         );
       },
     );
@@ -48,6 +51,7 @@ class ProfileGate extends StatefulWidget {
     this.deck = const SampleDeck(),
     this.chat,
     this.safety,
+    this.clips,
   });
 
   final ProfileRepository repository;
@@ -61,12 +65,36 @@ class ProfileGate extends StatefulWidget {
   /// Block and report, on cards and in chats.
   final SafetyRepository? safety;
 
+  /// Audio clips: playing on cards and managing your own.
+  final ClipRepository? clips;
+
   @override
   State<ProfileGate> createState() => _ProfileGateState();
 }
 
 class _ProfileGateState extends State<ProfileGate> {
   late Future<ProfileStatus> _status = widget.repository.myStatus();
+
+  // One player for the whole signed-in session, so only one clip plays at a time.
+  late final ClipPlayer? _player = widget.clips == null
+      ? null
+      : JustAudioClipPlayer(widget.clips!.playbackUrl);
+
+  @override
+  void dispose() {
+    _player?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openProfile() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => EditProfileScreen(
+        repository: widget.repository,
+        clips: widget.clips,
+        player: _player,
+      ),
+    ),
+  );
 
   // The braces matter: `setState(() => _status = ...)` would return the Future
   // from the callback, which setState rejects, and the screen wouldn't update.
@@ -122,6 +150,8 @@ class _ProfileGateState extends State<ProfileGate> {
             onOpenMatches: widget.chat == null ? null : _openMatches,
             onOpenChat: widget.chat == null ? null : _openChat,
             safety: widget.safety,
+            player: _player,
+            onOpenProfile: _openProfile,
           ),
           final status => OnboardingScreen(
             repository: widget.repository,

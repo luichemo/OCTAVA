@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
+import 'package:octava/models/musician.dart';
 import 'package:octava/models/profile_draft.dart';
 import 'package:octava/screens/auth_gate.dart';
 import 'package:octava/screens/auth_screen.dart';
@@ -29,6 +30,22 @@ class FakeProfileRepository implements ProfileRepository {
     saved = draft;
     hasProfile = true;
   }
+
+  @override
+  Future<ProfileDraft> loadMyProfile() async => saved!;
+
+  @override
+  Future<Musician> loadMyCard() async => Musician(
+    id: 'me',
+    name: saved!.displayName,
+    age: 30,
+    instrument: 'Vocals',
+    links: saved!.links,
+    clipSeconds: null,
+  );
+
+  @override
+  Future<void> updateProfile(ProfileDraft draft) async => saved = draft;
 
   @override
   Future<void> signOut() async => signOuts++;

@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../data/clip_repository.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 
@@ -16,7 +18,11 @@ class MusicianCard extends StatelessWidget {
     this.jamStamp = 0,
     this.passStamp = 0,
     this.onSafety,
+    this.player,
   });
+
+  /// Plays the card's audio clip. Without it the play button is disabled.
+  final ClipPlayer? player;
 
   /// Shows a "Block or report" button when set.
   final VoidCallback? onSafety;
@@ -169,11 +175,32 @@ class MusicianCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  if (m.clipSeconds != null) _Clip(musician: m),
+                  if (m.clipSeconds != null) _Clip(musician: m, player: player),
                   if (m.genres.isNotEmpty)
                     Text(
                       'Plays ${listJoin(m.genres)}',
                       style: const TextStyle(fontSize: 15),
+                    ),
+                  if (!compact && m.links.isNotEmpty)
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        for (final link in m.links)
+                          ActionChip(
+                            avatar: const Icon(
+                              Icons.open_in_new_rounded,
+                              size: 16,
+                            ),
+                            label: Text(link.label),
+                            tooltip: link.url,
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () => launchUrl(
+                              Uri.parse(link.url),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                          ),
+                      ],
                     ),
                   if (!compact && (m.lookingFor ?? '').isNotEmpty)
                     Text(
@@ -239,22 +266,86 @@ class _Stamp extends StatelessWidget {
 
 /// The audio clip row. Playback arrives with real profiles and uploaded
 /// clips, so the button is disabled for now.
+/// The clip row: play button, waveform (filling in as it plays) and length.
 class _Clip extends StatelessWidget {
-  const _Clip({required this.musician});
+  const _Clip({required this.musician, this.player});
 
   final Musician musician;
+  final ClipPlayer? player;
 
   @override
   Widget build(BuildContext context) {
+    final player = this.player;
+    final path = musician.clipPath;
+    if (player == null || path == null) {
+      return _row(context, playing: false, progress: 0);
+    }
+
+    // Rebuilds when any clip starts or stops, then follows the position.
+    return ValueListenableBuilder<String?>(
+      valueListenable: player.playing,
+      builder: (context, playingPath, _) {
+        final playing = playingPath == path;
+        if (!playing) {
+          return _row(
+            context,
+            playing: false,
+            progress: 0,
+            onPressed: () => _toggle(context),
+          );
+        }
+        return StreamBuilder<Duration>(
+          stream: player.position,
+          builder: (context, snapshot) {
+            final played = (snapshot.data?.inMilliseconds ?? 0) / 1000;
+            return _row(
+              context,
+              playing: true,
+              progress: (played / musician.clipSeconds!).clamp(0, 1),
+              onPressed: () => _toggle(context),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _toggle(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await player!.toggle(musician.clipPath!);
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Couldn't play the clip. Check your connection and try again.",
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _row(
+    BuildContext context, {
+    required bool playing,
+    required double progress,
+    VoidCallback? onPressed,
+  }) {
     final colors = Theme.of(context).colorScheme;
     final seconds = musician.clipSeconds!;
+    final bars = musician.waveform;
+    final lit = (progress * bars.length).floor();
     return Row(
       spacing: 10,
       children: [
         IconButton.outlined(
-          onPressed: null,
-          tooltip: 'Audio clips arrive with real profiles',
-          icon: const Icon(Icons.play_arrow_rounded),
+          onPressed: onPressed,
+          tooltip: onPressed == null
+              ? 'No clip to play'
+              : (playing
+                    ? "Stop ${musician.name}'s clip"
+                    : "Play ${musician.name}'s clip"),
+          icon: Icon(playing ? Icons.stop_rounded : Icons.play_arrow_rounded),
         ),
         Expanded(
           child: SizedBox(
@@ -262,13 +353,15 @@ class _Clip extends StatelessWidget {
             child: Row(
               spacing: 2,
               children: [
-                for (final h in musician.waveform)
+                for (final (i, h) in bars.indexed)
                   Expanded(
                     child: FractionallySizedBox(
                       heightFactor: h,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: colors.outlineVariant,
+                          color: i < lit
+                              ? OctavaColors.pink
+                              : colors.outlineVariant,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),

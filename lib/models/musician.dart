@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import '../data/profile_options.dart';
+import 'profile_link.dart';
 
 /// A musician shown on a swipe card: from the database (`get_deck`), or the
 /// sample people in lib/data/sample_musicians.dart.
@@ -17,6 +18,8 @@ class Musician {
     this.lookingFor,
     this.likesYou = false,
     this.clipSeconds = 30,
+    this.clipPath,
+    this.links = const [],
   });
 
   /// Builds a card from one row returned by the `get_deck` database function.
@@ -38,6 +41,12 @@ class Musician {
       genres: (row['genres'] as List? ?? const []).cast<String>(),
       lookingFor: row['looking_for'] as String?,
       clipSeconds: clips.firstOrNull?['seconds'] as int?,
+      clipPath: clips.firstOrNull?['path'] as String?,
+      links: [
+        for (final l
+            in (row['links'] as List? ?? const []).cast<Map<String, dynamic>>())
+          ProfileLink(kind: l['kind'] as String, url: l['url'] as String),
+      ],
     );
   }
 
@@ -61,6 +70,12 @@ class Musician {
 
   /// Length of the first audio clip; null when there are no clips.
   final int? clipSeconds;
+
+  /// Storage path of the first audio clip. Null for sample musicians, whose
+  /// clips are only pictures of a waveform.
+  final String? clipPath;
+
+  final List<ProfileLink> links;
 
   /// Stable identity for widget keys.
   String get key => id ?? name;
