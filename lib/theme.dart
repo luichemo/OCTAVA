@@ -23,12 +23,12 @@ class OctavaColors {
 
 /// Big Shoulders Display for headings and the wordmark.
 TextStyle displayStyle({double size = 32, Color? color}) => TextStyle(
-      fontFamily: 'BigShouldersDisplay',
-      fontSize: size,
-      fontWeight: FontWeight.w900,
-      height: 0.95,
-      color: color,
-    );
+  fontFamily: 'BigShouldersDisplay',
+  fontSize: size,
+  fontWeight: FontWeight.w900,
+  height: 0.95,
+  color: color,
+);
 
 ThemeData octavaTheme(Brightness brightness) {
   final dark = brightness == Brightness.dark;
@@ -52,7 +52,11 @@ ThemeData octavaTheme(Brightness brightness) {
     onError: Colors.white,
   );
 
-  final base = ThemeData(colorScheme: scheme, useMaterial3: true, fontFamily: 'InstrumentSans');
+  final base = ThemeData(
+    colorScheme: scheme,
+    useMaterial3: true,
+    fontFamily: 'InstrumentSans',
+  );
   return base.copyWith(
     scaffoldBackgroundColor: paper,
     textTheme: base.textTheme.apply(bodyColor: ink, displayColor: ink),

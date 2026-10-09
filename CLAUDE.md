@@ -8,7 +8,7 @@ OCTAVA is a Tinder-style app for forming bands. Musicians swipe on each other, a
 
 Decisions the owner has made (build to these; don't ask about them again):
 - **Audience:** all kinds of musicians: beginners and hobbyists, working musicians, existing bands looking for members, and session or one-off players.
-- **Platforms:** iOS and Android, mobile first. No web app is planned.
+- **Platforms:** iOS and Android, mobile first. No public web app is planned. The `web/` platform exists only as a development preview (see Commands).
 - **Reach:** worldwide from launch. The UI is in English and Georgian.
 - **Ages:** 16+. People aged 16–17 can join bands with adults but cannot have one-on-one private chats with adults. Enforce this on the server, not only in the UI.
 - **Matching:** a match happens when two people both swipe right. A new member joins a band when a majority of its current members vote yes.
@@ -37,11 +37,12 @@ flutter analyze                       # lint (rules in analysis_options.yaml)
 flutter test                          # all tests
 flutter test test/widget_test.dart    # one test file
 flutter test --plain-name "home shows" # one test by name
-flutter run                           # run on a connected Android device or emulator
+flutter run -d chrome                 # main way to preview the app during development
+flutter run                           # run on a connected Android device
 flutter build apk --debug             # Android debug build
 ```
 
-iOS can't be built on this Windows machine; it needs a Mac or a macOS CI runner. Develop against Android and keep the code platform-neutral.
+iOS can't be built on this Windows machine; it needs a Mac or a macOS CI runner. The Android emulator crashes on this PC (segfault at startup with the Android 37 image; the owner can't update the Intel graphics driver), so preview in Chrome and check Android with `flutter build apk --debug`. Because the app is previewed on the web but ships on mobile, choose packages that support web and mobile (for example for audio recording and playback), or isolate mobile-only code behind a check.
 
 ## Code layout
 
