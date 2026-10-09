@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:octava/data/sample_musicians.dart';
 import 'package:octava/main.dart';
+import 'package:octava/screens/swipe_screen.dart';
 
 void main() {
   // A phone-sized screen, so the full card layout is used.
@@ -10,7 +11,7 @@ void main() {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(const OctavaApp());
+    await tester.pumpWidget(const OctavaApp(home: SwipeScreen()));
   }
 
   testWidgets('shows the band lineup and the first musician', (tester) async {

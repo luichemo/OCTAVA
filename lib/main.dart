@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
-import 'screens/swipe_screen.dart';
+import 'screens/auth_gate.dart';
 import 'theme.dart';
 
 // `async` + `await`: work like in TypeScript. Supabase must be ready before
@@ -17,7 +17,10 @@ Future<void> main() async {
 }
 
 class OctavaApp extends StatelessWidget {
-  const OctavaApp({super.key});
+  const OctavaApp({super.key, this.home = const AuthGate()});
+
+  /// The first screen. Tests pass their own so they don't need Supabase.
+  final Widget home;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,7 @@ class OctavaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: octavaTheme(Brightness.light),
       darkTheme: octavaTheme(Brightness.dark),
-      home: const SwipeScreen(),
+      home: home,
     );
   }
 }

@@ -66,6 +66,30 @@ ThemeData octavaTheme(Brightness brightness) {
   return base.copyWith(
     scaffoldBackgroundColor: paper,
     textTheme: base.textTheme.apply(bodyColor: ink, displayColor: ink),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: scheme.surfaceContainer,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.outlineVariant, width: 2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: ink, width: 2),
+      ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: scheme.surfaceContainer,
+      selectedColor: scheme.tertiaryContainer,
+      checkmarkColor: ink,
+      side: BorderSide(color: scheme.outlineVariant, width: 1.5),
+      labelStyle: TextStyle(
+        fontFamily: 'InstrumentSans',
+        color: ink,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: OctavaColors.pink,

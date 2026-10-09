@@ -46,9 +46,14 @@ iOS can't be built on this Windows machine; it needs a Mac or a macOS CI runner.
 
 ## Code layout
 
-The Supabase database is built and tested, and the app initialises the Supabase client, but no screen uses it yet. The swipe screen still uses sample data, and all state lives in it (`setState`). No state-management package has been chosen yet.
-- `lib/main.dart`: initialises Supabase, then runs `OctavaApp` (MaterialApp with light and dark themes), which opens on `SwipeScreen`.
+Sign-up and profile setup use Supabase. The swipe screen still uses sample data, and all its state lives in it (`setState`). No state-management package has been chosen yet.
+- `lib/main.dart`: initialises Supabase, then runs `OctavaApp` (MaterialApp with light and dark themes). `OctavaApp(home:)` defaults to `AuthGate`; tests pass their own home so they don't need Supabase.
 - `lib/config/supabase_config.dart`: project URL and publishable key. These are public by design; never add the secret/service_role key or the DB password.
+- `lib/screens/auth_gate.dart`: `AuthGate` listens to Supabase auth. Signed out → `AuthScreen`; signed in → `ProfileGate`, which asks the repository for a `ProfileStatus` (needsBirthDate / needsProfile / ready) and shows `OnboardingScreen` or `SwipeScreen`.
+- `lib/screens/auth_screen.dart` (email + password sign-up/sign-in) and `lib/screens/onboarding_screen.dart` (birth date with a "can't change it later" confirmation, then the profile form).
+- `lib/data/repositories.dart`: `AuthRepository` / `ProfileRepository` interfaces with Supabase implementations. Errors become `UserFacingException` with wording for people; messages raised by our own DB rules (codes P0001/23514, not "new row…" constraint text) pass through. Screens take repositories as parameters; `test/signup_flow_test.dart` has fakes.
+- `lib/data/profile_options.dart`: labels for DB enum values and instrument ids (keys must match the DB). `lib/models/profile_draft.dart` builds the `profiles` and `profile_instruments` rows.
+- Dart gotcha that caused a real bug: `setState(() => _x = someFuture())` returns the Future, so `setState` throws and nothing redraws. Use a block body: `setState(() { _x = someFuture(); })`.
 - `lib/screens/swipe_screen.dart`: holds the band lineup (`Map<String, String?>` of role → member), the card queue, and the drag offset, which one `AnimationController` animates for fly-off and snap-back. It also contains the match dialog, the empty state, and arrow-key shortcuts. A Jam on someone with `likesYou` is a match and fills their instrument's slot if it's open.
 - `lib/widgets/musician_card.dart`: the card. `HalftonePainter` draws the riso portrait (dots grow away from a per-musician spotlight); the instrument name overlaps the portrait with a multiply blend in light mode. The audio clip's play button is disabled until real clips exist.
 - `lib/widgets/band_lineup.dart`: the "Your band" slots, which flash pink when filled.

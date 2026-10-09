@@ -16,9 +16,16 @@ enum Decision { pass, jam }
 /// The main screen: your band lineup, a deck of musician cards to drag or
 /// tap through, and Pass / Jam buttons.
 class SwipeScreen extends StatefulWidget {
-  const SwipeScreen({super.key, this.musicians = sampleMusicians});
+  const SwipeScreen({
+    super.key,
+    this.musicians = sampleMusicians,
+    this.onSignOut,
+  });
 
   final List<Musician> musicians;
+
+  /// Shows a Sign out button when set.
+  final VoidCallback? onSignOut;
 
   @override
   State<SwipeScreen> createState() => _SwipeScreenState();
@@ -228,6 +235,14 @@ class _SwipeScreenState extends State<SwipeScreen>
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (widget.onSignOut != null)
+                            IconButton(
+                              tooltip: 'Sign out',
+                              onPressed: widget.onSignOut,
+                              icon: const Icon(Icons.logout_rounded),
+                              color: colors.onSurfaceVariant,
+                              visualDensity: VisualDensity.compact,
+                            ),
                         ],
                       ),
                       const SizedBox(height: 14),
