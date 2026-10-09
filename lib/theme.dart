@@ -57,8 +57,35 @@ ThemeData octavaTheme(Brightness brightness) {
     useMaterial3: true,
     fontFamily: 'InstrumentSans',
   );
+  // Big pill buttons: pink "Jam" style (filled) and outlined "Pass" style.
+  const buttonText = TextStyle(
+    fontFamily: 'InstrumentSans',
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+  );
   return base.copyWith(
     scaffoldBackgroundColor: paper,
     textTheme: base.textTheme.apply(bodyColor: ink, displayColor: ink),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: OctavaColors.pink,
+        foregroundColor: OctavaColors.ink,
+        minimumSize: const Size(0, 56),
+        shape: const StadiumBorder(),
+        textStyle: buttonText,
+        iconSize: 22,
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        backgroundColor: scheme.surfaceContainer,
+        foregroundColor: ink,
+        side: BorderSide(color: ink, width: 2),
+        minimumSize: const Size(0, 56),
+        shape: const StadiumBorder(),
+        textStyle: buttonText,
+        iconSize: 22,
+      ),
+    ),
   );
 }

@@ -46,8 +46,13 @@ iOS can't be built on this Windows machine; it needs a Mac or a macOS CI runner.
 
 ## Code layout
 
-The Flutter project was just created. Supabase is not wired in yet, and there is no data model.
-- `lib/main.dart`: `OctavaApp` (MaterialApp with light and dark themes) and a placeholder `HomeScreen` showing the "Your band" lineup.
+Supabase is not wired in yet. Musicians come from sample data, and all state lives in the swipe screen (`setState`). No state-management package has been chosen yet.
+- `lib/main.dart`: `OctavaApp` (MaterialApp with light and dark themes), which opens on `SwipeScreen`.
+- `lib/screens/swipe_screen.dart`: holds the band lineup (`Map<String, String?>` of role → member), the card queue, and the drag offset, which one `AnimationController` animates for fly-off and snap-back. It also contains the match dialog, the empty state, and arrow-key shortcuts. A Jam on someone with `likesYou` is a match and fills their instrument's slot if it's open.
+- `lib/widgets/musician_card.dart`: the card. `HalftonePainter` draws the riso portrait (dots grow away from a per-musician spotlight); the instrument name overlaps the portrait with a multiply blend in light mode. The audio clip's play button is disabled until real clips exist.
+- `lib/widgets/band_lineup.dart`: the "Your band" slots, which flash pink when filled.
+- `lib/models/musician.dart` and `lib/data/sample_musicians.dart`: the `Musician` model (spotlight and waveform come from a stable name-based seed) and the 8 sample people from the prototype.
+- Tests (`test/widget_test.dart`) find the action buttons with `find.widgetWithText(OutlinedButton, 'Pass')` and `find.widgetWithText(FilledButton, 'Jam')`, because the drag stamps also contain the text "Pass" and "Jam". Tests render text in the wide Ahem font, so rows with two texts need `Expanded` with an ellipsis or they overflow.
 - `lib/theme.dart`: `OctavaColors` (the design palette), `octavaTheme(brightness)`, and `displayStyle()` for Big Shoulders headings. Take colours from the theme's `ColorScheme`, not hardcoded hex values.
 - `assets/fonts/`: static TTFs for Instrument Sans (400/600/700) and Big Shoulders Display (900), bundled through `pubspec.yaml`. Don't use the `google_fonts` package: its current release depends on `package:material_ui`, which clashes with this Flutter SDK's `TextTheme`. Neither font has Georgian glyphs, so Georgian text falls back to the system font.
 - `prototype/index.html`: the clickable HTML prototype of the swipe screen (open it in a browser). It's the design reference for the Flutter UI: riso-print look, swipe actions named "Pass" and "Jam", band-lineup slots, and halftone portrait tones in pink, yellow and aqua.
