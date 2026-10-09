@@ -63,6 +63,7 @@ class FakeChatRepository implements ChatRepository {
 void main() {
   final nika = MatchSummary(
     matchId: 'm1',
+    otherUserId: 'nika',
     name: 'Nika',
     instrument: 'Drums',
     matchedAt: DateTime.now().subtract(const Duration(hours: 1)),

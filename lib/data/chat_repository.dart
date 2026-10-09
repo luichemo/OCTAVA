@@ -42,6 +42,7 @@ class SupabaseChatRepository implements ChatRepository {
           )
           .inFilter('id', matches.map(otherOf).toList());
       final byId = {for (final p in people) p['id'] as String: p};
+      final blocked = await _blockedIds(_client);
 
       // Newest first, so the first message seen per match is its latest.
       final recent = await _client
@@ -59,11 +60,12 @@ class SupabaseChatRepository implements ChatRepository {
       for (final m in matches) {
         // Someone may have deleted their profile since matching.
         final person = byId[otherOf(m)];
-        if (person == null) continue;
+        if (person == null || blocked.contains(otherOf(m))) continue;
         final last = latest[m['id']];
         summaries.add(
           MatchSummary(
             matchId: m['id'] as String,
+            otherUserId: otherOf(m),
             name: person['display_name'] as String,
             instrument: _mainInstrument(person),
             matchedAt: DateTime.parse(m['created_at'] as String).toLocal(),
@@ -123,4 +125,10 @@ class SupabaseChatRepository implements ChatRepository {
         list.firstOrNull;
     return instrumentLabels[primary?['instrument_id']] ?? 'Musician';
   }
+}
+
+/// Ids of people the signed-in user has blocked.
+Future<Set<String>> _blockedIds(SupabaseClient client) async {
+  final rows = await client.from('blocks').select('blocked_id');
+  return {for (final r in rows) r['blocked_id'] as String};
 }

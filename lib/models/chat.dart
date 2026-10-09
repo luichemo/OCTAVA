@@ -2,6 +2,7 @@
 class MatchSummary {
   const MatchSummary({
     required this.matchId,
+    required this.otherUserId,
     required this.name,
     required this.instrument,
     required this.matchedAt,
@@ -11,6 +12,9 @@ class MatchSummary {
   });
 
   final String matchId;
+
+  /// The other person's id, for blocking and reporting.
+  final String otherUserId;
 
   /// The other person's name and main instrument label.
   final String name;

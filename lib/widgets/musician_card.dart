@@ -15,7 +15,11 @@ class MusicianCard extends StatelessWidget {
     required this.fitsOpenSlot,
     this.jamStamp = 0,
     this.passStamp = 0,
+    this.onSafety,
   });
+
+  /// Shows a "Block or report" button when set.
+  final VoidCallback? onSafety;
 
   final Musician musician;
 
@@ -137,6 +141,14 @@ class MusicianCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (onSafety != null)
+                        IconButton(
+                          tooltip: 'Block or report',
+                          onPressed: onSafety,
+                          icon: const Icon(Icons.flag_outlined, size: 20),
+                          color: colors.onSurfaceVariant,
+                          visualDensity: VisualDensity.compact,
+                        ),
                     ],
                   ),
                   if (fitsOpenSlot)

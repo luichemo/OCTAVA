@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../data/chat_repository.dart';
 import '../data/repositories.dart';
+import '../data/safety_repository.dart';
+import '../widgets/safety_sheet.dart';
 import '../models/chat.dart';
 import '../theme.dart';
 
@@ -11,12 +13,18 @@ class ChatScreen extends StatefulWidget {
     super.key,
     required this.repository,
     required this.matchId,
+    required this.otherUserId,
     required this.name,
     required this.instrument,
+    this.safety,
   });
 
   final ChatRepository repository;
   final String matchId;
+  final String otherUserId;
+
+  /// Block and report. Without it there's no safety menu.
+  final SafetyRepository? safety;
   final String name;
   final String instrument;
 
@@ -67,6 +75,23 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.surface,
+        actions: [
+          if (widget.safety != null)
+            IconButton(
+              tooltip: 'Block or report',
+              icon: const Icon(Icons.more_vert_rounded),
+              onPressed: () async {
+                final blocked = await showSafetyOptions(
+                  context,
+                  safety: widget.safety!,
+                  userId: widget.otherUserId,
+                  name: widget.name,
+                );
+                // A blocked chat is closed; the Matches list no longer shows it.
+                if (blocked && context.mounted) Navigator.of(context).pop();
+              },
+            ),
+        ],
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

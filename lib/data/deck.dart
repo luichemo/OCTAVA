@@ -97,10 +97,12 @@ class SupabaseDeck implements DeckSource {
     try {
       final me = _client.auth.currentUser!.id;
       final matches = await _client.from('matches').select('user_a, user_b');
+      final blocks = await _client.from('blocks').select('blocked_id');
+      final blocked = {for (final b in blocks) b['blocked_id'] as String};
       final others = [
         for (final m in matches)
           m['user_a'] == me ? m['user_b'] as String : m['user_a'] as String,
-      ];
+      ].where((id) => !blocked.contains(id));
       // Embeds each person's instruments through the profile_instruments foreign key.
       final people = await _client
           .from('profiles')

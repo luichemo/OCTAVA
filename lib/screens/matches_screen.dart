@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../data/chat_repository.dart';
 import '../data/repositories.dart';
+import '../data/safety_repository.dart';
 import '../models/chat.dart';
 import '../theme.dart';
 import 'chat_screen.dart';
 
 /// Everyone you've matched with, newest activity first. Tap one to chat.
 class MatchesScreen extends StatefulWidget {
-  const MatchesScreen({super.key, required this.repository});
+  const MatchesScreen({super.key, required this.repository, this.safety});
 
   final ChatRepository repository;
+
+  /// Passed on to chats for block and report.
+  final SafetyRepository? safety;
 
   @override
   State<MatchesScreen> createState() => _MatchesScreenState();
@@ -33,6 +37,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
         builder: (_) => ChatScreen(
           repository: widget.repository,
           matchId: match.matchId,
+          otherUserId: match.otherUserId,
+          safety: widget.safety,
           name: match.name,
           instrument: match.instrument,
         ),

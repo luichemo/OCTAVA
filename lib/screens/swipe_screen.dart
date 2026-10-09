@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 
 import '../data/deck.dart';
 import '../data/repositories.dart';
+import '../data/safety_repository.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 import '../widgets/band_lineup.dart';
 import '../widgets/musician_card.dart';
+import '../widgets/safety_sheet.dart';
 
 /// The main screen: your band lineup, a deck of musician cards to drag or
 /// tap through, and Pass / Jam buttons.
@@ -21,6 +23,7 @@ class SwipeScreen extends StatefulWidget {
     this.onSignOut,
     this.onOpenMatches,
     this.onOpenChat,
+    this.safety,
   });
 
   /// Where people come from and swipes go.
@@ -28,6 +31,9 @@ class SwipeScreen extends StatefulWidget {
 
   /// Shows a Sign out button when set.
   final VoidCallback? onSignOut;
+
+  /// Block and report from a card. Without it cards have no flag button.
+  final SafetyRepository? safety;
 
   /// Shows a Matches button when set.
   final VoidCallback? onOpenMatches;
@@ -243,6 +249,23 @@ class _SwipeScreenState extends State<SwipeScreen>
       );
   }
 
+  Future<void> _openSafety(Musician m) async {
+    final safety = widget.safety;
+    if (safety == null || m.id == null || _busy) return;
+    final blocked = await showSafetyOptions(
+      context,
+      safety: safety,
+      userId: m.id!,
+      name: m.name,
+    );
+    if (blocked && mounted) {
+      setState(() {
+        _queue = _queue.where((q) => q.key != m.key).toList();
+        _drag = Offset.zero;
+      });
+    }
+  }
+
   /// The swipe's result (a match id, or null), or the error to show.
   Future<Object?> _attempt(Future<String?> swipe) async {
     try {
@@ -441,6 +464,9 @@ class _SwipeScreenState extends State<SwipeScreen>
                   fitsOpenSlot: _fitsOpenSlot(top),
                   jamStamp: _drag.dx / 90,
                   passStamp: -_drag.dx / 90,
+                  onSafety: widget.safety == null
+                      ? null
+                      : () => _openSafety(top),
                 ),
               ),
             ),
