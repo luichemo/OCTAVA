@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'swipe_helpers.dart';
+
 import 'package:octava/data/chat_repository.dart';
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
@@ -132,9 +134,7 @@ void main() {
       SwipeScreen(onOpenChat: (matchId, musician) => openedMatch = matchId),
     );
 
-    await tester.tap(
-      find.widgetWithText(FilledButton, 'Jam'),
-    ); // Nika likes you
+    await swipeJam(tester); // Nika likes you
     await tester.pumpAndSettle();
     await tester.tap(find.text('Say hi'));
     await tester.pumpAndSettle();

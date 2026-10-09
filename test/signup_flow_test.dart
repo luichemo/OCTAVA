@@ -137,7 +137,7 @@ void main() {
       await pump(tester, ProfileGate(repository: repo));
 
       expect(find.text('Your band'), findsOneWidget);
-      await tester.tap(find.byTooltip('Sign out'));
+      await tester.tap(find.text('Sign out'));
       expect(repo.signOuts, 1);
     });
 

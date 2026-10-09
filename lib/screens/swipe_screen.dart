@@ -8,13 +8,16 @@ import 'package:flutter/services.dart';
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
+import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
+import '../models/deck_filters.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 import '../widgets/band_lineup.dart';
 import '../widgets/musician_card.dart';
 import '../widgets/safety_sheet.dart';
+import 'filters_screen.dart';
 
 /// The main screen: your band lineup, a deck of musician cards to drag or
 /// tap through, and Pass / Jam buttons.
@@ -29,7 +32,15 @@ class SwipeScreen extends StatefulWidget {
     this.player,
     this.onOpenProfile,
     this.avatars,
+    this.location,
+    this.filterStore,
   });
+
+  /// Sharing your location, for distances. Without it there's no prompt.
+  final LocationRepository? location;
+
+  /// Remembers filters. Defaults to keeping them only while the app runs.
+  final FilterStore? filterStore;
 
   /// Shows AI avatars on cards when set.
   final AvatarRepository? avatars;
@@ -70,6 +81,12 @@ class _SwipeScreenState extends State<SwipeScreen>
   bool _loading = true;
   String? _loadError;
 
+  late final FilterStore _store = widget.filterStore ?? MemoryFilterStore();
+  DeckFilters _filters = const DeckFilters();
+  bool _hasLocation = false;
+  bool _filtersLoaded = false;
+  bool _sharingLocation = false;
+
   // How far the top card has been dragged. Drives position, tilt and stamps.
   Offset _drag = Offset.zero;
   double _deckWidth = 360;
@@ -89,11 +106,16 @@ class _SwipeScreenState extends State<SwipeScreen>
   }
 
   Future<void> _load() async {
+    if (!_filtersLoaded) {
+      _filters = await _store.load();
+      _filtersLoaded = true;
+    }
+    _hasLocation = await widget.location?.hasLocation() ?? false;
     try {
       // Both requests run at the same time, like Promise.all.
       final (band, deck) = await (
         widget.source.loadLineup(),
-        widget.source.loadDeck(),
+        widget.source.loadDeck(_filters, hasLocation: _hasLocation),
       ).wait;
       if (!mounted) return;
       setState(() {
@@ -121,6 +143,41 @@ class _SwipeScreenState extends State<SwipeScreen>
       _loadError = null;
     });
     _load();
+  }
+
+  Future<void> _openFilters() async {
+    await widget.player?.stop();
+    if (!mounted) return;
+    final chosen = await Navigator.of(context).push<DeckFilters>(
+      MaterialPageRoute(
+        builder: (_) =>
+            FiltersScreen(initial: _filters, hasLocation: _hasLocation),
+      ),
+    );
+    if (chosen == null || !mounted) return;
+    _filters = chosen;
+    await _store.save(chosen);
+    _reload();
+  }
+
+  Future<void> _shareLocation() async {
+    final location = widget.location;
+    if (location == null) return;
+    setState(() {
+      _sharingLocation = true;
+    });
+    try {
+      await location.shareCurrentLocation();
+      if (mounted) _reload();
+    } on UserFacingException catch (e) {
+      if (mounted) _toast(e.message);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _sharingLocation = false;
+        });
+      }
+    }
   }
 
   @override
@@ -330,51 +387,38 @@ class _SwipeScreenState extends State<SwipeScreen>
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              widget.source.description,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: colors.onSurfaceVariant,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              // The summary is also the way into the filters.
+                              child: TextButton.icon(
+                                onPressed: _loading ? null : _openFilters,
+                                icon: const Icon(Icons.tune_rounded, size: 18),
+                                label: Text(
+                                  _filters.describe(hasLocation: _hasLocation),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: colors.onSurfaceVariant,
+                                  textStyle: const TextStyle(fontSize: 14),
+                                  visualDensity: VisualDensity.compact,
+                                ),
                               ),
-                              textAlign: TextAlign.end,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          if (widget.onOpenProfile != null)
-                            IconButton(
-                              tooltip: 'Your profile',
-                              onPressed: () async {
-                                await widget.player?.stop();
-                                await widget.onOpenProfile!();
-                                if (mounted) _reload();
-                              },
-                              icon: const Icon(Icons.person_outline_rounded),
-                              color: colors.onSurfaceVariant,
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          if (widget.onOpenMatches != null)
-                            IconButton(
-                              tooltip: 'Matches',
-                              onPressed: widget.onOpenMatches,
-                              icon: const Icon(
-                                Icons.chat_bubble_outline_rounded,
-                              ),
-                              color: colors.onSurfaceVariant,
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          if (widget.onSignOut != null)
-                            IconButton(
-                              tooltip: 'Sign out',
-                              onPressed: widget.onSignOut,
-                              icon: const Icon(Icons.logout_rounded),
-                              color: colors.onSurfaceVariant,
-                              visualDensity: VisualDensity.compact,
-                            ),
                         ],
                       ),
                       const SizedBox(height: 14),
                       BandLineup(band: _band, justFilled: _justFilled),
+                      if (widget.location != null &&
+                          !_loading &&
+                          !_hasLocation) ...[
+                        const SizedBox(height: 10),
+                        _LocationPrompt(
+                          busy: _sharingLocation,
+                          onShare: _shareLocation,
+                        ),
+                      ],
                       const SizedBox(height: 14),
                       Expanded(
                         child: LayoutBuilder(
@@ -393,6 +437,14 @@ class _SwipeScreenState extends State<SwipeScreen>
                                 onAction: _reload,
                               );
                             }
+                            if (_queue.isEmpty && _filters.activeCount > 0) {
+                              return _DeckMessage(
+                                title: 'Nobody matches',
+                                body: 'Nobody matches your filters right now. Try fewer filters or a bigger distance.',
+                                action: 'Change filters',
+                                onAction: _openFilters,
+                              );
+                            }
                             if (_queue.isEmpty) {
                               return _DeckMessage(
                                 title: "You've heard everyone",
@@ -405,40 +457,33 @@ class _SwipeScreenState extends State<SwipeScreen>
                           },
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 14,
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: canSwipe
-                                  ? () => _decide(Decision.pass)
-                                  : null,
-                              icon: const Icon(Icons.close_rounded),
-                              label: const Text('Pass'),
-                            ),
-                          ),
-                          Expanded(
-                            child: FilledButton.icon(
-                              onPressed: canSwipe
-                                  ? () => _decide(Decision.jam)
-                                  : null,
-                              icon: const Icon(Icons.music_note_rounded),
-                              label: const Text('Jam'),
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 10),
+                      Text(
+                        canSwipe
+                            ? (kIsWeb
+                                  ? 'Swipe right to Jam, left to Pass, or use the arrow keys'
+                                  : 'Swipe right to Jam, left to Pass')
+                            : ' ',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colors.onSurfaceVariant,
+                        ),
                       ),
-                      if (kIsWeb) ...[
+                      if (widget.onOpenProfile != null ||
+                          widget.onOpenMatches != null ||
+                          widget.onSignOut != null) ...[
                         const SizedBox(height: 8),
-                        Text(
-                          'Drag the card, or use the left and right arrow keys',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: colors.onSurfaceVariant,
-                          ),
+                        _BottomBar(
+                          onProfile: widget.onOpenProfile == null
+                              ? null
+                              : () async {
+                                  await widget.player?.stop();
+                                  await widget.onOpenProfile!();
+                                  if (mounted) _reload();
+                                },
+                          onMatches: widget.onOpenMatches,
+                          onSignOut: widget.onSignOut,
                         ),
                       ],
                     ],
@@ -479,25 +524,34 @@ class _SwipeScreenState extends State<SwipeScreen>
             ),
           ),
         Positioned.fill(
-          child: GestureDetector(
-            onPanUpdate: _onPanUpdate,
-            onPanEnd: _onPanEnd,
-            child: Transform.translate(
-              offset: _drag,
-              child: Transform.rotate(
-                angle: _drag.dx / 18 * pi / 180,
-                child: MusicianCard(
-                  key: ValueKey(top.key),
-                  musician: top,
-                  tone: _toneFor(top),
-                  fitsOpenSlot: _fitsOpenSlot(top),
-                  jamStamp: _drag.dx / 90,
-                  passStamp: -_drag.dx / 90,
-                  onSafety: widget.safety == null
-                      ? null
-                      : () => _openSafety(top),
-                  player: widget.player,
-                  avatars: widget.avatars,
+          // Swiping is the only control, so give screen readers named actions.
+          child: Semantics(
+            customSemanticsActions: {
+              const CustomSemanticsAction(label: 'Jam'): () =>
+                  _decide(Decision.jam),
+              const CustomSemanticsAction(label: 'Pass'): () =>
+                  _decide(Decision.pass),
+            },
+            child: GestureDetector(
+              onPanUpdate: _onPanUpdate,
+              onPanEnd: _onPanEnd,
+              child: Transform.translate(
+                offset: _drag,
+                child: Transform.rotate(
+                  angle: _drag.dx / 18 * pi / 180,
+                  child: MusicianCard(
+                    key: ValueKey(top.key),
+                    musician: top,
+                    tone: _toneFor(top),
+                    fitsOpenSlot: _fitsOpenSlot(top),
+                    jamStamp: _drag.dx / 90,
+                    passStamp: -_drag.dx / 90,
+                    onSafety: widget.safety == null
+                        ? null
+                        : () => _openSafety(top),
+                    player: widget.player,
+                    avatars: widget.avatars,
+                  ),
                 ),
               ),
             ),
@@ -587,6 +641,127 @@ class _DeckMessage extends StatelessWidget {
           Text(body, style: TextStyle(color: colors.onSurfaceVariant)),
           OutlinedButton(onPressed: onAction, child: Text(action)),
         ],
+      ),
+    );
+  }
+}
+
+/// Invites you to share your location so cards can show distances.
+class _LocationPrompt extends StatelessWidget {
+  const _LocationPrompt({required this.busy, required this.onShare});
+
+  final bool busy;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: colors.tertiaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.location_on_outlined, size: 20),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'See how far away people are.',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: busy ? null : onShare,
+            child: Text(busy ? 'Finding you…' : 'Share location'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Bottom navigation: Profile, Matches and Sign out, with labels.
+class _BottomBar extends StatelessWidget {
+  const _BottomBar({this.onProfile, this.onMatches, this.onSignOut});
+
+  final VoidCallback? onProfile;
+  final VoidCallback? onMatches;
+  final VoidCallback? onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: colors.outlineVariant, width: 1.5),
+        ),
+      ),
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        children: [
+          if (onProfile != null)
+            _BarButton(
+              icon: Icons.person_outline_rounded,
+              label: 'Profile',
+              onTap: onProfile!,
+            ),
+          if (onMatches != null)
+            _BarButton(
+              icon: Icons.chat_bubble_outline_rounded,
+              label: 'Matches',
+              onTap: onMatches!,
+            ),
+          if (onSignOut != null)
+            _BarButton(
+              icon: Icons.logout_rounded,
+              label: 'Sign out',
+              onTap: onSignOut!,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BarButton extends StatelessWidget {
+  const _BarButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: colors.onSurface),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

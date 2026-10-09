@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'swipe_helpers.dart';
+
 import 'package:octava/data/sample_musicians.dart';
 import 'package:octava/main.dart';
 import 'package:octava/screens/swipe_screen.dart';
@@ -28,7 +30,7 @@ void main() {
   testWidgets('Pass moves on to the next musician', (tester) async {
     await pumpApp(tester);
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Pass'));
+    await swipePass(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Nika, 24'), findsNothing);
@@ -41,7 +43,7 @@ void main() {
   ) async {
     await pumpApp(tester);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Jam'));
+    await swipeJam(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Nika wants to jam too'), findsOneWidget);
@@ -80,7 +82,7 @@ void main() {
     await pumpApp(tester);
 
     for (var i = 0; i < sampleMusicians.length; i++) {
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Pass'));
+      await swipePass(tester);
       await tester.pumpAndSettle();
     }
 

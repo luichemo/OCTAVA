@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'swipe_helpers.dart';
+
 import 'package:octava/data/clip_repository.dart';
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
+import 'package:octava/models/deck_filters.dart';
 import 'package:octava/models/musician.dart';
 import 'package:octava/models/profile_draft.dart';
 import 'package:octava/models/profile_link.dart';
@@ -309,7 +312,7 @@ void main() {
       expect(find.byTooltip("Stop Ana's clip"), findsOneWidget);
 
       // Swiping stops it.
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Pass'));
+      await swipePass(tester);
       await tester.pumpAndSettle();
       expect(player.playing.value, isNull);
     });
@@ -320,7 +323,10 @@ class _ClipDeck extends SampleDeck {
   const _ClipDeck();
 
   @override
-  Future<List<Musician>> loadDeck() async => const [
+  Future<List<Musician>> loadDeck(
+    DeckFilters filters, {
+    required bool hasLocation,
+  }) async => const [
     Musician(
       id: 'ana',
       name: 'Ana',

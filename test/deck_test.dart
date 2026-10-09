@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'swipe_helpers.dart';
+
 import 'package:octava/data/deck.dart';
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
+import 'package:octava/models/deck_filters.dart';
 import 'package:octava/models/musician.dart';
 import 'package:octava/screens/swipe_screen.dart';
+import 'package:octava/widgets/musician_card.dart';
 
 /// A deck whose swipes fail, like a lost connection.
 class OfflineDeck extends SampleDeck {
@@ -23,7 +27,10 @@ class BrokenDeck extends SampleDeck {
   const BrokenDeck();
 
   @override
-  Future<List<Musician>> loadDeck() async => throw const UserFacingException(
+  Future<List<Musician>> loadDeck(
+    DeckFilters filters, {
+    required bool hasLocation,
+  }) async => throw const UserFacingException(
     "Couldn't load musicians. Check your connection and try again.",
   );
 }
@@ -40,7 +47,7 @@ void main() {
   testWidgets('a swipe that fails to save puts the card back', (tester) async {
     await pump(tester, const OfflineDeck());
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Pass'));
+    await swipePass(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Nika, 24'), findsOneWidget);
@@ -52,12 +59,8 @@ void main() {
 
     expect(find.text('Something went wrong'), findsOneWidget);
     expect(find.text('Try again'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Jam'))
-          .onPressed,
-      isNull,
-    );
+    expect(find.byType(MusicianCard), findsNothing);
+    expect(find.textContaining('Swipe right'), findsNothing);
   });
 
   test('a get_deck row becomes a card', () {

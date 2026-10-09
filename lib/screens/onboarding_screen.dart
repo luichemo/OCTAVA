@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
+import '../data/location_repository.dart';
 import '../data/profile_options.dart';
 import '../data/repositories.dart';
 import '../models/profile_draft.dart';
@@ -9,6 +10,8 @@ import '../models/profile_link.dart';
 import '../theme.dart';
 import '../widgets/avatar_section.dart';
 import '../widgets/clips_section.dart';
+import '../widgets/location_section.dart';
+import '../widgets/tag_input.dart';
 import 'card_preview_screen.dart';
 
 /// The profile form. First-time setup asks for the date of birth (once, can't
@@ -24,10 +27,14 @@ class OnboardingScreen extends StatefulWidget {
     this.clips,
     this.player,
     this.avatars,
+    this.location,
   });
 
   /// Avatar section, shown when editing.
   final AvatarRepository? avatars;
+
+  /// Location section, shown when editing.
+  final LocationRepository? location;
 
   /// The current profile when editing; null during sign-up.
   final ProfileDraft? initial;
@@ -299,6 +306,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       counterText: '',
                     ),
                   ),
+                  if (_editing && widget.location != null) ...[
+                    _Section('Location'),
+                    LocationSection(location: widget.location!),
+                  ],
                   _Section('What you play'),
                   Wrap(
                     spacing: 8,
@@ -358,7 +369,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   const SizedBox(height: 18),
-                  _TagInput(
+                  TagInput(
                     label: 'Genres',
                     hint: 'Type a genre and press Enter',
                     values: _genres,
@@ -541,85 +552,4 @@ class _Section extends StatelessWidget {
       ),
     ),
   );
-}
-
-/// A text field that turns entries into removable chips (max 10).
-class _TagInput extends StatefulWidget {
-  const _TagInput({
-    required this.label,
-    required this.hint,
-    required this.values,
-    required this.onChanged,
-  });
-
-  final String label;
-  final String hint;
-  final List<String> values;
-  final VoidCallback onChanged;
-
-  @override
-  State<_TagInput> createState() => _TagInputState();
-}
-
-class _TagInputState extends State<_TagInput> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _add() {
-    final value = _controller.text.trim();
-    _controller.clear();
-    if (value.isEmpty || widget.values.length >= 10) return;
-    if (widget.values.any((v) => v.toLowerCase() == value.toLowerCase())) {
-      return;
-    }
-    widget.values.add(value);
-    widget.onChanged();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final full = widget.values.length >= 10;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _controller,
-          enabled: !full,
-          onSubmitted: (_) => _add(),
-          textInputAction: TextInputAction.done,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            hintText: full ? 'You can add up to 10' : widget.hint,
-            suffixIcon: IconButton(
-              tooltip: 'Add',
-              onPressed: full ? null : _add,
-              icon: const Icon(Icons.add_rounded),
-            ),
-          ),
-        ),
-        if (widget.values.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final v in widget.values)
-                InputChip(
-                  label: Text(v),
-                  onDeleted: () {
-                    widget.values.remove(v);
-                    widget.onChanged();
-                  },
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
 }

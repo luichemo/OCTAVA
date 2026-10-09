@@ -5,6 +5,7 @@ import '../data/avatar_repository.dart';
 import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
+import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../models/musician.dart';
@@ -39,6 +40,8 @@ class AuthGate extends StatelessWidget {
           safety: SupabaseSafetyRepository(client),
           clips: SupabaseClipRepository(client),
           avatars: SupabaseAvatarRepository(client),
+          location: DeviceLocationRepository(client),
+          filterStore: PrefsFilterStore(user.id),
         );
       },
     );
@@ -55,6 +58,8 @@ class ProfileGate extends StatefulWidget {
     this.safety,
     this.clips,
     this.avatars,
+    this.location,
+    this.filterStore,
   });
 
   final ProfileRepository repository;
@@ -73,6 +78,12 @@ class ProfileGate extends StatefulWidget {
 
   /// AI avatars: on cards and made from your profile.
   final AvatarRepository? avatars;
+
+  /// Sharing your approximate location, for distances.
+  final LocationRepository? location;
+
+  /// Remembers swipe filters on this device.
+  final FilterStore? filterStore;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -99,6 +110,7 @@ class _ProfileGateState extends State<ProfileGate> {
         clips: widget.clips,
         player: _player,
         avatars: widget.avatars,
+        location: widget.location,
       ),
     ),
   );
@@ -160,6 +172,8 @@ class _ProfileGateState extends State<ProfileGate> {
             player: _player,
             onOpenProfile: _openProfile,
             avatars: widget.avatars,
+            location: widget.location,
+            filterStore: widget.filterStore,
           ),
           final status => OnboardingScreen(
             repository: widget.repository,

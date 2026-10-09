@@ -5,6 +5,7 @@ import 'package:octava/data/deck.dart';
 import 'package:octava/data/safety_repository.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/chat.dart';
+import 'package:octava/models/deck_filters.dart';
 import 'package:octava/models/musician.dart';
 import 'package:octava/screens/matches_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
@@ -28,7 +29,10 @@ class IdDeck extends SampleDeck {
   const IdDeck();
 
   @override
-  Future<List<Musician>> loadDeck() async => const [
+  Future<List<Musician>> loadDeck(
+    DeckFilters filters, {
+    required bool hasLocation,
+  }) async => const [
     Musician(id: 'nika-id', name: 'Nika', age: 24, instrument: 'Drums'),
     Musician(id: 'mariam-id', name: 'Mariam', age: 27, instrument: 'Bass'),
   ];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
+import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../models/profile_draft.dart';
 import 'onboarding_screen.dart';
@@ -14,12 +15,14 @@ class EditProfileScreen extends StatefulWidget {
     this.clips,
     this.player,
     this.avatars,
+    this.location,
   });
 
   final ProfileRepository repository;
   final ClipRepository? clips;
   final ClipPlayer? player;
   final AvatarRepository? avatars;
+  final LocationRepository? location;
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -73,6 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           clips: widget.clips,
           player: widget.player,
           avatars: widget.avatars,
+          location: widget.location,
           onDone: () {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('Profile saved.')));

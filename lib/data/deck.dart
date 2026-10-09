@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/deck_filters.dart';
 import '../models/musician.dart';
 import 'profile_options.dart';
 import 'repositories.dart';
@@ -9,10 +10,11 @@ enum Decision { pass, jam }
 
 /// Where the swipe screen gets people and sends swipes.
 abstract interface class DeckSource {
-  /// Short text for the header, e.g. "Tbilisi, within 10 km".
-  String get description;
-
-  Future<List<Musician>> loadDeck();
+  /// People to swipe on. Distance only applies when [hasLocation].
+  Future<List<Musician>> loadDeck(
+    DeckFilters filters, {
+    required bool hasLocation,
+  });
 
   /// Records the choice. Returns the match id when it's a match, else null.
   Future<String?> swipe(Musician musician, Decision decision);
@@ -28,11 +30,24 @@ class SampleDeck implements DeckSource {
 
   final List<Musician> musicians;
 
+  /// Applies the instrument and genre filters; the rest needs real data.
   @override
-  String get description => 'Tbilisi, within 10 km';
-
-  @override
-  Future<List<Musician>> loadDeck() async => List.of(musicians);
+  Future<List<Musician>> loadDeck(
+    DeckFilters filters, {
+    required bool hasLocation,
+  }) async {
+    final instruments = {
+      for (final id in filters.instruments) instrumentLabels[id],
+    };
+    final genres = {for (final g in filters.genres) g.toLowerCase()};
+    return [
+      for (final m in musicians)
+        if ((instruments.isEmpty || instruments.contains(m.instrument)) &&
+            (genres.isEmpty ||
+                m.genres.any((g) => genres.contains(g.toLowerCase()))))
+          m,
+    ];
+  }
 
   @override
   Future<String?> swipe(Musician musician, Decision decision) async =>
@@ -58,15 +73,16 @@ class SupabaseDeck implements DeckSource {
 
   static const _roles = ['Vocals', 'Guitar', 'Bass', 'Drums', 'Keys'];
 
-  // No location yet, so the deck isn't limited by distance.
   @override
-  String get description => 'Everywhere';
-
-  @override
-  Future<List<Musician>> loadDeck() async {
+  Future<List<Musician>> loadDeck(
+    DeckFilters filters, {
+    required bool hasLocation,
+  }) async {
     try {
-      final rows =
-          await _client.rpc('get_deck', params: {'max_km': null}) as List;
+      final rows = await _client.rpc(
+        'get_deck',
+        params: filters.toRpcParams(hasLocation: hasLocation),
+      ) as List;
       return [
         for (final row in rows)
           Musician.fromDeckRow(row as Map<String, dynamic>),
