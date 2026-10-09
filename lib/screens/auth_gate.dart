@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../data/chat_repository.dart';
 import '../data/deck.dart';
 import '../data/repositories.dart';
+import '../models/musician.dart';
 import 'auth_screen.dart';
+import 'chat_screen.dart';
+import 'matches_screen.dart';
 import 'onboarding_screen.dart';
 import 'swipe_screen.dart';
 
@@ -27,6 +31,7 @@ class AuthGate extends StatelessWidget {
           key: ValueKey(user.id),
           repository: SupabaseProfileRepository(client),
           deck: SupabaseDeck(client),
+          chat: SupabaseChatRepository(client),
         );
       },
     );
@@ -39,12 +44,16 @@ class ProfileGate extends StatefulWidget {
     super.key,
     required this.repository,
     this.deck = const SampleDeck(),
+    this.chat,
   });
 
   final ProfileRepository repository;
 
   /// People to swipe on once the profile is ready.
   final DeckSource deck;
+
+  /// Matches and messages. Without it the swipe screen has no Matches button.
+  final ChatRepository? chat;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -58,6 +67,27 @@ class _ProfileGateState extends State<ProfileGate> {
   void _reload() => setState(() {
     _status = widget.repository.myStatus();
   });
+
+  void _openMatches() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MatchesScreen(repository: widget.chat!),
+      ),
+    );
+  }
+
+  void _openChat(String matchId, Musician musician) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ChatScreen(
+          repository: widget.chat!,
+          matchId: matchId,
+          name: musician.name,
+          instrument: musician.instrument,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +110,8 @@ class _ProfileGateState extends State<ProfileGate> {
           ProfileStatus.ready => SwipeScreen(
             source: widget.deck,
             onSignOut: widget.repository.signOut,
+            onOpenMatches: widget.chat == null ? null : _openMatches,
+            onOpenChat: widget.chat == null ? null : _openChat,
           ),
           final status => OnboardingScreen(
             repository: widget.repository,

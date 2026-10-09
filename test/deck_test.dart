@@ -12,7 +12,7 @@ class OfflineDeck extends SampleDeck {
   const OfflineDeck();
 
   @override
-  Future<bool> swipe(Musician musician, Decision decision) async =>
+  Future<String?> swipe(Musician musician, Decision decision) async =>
       throw const UserFacingException(
         "Couldn't save that. Check your connection and try again.",
       );

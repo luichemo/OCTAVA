@@ -1,0 +1,73 @@
+/// One of your matches, as listed on the Matches screen.
+class MatchSummary {
+  const MatchSummary({
+    required this.matchId,
+    required this.name,
+    required this.instrument,
+    required this.matchedAt,
+    this.lastMessage,
+    this.lastMessageAt,
+    this.lastMessageIsMine = false,
+  });
+
+  final String matchId;
+
+  /// The other person's name and main instrument label.
+  final String name;
+  final String instrument;
+  final DateTime matchedAt;
+  final String? lastMessage;
+  final DateTime? lastMessageAt;
+  final bool lastMessageIsMine;
+
+  /// When anything last happened, for sorting newest first.
+  DateTime get lastActivity => lastMessageAt ?? matchedAt;
+}
+
+/// One chat message.
+class ChatMessage {
+  const ChatMessage({
+    required this.id,
+    required this.senderId,
+    required this.body,
+    required this.sentAt,
+  });
+
+  factory ChatMessage.fromRow(Map<String, dynamic> row) => ChatMessage(
+    id: row['id'] as String,
+    senderId: row['sender_id'] as String,
+    body: row['body'] as String,
+    sentAt: DateTime.parse(row['created_at'] as String).toLocal(),
+  );
+
+  final String id;
+  final String senderId;
+  final String body;
+  final DateTime sentAt;
+}
+
+/// "14:05" for today, "Yesterday", or "12 Oct".
+String formatMessageTime(DateTime t, {DateTime? now}) {
+  final today = now ?? DateTime.now();
+  final day = DateTime(t.year, t.month, t.day);
+  final todayDay = DateTime(today.year, today.month, today.day);
+  if (day == todayDay) {
+    return '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+  }
+  if (todayDay.difference(day).inDays == 1) return 'Yesterday';
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return '${t.day} ${months[t.month - 1]}';
+}

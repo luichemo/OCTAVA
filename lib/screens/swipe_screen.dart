@@ -19,6 +19,8 @@ class SwipeScreen extends StatefulWidget {
     super.key,
     this.source = const SampleDeck(),
     this.onSignOut,
+    this.onOpenMatches,
+    this.onOpenChat,
   });
 
   /// Where people come from and swipes go.
@@ -26,6 +28,13 @@ class SwipeScreen extends StatefulWidget {
 
   /// Shows a Sign out button when set.
   final VoidCallback? onSignOut;
+
+  /// Shows a Matches button when set.
+  final VoidCallback? onOpenMatches;
+
+  /// Opens the chat for a new match ("Say hi"). Without it, "Say hi" only
+  /// shows a confirmation.
+  final void Function(String matchId, Musician musician)? onOpenChat;
 
   @override
   State<SwipeScreen> createState() => _SwipeScreenState();
@@ -169,7 +178,7 @@ class _SwipeScreenState extends State<SwipeScreen>
       _toast(outcome.message);
       return;
     }
-    final matched = outcome == true;
+    final matchId = outcome is String ? outcome : null;
 
     if (decision == Decision.pass) {
       SemanticsService.sendAnnouncement(
@@ -177,14 +186,14 @@ class _SwipeScreenState extends State<SwipeScreen>
         'Passed on ${musician.name}.',
         TextDirection.ltr,
       );
-    } else if (matched) {
-      await _showMatch(musician);
+    } else if (matchId != null) {
+      await _showMatch(musician, matchId);
     } else {
       _toast('You asked ${musician.name} to jam');
     }
   }
 
-  Future<void> _showMatch(Musician m) async {
+  Future<void> _showMatch(Musician m, String matchId) async {
     final filledSlot = _fitsOpenSlot(m);
     final holder = _band[m.instrument];
     if (filledSlot) {
@@ -202,7 +211,13 @@ class _SwipeScreenState extends State<SwipeScreen>
             : '$holder already plays ${m.instrument.toLowerCase()} in your band, but you can still say hi.',
       ),
     );
-    if (saidHi == true && mounted) _toast('You said hi to ${m.name}');
+    if (saidHi != true || !mounted) return;
+    final openChat = widget.onOpenChat;
+    if (openChat != null) {
+      openChat(matchId, m);
+    } else {
+      _toast('You said hi to ${m.name}');
+    }
   }
 
   void _toast(String message) {
@@ -228,8 +243,8 @@ class _SwipeScreenState extends State<SwipeScreen>
       );
   }
 
-  /// The swipe's result (true for a match), or the error to show.
-  Future<Object> _attempt(Future<bool> swipe) async {
+  /// The swipe's result (a match id, or null), or the error to show.
+  Future<Object?> _attempt(Future<String?> swipe) async {
     try {
       return await swipe;
     } on UserFacingException catch (e) {
@@ -287,6 +302,16 @@ class _SwipeScreenState extends State<SwipeScreen>
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (widget.onOpenMatches != null)
+                            IconButton(
+                              tooltip: 'Matches',
+                              onPressed: widget.onOpenMatches,
+                              icon: const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                              ),
+                              color: colors.onSurfaceVariant,
+                              visualDensity: VisualDensity.compact,
+                            ),
                           if (widget.onSignOut != null)
                             IconButton(
                               tooltip: 'Sign out',

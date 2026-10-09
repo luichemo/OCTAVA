@@ -14,8 +14,8 @@ abstract interface class DeckSource {
 
   Future<List<Musician>> loadDeck();
 
-  /// Records the choice. Returns true when it's a match.
-  Future<bool> swipe(Musician musician, Decision decision);
+  /// Records the choice. Returns the match id when it's a match, else null.
+  Future<String?> swipe(Musician musician, Decision decision);
 
   /// Band lineup: role → member name ("You" for yourself), null when open.
   /// Map order is display order.
@@ -35,8 +35,10 @@ class SampleDeck implements DeckSource {
   Future<List<Musician>> loadDeck() async => List.of(musicians);
 
   @override
-  Future<bool> swipe(Musician musician, Decision decision) async =>
-      decision == Decision.jam && musician.likesYou;
+  Future<String?> swipe(Musician musician, Decision decision) async =>
+      decision == Decision.jam && musician.likesYou
+      ? 'sample-${musician.key}'
+      : null;
 
   @override
   Future<Map<String, String?>> loadLineup() async => {
@@ -77,13 +79,12 @@ class SupabaseDeck implements DeckSource {
   }
 
   @override
-  Future<bool> swipe(Musician musician, Decision decision) async {
+  Future<String?> swipe(Musician musician, Decision decision) async {
     try {
-      final matchId = await _client.rpc(
+      return await _client.rpc(
         'record_swipe',
         params: {'target': musician.id, 'decision': decision.name},
-      );
-      return matchId != null;
+      ) as String?;
     } catch (_) {
       throw const UserFacingException(
         "Couldn't save that. Check your connection and try again.",
