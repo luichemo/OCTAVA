@@ -20,6 +20,7 @@ class Musician {
     this.clipSeconds = 30,
     this.clipPath,
     this.links = const [],
+    this.avatarPath,
   });
 
   /// Builds a card from one row returned by the `get_deck` database function.
@@ -42,6 +43,7 @@ class Musician {
       lookingFor: row['looking_for'] as String?,
       clipSeconds: clips.firstOrNull?['seconds'] as int?,
       clipPath: clips.firstOrNull?['path'] as String?,
+      avatarPath: row['avatar_path'] as String?,
       links: [
         for (final l
             in (row['links'] as List? ?? const []).cast<Map<String, dynamic>>())
@@ -76,6 +78,9 @@ class Musician {
   final String? clipPath;
 
   final List<ProfileLink> links;
+
+  /// AI avatar in the `avatars` bucket; null shows the halftone pattern.
+  final String? avatarPath;
 
   /// Stable identity for widget keys.
   String get key => id ?? name;

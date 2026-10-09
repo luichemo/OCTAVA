@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
 import '../data/repositories.dart';
@@ -27,7 +28,11 @@ class SwipeScreen extends StatefulWidget {
     this.safety,
     this.player,
     this.onOpenProfile,
+    this.avatars,
   });
+
+  /// Shows AI avatars on cards when set.
+  final AvatarRepository? avatars;
 
   /// Plays audio clips on cards. Without it the play buttons are disabled.
   final ClipPlayer? player;
@@ -466,6 +471,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                       musician: next,
                       tone: _toneFor(next),
                       fitsOpenSlot: _fitsOpenSlot(next),
+                      avatars: widget.avatars,
                     ),
                   ),
                 ),
@@ -491,6 +497,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                       ? null
                       : () => _openSafety(top),
                   player: widget.player,
+                  avatars: widget.avatars,
                 ),
               ),
             ),

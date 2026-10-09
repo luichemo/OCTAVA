@@ -192,6 +192,11 @@ class SupabaseProfileRepository implements ProfileRepository {
       final hadBirthday =
           now.month > born.month ||
           (now.month == born.month && now.day >= born.day);
+      final avatar = await _client
+          .from('profiles')
+          .select('avatar_path')
+          .eq('id', _uid)
+          .single();
       final clip = await _client
           .from('audio_clips')
           .select('storage_path, duration_seconds')
@@ -211,6 +216,7 @@ class SupabaseProfileRepository implements ProfileRepository {
         links: draft.links,
         clipSeconds: clip?['duration_seconds'] as int?,
         clipPath: clip?['storage_path'] as String?,
+        avatarPath: avatar['avatar_path'] as String?,
       );
     } catch (_) {
       throw const UserFacingException(_offline);

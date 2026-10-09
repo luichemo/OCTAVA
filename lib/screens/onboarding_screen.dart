@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/profile_options.dart';
 import '../data/repositories.dart';
 import '../models/profile_draft.dart';
 import '../models/profile_link.dart';
 import '../theme.dart';
+import '../widgets/avatar_section.dart';
 import '../widgets/clips_section.dart';
 import 'card_preview_screen.dart';
 
@@ -21,7 +23,11 @@ class OnboardingScreen extends StatefulWidget {
     this.initial,
     this.clips,
     this.player,
+    this.avatars,
   });
+
+  /// Avatar section, shown when editing.
+  final AvatarRepository? avatars;
 
   /// The current profile when editing; null during sign-up.
   final ProfileDraft? initial;
@@ -241,6 +247,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             builder: (_) => CardPreviewScreen(
                               repository: widget.repository,
                               player: widget.player,
+                              avatars: widget.avatars,
                             ),
                           ),
                         ),
@@ -248,6 +255,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         label: const Text('See your card'),
                       ),
                     ),
+                  ],
+                  if (_editing && widget.avatars != null) ...[
+                    _Section('Avatar'),
+                    AvatarSection(avatars: widget.avatars!),
                   ],
                   _Section('About you'),
                   TextFormField(

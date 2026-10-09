@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
 import '../models/musician.dart';
@@ -9,10 +10,16 @@ import '../widgets/musician_card.dart';
 /// Your own card, exactly as other musicians see it when swiping, with your
 /// clip and links working. Shows the saved profile.
 class CardPreviewScreen extends StatefulWidget {
-  const CardPreviewScreen({super.key, required this.repository, this.player});
+  const CardPreviewScreen({
+    super.key,
+    required this.repository,
+    this.player,
+    this.avatars,
+  });
 
   final ProfileRepository repository;
   final ClipPlayer? player;
+  final AvatarRepository? avatars;
 
   @override
   State<CardPreviewScreen> createState() => _CardPreviewScreenState();
@@ -78,6 +85,7 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
                           ][me.toneIndex],
                           fitsOpenSlot: false,
                           player: widget.player,
+                          avatars: widget.avatars,
                         ),
                       ),
                     ],

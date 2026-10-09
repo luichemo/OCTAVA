@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../models/musician.dart';
 import '../theme.dart';
+import 'avatar_section.dart';
 
 /// One swipe card: a halftone "portrait", the instrument in big poster type
 /// overlapping it, and the musician's details below.
@@ -19,7 +21,11 @@ class MusicianCard extends StatelessWidget {
     this.passStamp = 0,
     this.onSafety,
     this.player,
+    this.avatars,
   });
+
+  /// Shows the musician's AI avatar over the halftone pattern when set.
+  final AvatarRepository? avatars;
 
   /// Plays the card's audio clip. Without it the play button is disabled.
   final ClipPlayer? player;
@@ -71,6 +77,15 @@ class MusicianCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (avatars != null && m.avatarPath != null)
+                    Positioned.fill(
+                      child: ExcludeSemantics(
+                        child: AvatarImage(
+                          avatars: avatars!,
+                          path: m.avatarPath!,
+                        ),
+                      ),
+                    ),
                   Positioned(
                     top: 18,
                     left: 16,

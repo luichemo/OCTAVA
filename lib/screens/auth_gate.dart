@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
@@ -37,6 +38,7 @@ class AuthGate extends StatelessWidget {
           chat: SupabaseChatRepository(client),
           safety: SupabaseSafetyRepository(client),
           clips: SupabaseClipRepository(client),
+          avatars: SupabaseAvatarRepository(client),
         );
       },
     );
@@ -52,6 +54,7 @@ class ProfileGate extends StatefulWidget {
     this.chat,
     this.safety,
     this.clips,
+    this.avatars,
   });
 
   final ProfileRepository repository;
@@ -67,6 +70,9 @@ class ProfileGate extends StatefulWidget {
 
   /// Audio clips: playing on cards and managing your own.
   final ClipRepository? clips;
+
+  /// AI avatars: on cards and made from your profile.
+  final AvatarRepository? avatars;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -92,6 +98,7 @@ class _ProfileGateState extends State<ProfileGate> {
         repository: widget.repository,
         clips: widget.clips,
         player: _player,
+        avatars: widget.avatars,
       ),
     ),
   );
@@ -152,6 +159,7 @@ class _ProfileGateState extends State<ProfileGate> {
             safety: widget.safety,
             player: _player,
             onOpenProfile: _openProfile,
+            avatars: widget.avatars,
           ),
           final status => OnboardingScreen(
             repository: widget.repository,

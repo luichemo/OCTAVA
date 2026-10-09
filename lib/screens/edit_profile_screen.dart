@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
 import '../models/profile_draft.dart';
@@ -12,11 +13,13 @@ class EditProfileScreen extends StatefulWidget {
     required this.repository,
     this.clips,
     this.player,
+    this.avatars,
   });
 
   final ProfileRepository repository;
   final ClipRepository? clips;
   final ClipPlayer? player;
+  final AvatarRepository? avatars;
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -69,6 +72,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           initial: profile,
           clips: widget.clips,
           player: widget.player,
+          avatars: widget.avatars,
           onDone: () {
             ScaffoldMessenger.of(context)
                 .showSnackBar(const SnackBar(content: Text('Profile saved.')));
