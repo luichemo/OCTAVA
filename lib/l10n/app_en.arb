@@ -1,0 +1,622 @@
+{
+  "@@locale": "en",
+  "tryAgain": "Try again",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "add": "Add",
+  "signOut": "Sign out",
+  "navProfile": "Profile",
+  "navMatches": "Matches",
+  "errOffline": "Couldn't reach OCTAVA. Check your connection and try again.",
+  "authTagline": "Find people to make music with.",
+  "authEmail": "Email",
+  "authEmailError": "Enter your email address",
+  "authPassword": "Password",
+  "authPasswordHelper": "At least 8 characters",
+  "authPasswordEmpty": "Enter your password",
+  "authPasswordShort": "Use at least 8 characters",
+  "authCreateAccount": "Create account",
+  "authSignIn": "Sign in",
+  "authHaveAccount": "I already have an account",
+  "authNewAccount": "Create a new account",
+  "authCheckEmail": "Check your email: we sent you a link to confirm your account. Open it, then sign in here.",
+  "errEmailTaken": "There is already an account with this email. Sign in instead.",
+  "errBadLogin": "That email and password don't match an account.",
+  "errEmailNotConfirmed": "Confirm your email first: open the link we sent you, then sign in.",
+  "errWeakPassword": "Choose a stronger password: at least 8 characters, mixing letters and numbers.",
+  "errEmailInvalid": "Enter a valid email address.",
+  "errTooManyAttempts": "Too many attempts. Wait a minute and try again.",
+  "profileSetUpTitle": "Set up your profile",
+  "profileTitle": "Your profile",
+  "profileSubtitle": "This is what other musicians see when they swipe.",
+  "seeYourCard": "See your card",
+  "sectionAvatar": "Avatar",
+  "sectionAbout": "About you",
+  "sectionLocation": "Location",
+  "sectionPlay": "What you play",
+  "sectionWant": "What you want",
+  "sectionLinks": "Links",
+  "sectionClips": "Audio clips",
+  "sectionLanguage": "Language",
+  "fieldName": "Name",
+  "fieldNameError": "Enter the name people will see",
+  "fieldBirthDate": "Date of birth",
+  "fieldBirthDateHelper": "OCTAVA is for ages 16 and over. Others only see your age.",
+  "fieldBirthDateError": "Enter your date of birth",
+  "birthDatePickerTitle": "Your date of birth",
+  "confirmBirthDateTitle": "Is your date of birth right?",
+  "confirmBirthDateBody": "{date}. You can't change it later, because it decides who you can meet on OCTAVA.",
+  "@confirmBirthDateBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmBirthDateNo": "Change it",
+  "confirmBirthDateYes": "Yes, it's right",
+  "fieldArea": "Area (optional)",
+  "fieldAreaHint": "e.g. Vake, Tbilisi",
+  "instrumentMain": "{instrument} (main)",
+  "@instrumentMain": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "pickInstrumentError": "Pick at least one instrument",
+  "fieldGenres": "Genres",
+  "rehearseQuestion": "How often can you rehearse?",
+  "gearQuestion": "What do you have?",
+  "fieldLookingFor": "What are you looking for? (optional)",
+  "fieldLookingForHint": "e.g. A band that rehearses weekly and plays shows",
+  "linksLabel": "YouTube, TikTok, SoundCloud, Spotify…",
+  "linksHint": "Paste a link and press Enter",
+  "addLink": "Add link",
+  "removeLink": "Remove link",
+  "linkInvalid": "Paste a full web address, like youtube.com/watch?v=…",
+  "linkMax": "You can add up to 6 links.",
+  "linkCheckError": "Check the link: it isn't a web address we can use.",
+  "answersMissing": "Some answers are missing. Check the fields marked in red above.",
+  "saveChanges": "Save changes",
+  "createProfile": "Create profile",
+  "profileSaved": "Profile saved.",
+  "errSaveProfile": "Couldn't save your profile. Try again in a moment.",
+  "errUnder16": "OCTAVA is for people aged 16 and over.",
+  "errBirthDateInvalid": "Enter a real date of birth.",
+  "genresChoose": "Choose genres",
+  "genresChange": "Change genres",
+  "genresSearch": "Search genres",
+  "genresDone": "Done",
+  "genresMax": "You can pick up to 10 genres.",
+  "genresNoResults": "No genre matches that.",
+  "noClipsTitle": "You're hidden from the feed",
+  "noClipsBody": "Musicians without an audio clip don't appear when others swipe. Add at least one so people can hear you.",
+  "noClipsAction": "Record a clip",
+  "deckEverywhere": "Everywhere",
+  "deckWithin": "Within {km} km",
+  "@deckWithin": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "deckWithFilters": "{where}, {count, plural, =1{1 filter} other{{count} filters}}",
+  "@deckWithFilters": {
+    "placeholders": {
+      "where": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stampJam": "Jam",
+  "stampPass": "Pass",
+  "actionJam": "Jam",
+  "actionPass": "Pass",
+  "passedOn": "Passed on {name}.",
+  "@passedOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "askedToJam": "You asked {name} to jam",
+  "@askedToJam": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matchTitle": "{name} wants to jam too",
+  "@matchTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matchSlotFilled": "{instrument} is now filled in your band. Say hi and plan a first rehearsal.",
+  "@matchSlotFilled": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "matchSlotTaken": "{holder} already plays {instrument} in your band, but you can still say hi.",
+  "@matchSlotTaken": {
+    "placeholders": {
+      "holder": {
+        "type": "String"
+      },
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "matchSlotYours": "You already cover {instrument} yourself, but you can still say hi.",
+  "@matchSlotYours": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "saidHi": "You said hi to {name}",
+  "@saidHi": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sayHi": "Say hi",
+  "keepSwiping": "Keep swiping",
+  "loadErrorTitle": "Something went wrong",
+  "errLoadMusiciansShort": "Couldn't load musicians. Try again.",
+  "noMatchTitle": "Nobody matches",
+  "noMatchBody": "Nobody matches your filters right now. Try fewer filters or a bigger distance.",
+  "changeFilters": "Change filters",
+  "heardEveryoneTitle": "You've heard everyone",
+  "heardEveryoneBody": "That's everyone for now. New musicians join every week.",
+  "checkAgain": "Check again",
+  "locationPrompt": "See how far away people are.",
+  "shareLocation": "Share location",
+  "shareLocationShort": "Share location",
+  "findingYou": "Finding you…",
+  "yourBand": "Your band",
+  "slotOpen": "Open",
+  "slotYou": "You",
+  "cardSemantics": "{name}, {age}, {instrument}",
+  "@cardSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      },
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "nameAge": "{name}, {age}",
+  "@nameAge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "kmAway": "{distance} km away",
+  "@kmAway": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "fitsSlot": "Fits your open {instrument} slot",
+  "@fitsSlot": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "plays": "Plays {genres}",
+  "@plays": {
+    "placeholders": {
+      "genres": {
+        "type": "String"
+      }
+    }
+  },
+  "listAnd": "and",
+  "quoted": "“{text}”",
+  "@quoted": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "noClip": "No clip to play",
+  "playClipOf": "Play {name}'s clip",
+  "@playClipOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "stopClipOf": "Stop {name}'s clip",
+  "@stopClipOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "blockOrReport": "Block or report",
+  "musicianFallback": "Musician",
+  "matchesTitle": "Matches",
+  "matchesEmpty": "No matches yet. When someone you chose Jam on chooses Jam on you too, they appear here.",
+  "newMatchSayHi": "New match. Say hi!",
+  "youPrefix": "You: {message}",
+  "@youPrefix": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "yesterday": "Yesterday",
+  "chatEmpty": "You and {name} both want to jam. Say hi and plan a first rehearsal.",
+  "@chatEmpty": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "messageHint": "Message",
+  "send": "Send",
+  "chatLoadError": "Couldn't load messages. Check your connection, then go back and open the chat again.",
+  "errLoadMatches": "Couldn't load your matches. Check your connection and try again.",
+  "errSendBlocked": "You can't send messages in this chat anymore.",
+  "errSend": "Couldn't send your message. Try again.",
+  "errSendOffline": "Couldn't send your message. Check your connection and try again.",
+  "blockName": "Block {name}",
+  "@blockName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "blockSubtitle": "You won't see each other and can't message. They aren't told.",
+  "reportName": "Report {name}",
+  "@reportName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSubtitle": "Tell us about something wrong. Reports are private.",
+  "blockedName": "You blocked {name}.",
+  "@blockedName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportThanksBlocked": "Thanks for reporting. You also blocked {name}.",
+  "@reportThanksBlocked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportThanks": "Thanks for reporting. We review every report.",
+  "blockConfirmTitle": "Block {name}?",
+  "@blockConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "blockConfirmBody": "You won't see each other on OCTAVA anymore, and neither of you can send messages. {name} won't be told.",
+  "@blockConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "whatsWrong": "What's wrong?",
+  "reportDetails": "Details (optional)",
+  "alsoBlock": "Also block {name}",
+  "@alsoBlock": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sendReport": "Send report",
+  "reasonHarassment": "Harassment or hate",
+  "reasonInappropriate": "Inappropriate messages or content",
+  "reasonSpam": "Spam or a scam",
+  "reasonFake": "Fake profile",
+  "reasonUnderage": "Seems to be under 16",
+  "reasonOther": "Something else",
+  "errBlock": "Couldn't block. Try again.",
+  "errBlockOffline": "Couldn't block. Check your connection and try again.",
+  "errReport": "Couldn't send your report. Check your connection and try again.",
+  "navAdd": "Record a clip",
+  "recordTitle": "New clip",
+  "recordStarting": "Starting the microphone…",
+  "recordRecording": "Recording",
+  "recordLimit": "Recording stops by itself at 2:00.",
+  "recordStop": "Stop",
+  "recordDone": "Recorded {length}",
+  "@recordDone": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  },
+  "recordSave": "Add to profile",
+  "recordListen": "Listen back",
+  "recordStopListening": "Stop listening",
+  "recordAgain": "Record again",
+  "recordUploadFile": "Upload a file instead",
+  "errMicDenied": "OCTAVA can't use your microphone. Allow it in your browser or phone settings, then try again.",
+  "errRecord": "Couldn't record. Try again.",
+  "errRecordShort": "That's too short. Record at least a second.",
+  "clipsInfo": "Up to 5 clips, 2 minutes each. Star one to make it your card's song; otherwise your first clip plays.",
+  "clipMakeSong": "Make this your card's song",
+  "clipIsSong": "Your card's song",
+  "errClipSong": "Couldn't change your card's song. Check your connection and try again.",
+  "clipAdded": "Clip added to your profile.",
+  "deleteClipTitle": "Delete this clip?",
+  "deleteClipBody": "\"{title}\" will be removed from your profile.",
+  "@deleteClipBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "clipFallback": "Clip",
+  "deleteClip": "Delete clip",
+  "play": "Play",
+  "stop": "Stop",
+  "uploading": "Uploading…",
+  "clipsFull": "You have 5 clips",
+  "addClip": "Add a clip",
+  "errOpenFiles": "Couldn't open your files. Restart the app and try again.",
+  "errClipsLoad": "Couldn't load your clips. Check your connection and try again.",
+  "errClipType": "Use an MP3, M4A, AAC, WAV, OGG, WEBM or FLAC file.",
+  "errClipSize": "That file is over 10 MB. Try a shorter or more compressed clip.",
+  "errClipsMax": "You can have up to 5 clips. Delete one to add another.",
+  "errClipUpload": "Couldn't upload your clip. Check your connection and try again.",
+  "errClipUnreadable": "Couldn't play that file. Try exporting it as MP3 or M4A.",
+  "errClipTooLong": "Clips can be up to 2 minutes. This one is {length}.",
+  "@errClipTooLong": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  },
+  "errClipSave": "Couldn't save your clip. Try again.",
+  "errClipDelete": "Couldn't delete the clip. Check your connection and try again.",
+  "errClipPlay": "Couldn't play the clip. Check your connection and try again.",
+  "avatarPainting": "Painting your avatar… this takes a few seconds.",
+  "avatarInfo": "A riso-print illustration made by AI from your main instrument and genres.",
+  "avatarGenerate": "Generate my avatar",
+  "avatarNew": "Make a new one",
+  "avatarRemaining": "{count, plural, =1{1 more today} other{{count} more today}}",
+  "@avatarRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errAvatarLoad": "Couldn't load your avatar. Check your connection and try again.",
+  "errAvatarGeneric": "Couldn't make an avatar right now. Try again.",
+  "errAvatarOffline": "Couldn't make an avatar. Check your connection and try again.",
+  "errAvatarDaily": "You've made 5 avatars today. Try again tomorrow.",
+  "errAvatarBusy": "Too many avatars are being made right now. Try again later.",
+  "errAvatarNotReady": "Avatar generation isn't set up yet. Try again later.",
+  "locationSharing": "You share an approximate location (to about 1 km). People see how far away you are, never where you are.",
+  "locationNotSharing": "You don't share a location, so nobody sees distances to you and distance filters are off.",
+  "locationSaved": "Location saved.",
+  "updateLocation": "Update location",
+  "locationStopped": "You no longer share a location.",
+  "stopSharing": "Stop sharing",
+  "errLocationOff": "Location is turned off on this device. Turn it on and try again.",
+  "errLocationDenied": "OCTAVA isn't allowed to use your location. Allow it in your browser or phone settings, then try again.",
+  "errLocationFind": "Couldn't find your location. Try again in a moment.",
+  "errLocationSave": "Couldn't save your location. Check your connection and try again.",
+  "errLocationRemove": "Couldn't remove your location. Check your connection and try again.",
+  "filtersTitle": "Filters",
+  "reset": "Reset",
+  "filterDistance": "Distance",
+  "filterDistanceNoLocation": "Share your location to filter by distance. Until then you see everyone.",
+  "kmShort": "{km} km",
+  "@kmShort": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "anywhere": "Anywhere",
+  "filterInstruments": "Instruments",
+  "filterInstrumentsHint": "Show only people who play these. Leave empty for everyone.",
+  "filterSkill": "Lowest skill level",
+  "filterSkillNeedsInstruments": "Pick instruments first; the skill level applies to them.",
+  "any": "Any",
+  "skillOrBetter": "{skill} or better",
+  "@skillOrBetter": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "filterGenresHint": "Show people who play at least one of these.",
+  "filterGoals": "Goals",
+  "filterRehearses": "Rehearses",
+  "showMusicians": "Show musicians",
+  "errLoadMusicians": "Couldn't load musicians. Check your connection and try again.",
+  "errSaveSwipe": "Couldn't save that. Check your connection and try again.",
+  "errLoadBand": "Couldn't load your band. Check your connection and try again.",
+  "yourCard": "Your card",
+  "cardPreviewInfo": "This is how other musicians see you. Distance shows for them once you both share a location.",
+  "languageDevice": "Device",
+  "languageInfo": "\"Device\" follows your phone or browser language.",
+  "instrumentVocals": "Vocals",
+  "instrumentGuitar": "Guitar",
+  "instrumentBass": "Bass",
+  "instrumentDrums": "Drums",
+  "instrumentKeys": "Keys",
+  "instrumentPercussion": "Percussion",
+  "instrumentViolin": "Violin",
+  "instrumentCello": "Cello",
+  "instrumentSaxophone": "Saxophone",
+  "instrumentTrumpet": "Trumpet",
+  "instrumentTrombone": "Trombone",
+  "instrumentFlute": "Flute",
+  "instrumentClarinet": "Clarinet",
+  "instrumentDj": "DJ",
+  "instrumentProduction": "Production",
+  "instrumentOther": "Other",
+  "skillBeginner": "Beginner",
+  "skillIntermediate": "Intermediate",
+  "skillAdvanced": "Advanced",
+  "skillPro": "Pro",
+  "goalFun": "For fun",
+  "goalGigging": "Gigging",
+  "goalRecording": "Recording",
+  "goalPaid": "Paid work",
+  "freqOccasionally": "Now and then",
+  "freqMonthly": "Monthly",
+  "freqWeekly": "Weekly",
+  "freqSeveralAWeek": "Several times a week",
+  "gearOwnGear": "Own gear",
+  "gearCar": "Car",
+  "gearRehearsalSpace": "Rehearsal space",
+  "gearHomeStudio": "Home studio",
+  "linkWebsite": "Website",
+  "genreRock": "Rock",
+  "genrePop": "Pop",
+  "genreIndie": "Indie",
+  "genreAltRock": "Alternative rock",
+  "genrePunk": "Punk",
+  "genrePostPunk": "Post-punk",
+  "genreHardcore": "Hardcore",
+  "genreMetal": "Metal",
+  "genreGrunge": "Grunge",
+  "genreMathRock": "Math rock",
+  "genrePostRock": "Post-rock",
+  "genreShoegaze": "Shoegaze",
+  "genreDreamPop": "Dream pop",
+  "genreSynthPop": "Synth-pop",
+  "genreCityPop": "City pop",
+  "genreDisco": "Disco",
+  "genreFunk": "Funk",
+  "genreSoul": "Soul",
+  "genreNeoSoul": "Neo-soul",
+  "genreRAndB": "R&B",
+  "genreHipHop": "Hip-hop",
+  "genreRap": "Rap",
+  "genreJazz": "Jazz",
+  "genreBlues": "Blues",
+  "genreGospel": "Gospel",
+  "genreElectronic": "Electronic",
+  "genreTechno": "Techno",
+  "genreHouse": "House",
+  "genreAmbient": "Ambient",
+  "genreLoFi": "Lo-fi",
+  "genreExperimental": "Experimental",
+  "genreFolk": "Folk",
+  "genreIndieFolk": "Indie folk",
+  "genreGeorgianFolk": "Georgian folk",
+  "genreSingerSongwriter": "Singer-songwriter",
+  "genreCountry": "Country",
+  "genreReggae": "Reggae",
+  "genreSka": "Ska",
+  "genreLatin": "Latin",
+  "genreWorld": "World music",
+  "genreClassical": "Classical",
+  "genreSoundtrack": "Soundtrack",
+  "bandEdit": "Choose the roles your band needs",
+  "bandRolesTitle": "Who does your band need?",
+  "bandRolesHint": "Room for up to {max} people besides you.",
+  "@bandRolesHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "bandRolesCount": "{count} of {max}",
+  "@bandRolesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "bandRolesEmpty": "Pick at least one role.",
+  "bandRolesSave": "Save",
+  "roleMore": "One more",
+  "roleFewer": "One fewer",
+  "roleCount": "{instrument} ×{count}",
+  "@roleCount": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sectionBand": "Your band needs",
+  "bandChange": "Change roles",
+  "bandDefaultNote": "Not chosen yet, so these are the usual roles.",
+  "matchNoSlot": "Your band isn't looking for {instrument} right now, but you can still say hi.",
+  "@matchNoSlot": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "errSaveBand": "Couldn't save your band's roles. Check your connection and try again."
+}

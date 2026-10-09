@@ -1,0 +1,88 @@
+import '../models/musician.dart';
+
+/// Placeholder people (the same as prototype/index.html) until profiles come
+/// from Supabase.
+const sampleMusicians = <Musician>[
+  Musician(
+    name: 'Nika',
+    age: 24,
+    instrumentId: 'drums',
+    area: 'Vera',
+    km: 1.2,
+    genres: ['post-punk', 'math-rock'],
+    lookingFor: 'A band that rehearses twice a week and actually plays shows.',
+    likesYou: true,
+  ),
+  Musician(
+    name: 'Mariam',
+    age: 27,
+    instrumentId: 'bass',
+    area: 'Sololaki',
+    km: 2.4,
+    genres: ['funk', 'neo-soul'],
+    lookingFor:
+        'Groove-first people. I have a car and a key to a rehearsal room.',
+    likesYou: false,
+  ),
+  Musician(
+    name: 'Luka',
+    age: 22,
+    instrumentId: 'vocals',
+    area: 'Saburtalo',
+    km: 4.1,
+    genres: ['alt-rock', 'grunge'],
+    lookingFor: 'I write lyrics in Georgian and English. I need a band to make them loud.',
+    likesYou: true,
+  ),
+  Musician(
+    name: 'Tamar',
+    age: 30,
+    instrumentId: 'keys',
+    area: 'Vake',
+    km: 3.0,
+    genres: ['jazz', 'synth-pop'],
+    lookingFor:
+        'Classically trained, recovering. I want to play over a drum machine.',
+    likesYou: true,
+  ),
+  Musician(
+    name: 'Giorgi',
+    age: 26,
+    instrumentId: 'drums',
+    area: 'Didube',
+    km: 6.5,
+    genres: ['metal', 'hardcore'],
+    lookingFor: 'Double kick, my own kit, no excuses.',
+    likesYou: false,
+  ),
+  Musician(
+    name: 'Ana',
+    age: 25,
+    instrumentId: 'vocals',
+    area: 'Mtatsminda',
+    km: 1.8,
+    genres: ['indie-folk', 'dream-pop'],
+    lookingFor: 'Harmonies are my favourite part of any song.',
+    likesYou: false,
+  ),
+  Musician(
+    name: 'Dato',
+    age: 29,
+    instrumentId: 'bass',
+    area: 'Nadzaladevi',
+    km: 5.2,
+    genres: ['post-rock', 'shoegaze'],
+    lookingFor: 'Long songs, lots of pedals, quiet and then very loud.',
+    likesYou: true,
+  ),
+  Musician(
+    name: 'Salome',
+    age: 23,
+    instrumentId: 'keys',
+    area: 'Avlabari',
+    km: 2.9,
+    genres: ['city-pop', 'disco'],
+    lookingFor: 'I want our first gig to be on a rooftop in June.',
+    likesYou: false,
+  ),
+];

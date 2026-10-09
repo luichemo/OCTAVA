@@ -1,0 +1,292 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'repositories.dart';
+import '../l10n/l10n.dart';
+
+/// One of your own audio clips.
+class MyClip {
+  const MyClip({
+    required this.id,
+    required this.path,
+    required this.seconds,
+    this.title,
+    this.featured = false,
+  });
+
+  final String id;
+
+  /// The clip chosen as the card's song.
+  final bool featured;
+
+  /// Path in the `clips` storage bucket.
+  final String path;
+  final String? title;
+  final int seconds;
+}
+
+/// File types the `clips` bucket accepts, by extension.
+const clipMimeTypes = <String, String>{
+  'mp3': 'audio/mpeg',
+  'm4a': 'audio/mp4',
+  'aac': 'audio/aac',
+  'wav': 'audio/wav',
+  'ogg': 'audio/ogg',
+  'oga': 'audio/ogg',
+  'webm': 'audio/webm',
+  'flac': 'audio/flac',
+};
+
+const maxClips = 5;
+// 2:00, matches the audio_clips check in the database.
+const maxClipSeconds = 120;
+const maxClipBytes = 10 * 1024 * 1024;
+
+/// Uploading, listing, deleting and playing audio clips.
+abstract interface class ClipRepository {
+  Future<List<MyClip>> myClips();
+
+  /// Uploads a file and adds it to your profile. Checks the type, size and
+  /// length first and explains any problem with a [UserFacingException].
+  /// [knownSeconds] skips measuring, e.g. for a fresh recording whose length
+  /// the recorder already knows.
+  Future<MyClip> upload({
+    required Uint8List bytes,
+    required String fileName,
+    int? knownSeconds,
+  });
+
+  Future<void> delete(MyClip clip);
+
+  /// Makes [clipId] the song on your card, or clears the choice with null
+  /// (then your first clip plays).
+  Future<void> setFeatured(String? clipId);
+
+  /// A temporary link for playing a clip.
+  Future<String> playbackUrl(String path);
+}
+
+class SupabaseClipRepository implements ClipRepository {
+  SupabaseClipRepository(this._client);
+  final SupabaseClient _client;
+
+  String get _uid => _client.auth.currentUser!.id;
+  StorageFileApi get _bucket => _client.storage.from('clips');
+
+  @override
+  Future<List<MyClip>> myClips() async {
+    try {
+      final rows = await _client
+          .from('audio_clips')
+          .select('id, storage_path, title, duration_seconds')
+          .eq('profile_id', _uid)
+          .order('created_at');
+      final profile = await _client
+          .from('profiles')
+          .select('featured_clip_id')
+          .eq('id', _uid)
+          .single();
+      final featuredId = profile['featured_clip_id'] as String?;
+      return [
+        for (final r in rows)
+          MyClip(
+            id: r['id'] as String,
+            path: r['storage_path'] as String,
+            title: r['title'] as String?,
+            seconds: r['duration_seconds'] as int,
+            featured: r['id'] == featuredId,
+          ),
+      ];
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipsLoad);
+    }
+  }
+
+  @override
+  Future<MyClip> upload({
+    required Uint8List bytes,
+    required String fileName,
+    int? knownSeconds,
+  }) async {
+    final ext = fileName.contains('.')
+        ? fileName.split('.').last.toLowerCase()
+        : '';
+    final mime = clipMimeTypes[ext];
+    if (mime == null) {
+      throw UserFacingException(L10n.current.errClipType);
+    }
+    if (bytes.length > maxClipBytes) {
+      throw UserFacingException(L10n.current.errClipSize);
+    }
+    if ((await myClips()).length >= maxClips) {
+      throw UserFacingException(L10n.current.errClipsMax);
+    }
+
+    final path = '$_uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    try {
+      await _bucket.uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: mime),
+      );
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipUpload);
+    }
+
+    // Measure the uploaded file (unless the length is known); remove it again
+    // if it can't be used.
+    final seconds = knownSeconds ?? await _measure(path);
+    if (seconds == null || seconds > maxClipSeconds) {
+      await _bucket.remove([path]).catchError((_) => <FileObject>[]);
+      throw UserFacingException(
+        seconds == null
+            ? L10n.current.errClipUnreadable
+            : 'Clips can be up to 2 minutes. This one is ${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}.',
+      );
+    }
+
+    final title = _titleFrom(fileName);
+    try {
+      final row = await _client
+          .from('audio_clips')
+          .insert({
+            'profile_id': _uid,
+            'storage_path': path,
+            'title': title,
+            'duration_seconds': seconds,
+          })
+          .select('id')
+          .single();
+      return MyClip(
+        id: row['id'] as String,
+        path: path,
+        title: title,
+        seconds: seconds,
+      );
+    } catch (e) {
+      await _bucket.remove([path]).catchError((_) => <FileObject>[]);
+      // The database's 5-clip rule (a race with another upload).
+      if (e is PostgrestException && e.message.contains('up to 5 clips')) {
+        throw UserFacingException(L10n.current.errClipsMax);
+      }
+      throw UserFacingException(L10n.current.errClipSave);
+    }
+  }
+
+  @override
+  Future<void> setFeatured(String? clipId) async {
+    try {
+      await _client
+          .from('profiles')
+          .update({'featured_clip_id': clipId})
+          .eq('id', _uid);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipSong);
+    }
+  }
+
+  @override
+  Future<void> delete(MyClip clip) async {
+    try {
+      await _client.from('audio_clips').delete().eq('id', clip.id);
+      await _bucket.remove([clip.path]);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipDelete);
+    }
+  }
+
+  @override
+  Future<String> playbackUrl(String path) async {
+    try {
+      return await _bucket.createSignedUrl(path, 60 * 60);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipPlay);
+    }
+  }
+
+  /// Length in whole seconds (at least 1), or null if it can't be read.
+  Future<int?> _measure(String path) async {
+    final player = AudioPlayer();
+    try {
+      final duration = await player.setUrl(await playbackUrl(path));
+      if (duration == null) return null;
+      return (duration.inMilliseconds / 1000).ceil().clamp(1, 1 << 30);
+    } catch (_) {
+      return null;
+    } finally {
+      await player.dispose();
+    }
+  }
+
+  /// "My Song (demo).mp3" → "My Song (demo)", at most 60 characters.
+  static String _titleFrom(String fileName) {
+    final base = fileName.contains('.')
+        ? fileName.substring(0, fileName.lastIndexOf('.'))
+        : fileName;
+    final clean = base.replaceAll(RegExp(r'[_\s]+'), ' ').trim();
+    return clean.length > 60 ? clean.substring(0, 60) : clean;
+  }
+}
+
+/// Plays one clip at a time, for the whole app.
+abstract interface class ClipPlayer {
+  /// Storage path of the clip that's playing, or null.
+  ValueListenable<String?> get playing;
+
+  Stream<Duration> get position;
+
+  /// Plays [path], or stops it if it's already playing.
+  Future<void> toggle(String path);
+
+  Future<void> stop();
+
+  Future<void> dispose();
+}
+
+/// [ClipPlayer] using just_audio (web, Android and iOS).
+class JustAudioClipPlayer implements ClipPlayer {
+  JustAudioClipPlayer(this._urlFor) {
+    _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) stop();
+    });
+  }
+
+  final Future<String> Function(String path) _urlFor;
+  final AudioPlayer _player = AudioPlayer();
+
+  @override
+  final ValueNotifier<String?> playing = ValueNotifier(null);
+
+  @override
+  Stream<Duration> get position => _player.positionStream;
+
+  @override
+  Future<void> toggle(String path) async {
+    if (playing.value == path) return stop();
+    await _player.stop();
+    playing.value = path;
+    try {
+      await _player.setUrl(await _urlFor(path));
+      // play() only completes when playback ends, so don't wait for it.
+      if (playing.value == path) unawaited(_player.play());
+    } catch (_) {
+      if (playing.value == path) playing.value = null;
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> stop() async {
+    playing.value = null;
+    await _player.stop();
+  }
+
+  @override
+  Future<void> dispose() async {
+    playing.dispose();
+    await _player.dispose();
+  }
+}
