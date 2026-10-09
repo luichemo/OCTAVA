@@ -5,7 +5,7 @@ import '../models/musician.dart';
 import 'repositories.dart';
 import 'sample_musicians.dart';
 import '../l10n/l10n.dart';
-import '../widgets/band_lineup.dart';
+import '../models/band.dart';
 
 enum Decision { pass, jam }
 
@@ -20,9 +20,9 @@ abstract interface class DeckSource {
   /// Records the choice. Returns the match id when it's a match, else null.
   Future<String?> swipe(Musician musician, Decision decision);
 
-  /// Band lineup: role → member name ("You" for yourself), null when open.
-  /// Map order is display order.
-  Future<Map<String, String?>> loadLineup();
+  /// Your main instrument and your matches (oldest first), which fill the
+  /// band lineup (see `buildLineup`).
+  Future<({String? myRole, List<BandMember> members})> loadBand();
 }
 
 /// The 8 sample people, kept in memory. Used by tests and design previews.
@@ -55,13 +55,8 @@ class SampleDeck implements DeckSource {
       : null;
 
   @override
-  Future<Map<String, String?>> loadLineup() async => {
-    'guitar': youMarker,
-    'drums': null,
-    'bass': null,
-    'vocals': null,
-    'keys': null,
-  };
+  Future<({String? myRole, List<BandMember> members})> loadBand() async =>
+      (myRole: 'guitar', members: const <BandMember>[]);
 }
 
 /// Real people and swipes, through the database functions get_deck and
@@ -69,8 +64,6 @@ class SampleDeck implements DeckSource {
 class SupabaseDeck implements DeckSource {
   SupabaseDeck(this._client);
   final SupabaseClient _client;
-
-  static const _roles = ['vocals', 'guitar', 'bass', 'drums', 'keys'];
 
   @override
   Future<List<Musician>> loadDeck(
@@ -104,10 +97,13 @@ class SupabaseDeck implements DeckSource {
   }
 
   @override
-  Future<Map<String, String?>> loadLineup() async {
+  Future<({String? myRole, List<BandMember> members})> loadBand() async {
     try {
       final me = _client.auth.currentUser!.id;
-      final matches = await _client.from('matches').select('user_a, user_b');
+      final matches = await _client
+          .from('matches')
+          .select('user_a, user_b')
+          .order('created_at');
       final blocks = await _client.from('blocks').select('blocked_id');
       final blocked = {for (final b in blocks) b['blocked_id'] as String};
       final others = [
@@ -131,19 +127,19 @@ class SupabaseDeck implements DeckSource {
         return primary?['instrument_id'] as String?;
       }
 
-      final myRole = roleOf(people.firstWhere((p) => p['id'] == me));
-      final band = <String, String?>{
-        // An instrument outside the usual five gets its own slot, first.
-        if (myRole != null && !_roles.contains(myRole)) myRole: youMarker,
-        for (final role in _roles) role: role == myRole ? youMarker : null,
-      };
-      for (final person in people.where((p) => p['id'] != me)) {
-        final role = roleOf(person);
-        if (role != null && band.containsKey(role) && band[role] == null) {
-          band[role] = person['display_name'] as String;
-        }
-      }
-      return band;
+      final byId = {for (final p in people) p['id'] as String: p};
+      return (
+        myRole: switch (byId[me]) {
+          final p? => roleOf(p),
+          null => null,
+        },
+        members: [
+          // In match order; people whose profile is gone are skipped.
+          for (final id in others)
+            if (byId[id] case final p?)
+              (name: p['display_name'] as String, role: roleOf(p)),
+        ],
+      );
     } catch (_) {
       throw UserFacingException(L10n.current.errLoadBand);
     }

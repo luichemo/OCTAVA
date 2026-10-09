@@ -181,9 +181,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldGenres => 'Genres';
 
   @override
-  String get fieldGenresHint => 'Type a genre and press Enter';
-
-  @override
   String get rehearseQuestion => 'How often can you rehearse?';
 
   @override
@@ -243,7 +240,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errBirthDateInvalid => 'Enter a real date of birth.';
 
   @override
-  String get tagMax => 'You can add up to 10';
+  String get genresChoose => 'Choose genres';
+
+  @override
+  String get genresChange => 'Change genres';
+
+  @override
+  String get genresSearch => 'Search genres';
+
+  @override
+  String get genresDone => 'Done';
+
+  @override
+  String get genresMax => 'You can pick up to 10 genres.';
+
+  @override
+  String get genresNoResults => 'No genre matches that.';
+
+  @override
+  String get noClipsTitle => 'You\'re hidden from the feed';
+
+  @override
+  String get noClipsBody =>
+      'Musicians without an audio clip don\'t appear when others swipe. Add at least one so people can hear you.';
+
+  @override
+  String get noClipsAction => 'Record a clip';
 
   @override
   String get deckEverywhere => 'Everywhere';
@@ -263,13 +285,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$where, $_temp0';
   }
-
-  @override
-  String get swipeHint => 'Swipe right to Jam, left to Pass';
-
-  @override
-  String get swipeHintWeb =>
-      'Swipe right to Jam, left to Pass, or use the arrow keys';
 
   @override
   String get stampJam => 'Jam';
@@ -555,8 +570,66 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t send your report. Check your connection and try again.';
 
   @override
+  String get navAdd => 'Record a clip';
+
+  @override
+  String get recordTitle => 'New clip';
+
+  @override
+  String get recordStarting => 'Starting the microphone…';
+
+  @override
+  String get recordRecording => 'Recording';
+
+  @override
+  String get recordLimit => 'Recording stops by itself at 2:00.';
+
+  @override
+  String get recordStop => 'Stop';
+
+  @override
+  String recordDone(String length) {
+    return 'Recorded $length';
+  }
+
+  @override
+  String get recordSave => 'Add to profile';
+
+  @override
+  String get recordListen => 'Listen back';
+
+  @override
+  String get recordStopListening => 'Stop listening';
+
+  @override
+  String get recordAgain => 'Record again';
+
+  @override
+  String get recordUploadFile => 'Upload a file instead';
+
+  @override
+  String get errMicDenied =>
+      'OCTAVA can\'t use your microphone. Allow it in your browser or phone settings, then try again.';
+
+  @override
+  String get errRecord => 'Couldn\'t record. Try again.';
+
+  @override
+  String get errRecordShort => 'That\'s too short. Record at least a second.';
+
+  @override
   String get clipsInfo =>
-      'Up to 5 clips, 2 minutes each. Your first clip plays on your card.';
+      'Up to 5 clips, 2 minutes each. Star one to make it your card\'s song; otherwise your first clip plays.';
+
+  @override
+  String get clipMakeSong => 'Make this your card\'s song';
+
+  @override
+  String get clipIsSong => 'Your card\'s song';
+
+  @override
+  String get errClipSong =>
+      'Couldn\'t change your card\'s song. Check your connection and try again.';
 
   @override
   String get clipAdded => 'Clip added to your profile.';
@@ -902,4 +975,181 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkWebsite => 'Website';
+
+  @override
+  String get genreRock => 'Rock';
+
+  @override
+  String get genrePop => 'Pop';
+
+  @override
+  String get genreIndie => 'Indie';
+
+  @override
+  String get genreAltRock => 'Alternative rock';
+
+  @override
+  String get genrePunk => 'Punk';
+
+  @override
+  String get genrePostPunk => 'Post-punk';
+
+  @override
+  String get genreHardcore => 'Hardcore';
+
+  @override
+  String get genreMetal => 'Metal';
+
+  @override
+  String get genreGrunge => 'Grunge';
+
+  @override
+  String get genreMathRock => 'Math rock';
+
+  @override
+  String get genrePostRock => 'Post-rock';
+
+  @override
+  String get genreShoegaze => 'Shoegaze';
+
+  @override
+  String get genreDreamPop => 'Dream pop';
+
+  @override
+  String get genreSynthPop => 'Synth-pop';
+
+  @override
+  String get genreCityPop => 'City pop';
+
+  @override
+  String get genreDisco => 'Disco';
+
+  @override
+  String get genreFunk => 'Funk';
+
+  @override
+  String get genreSoul => 'Soul';
+
+  @override
+  String get genreNeoSoul => 'Neo-soul';
+
+  @override
+  String get genreRAndB => 'R&B';
+
+  @override
+  String get genreHipHop => 'Hip-hop';
+
+  @override
+  String get genreRap => 'Rap';
+
+  @override
+  String get genreJazz => 'Jazz';
+
+  @override
+  String get genreBlues => 'Blues';
+
+  @override
+  String get genreGospel => 'Gospel';
+
+  @override
+  String get genreElectronic => 'Electronic';
+
+  @override
+  String get genreTechno => 'Techno';
+
+  @override
+  String get genreHouse => 'House';
+
+  @override
+  String get genreAmbient => 'Ambient';
+
+  @override
+  String get genreLoFi => 'Lo-fi';
+
+  @override
+  String get genreExperimental => 'Experimental';
+
+  @override
+  String get genreFolk => 'Folk';
+
+  @override
+  String get genreIndieFolk => 'Indie folk';
+
+  @override
+  String get genreGeorgianFolk => 'Georgian folk';
+
+  @override
+  String get genreSingerSongwriter => 'Singer-songwriter';
+
+  @override
+  String get genreCountry => 'Country';
+
+  @override
+  String get genreReggae => 'Reggae';
+
+  @override
+  String get genreSka => 'Ska';
+
+  @override
+  String get genreLatin => 'Latin';
+
+  @override
+  String get genreWorld => 'World music';
+
+  @override
+  String get genreClassical => 'Classical';
+
+  @override
+  String get genreSoundtrack => 'Soundtrack';
+
+  @override
+  String get bandEdit => 'Choose the roles your band needs';
+
+  @override
+  String get bandRolesTitle => 'Who does your band need?';
+
+  @override
+  String bandRolesHint(int max) {
+    return 'Room for up to $max people besides you.';
+  }
+
+  @override
+  String bandRolesCount(int count, int max) {
+    return '$count of $max';
+  }
+
+  @override
+  String get bandRolesEmpty => 'Pick at least one role.';
+
+  @override
+  String get bandRolesSave => 'Save';
+
+  @override
+  String get roleMore => 'One more';
+
+  @override
+  String get roleFewer => 'One fewer';
+
+  @override
+  String roleCount(String instrument, int count) {
+    return '$instrument ×$count';
+  }
+
+  @override
+  String get sectionBand => 'Your band needs';
+
+  @override
+  String get bandChange => 'Change roles';
+
+  @override
+  String get bandDefaultNote => 'Not chosen yet, so these are the usual roles.';
+
+  @override
+  String matchNoSlot(String instrument) {
+    return 'Your band isn\'t looking for $instrument right now, but you can still say hi.';
+  }
+
+  @override
+  String get errSaveBand =>
+      'Couldn\'t save your band\'s roles. Check your connection and try again.';
 }

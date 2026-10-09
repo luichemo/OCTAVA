@@ -416,12 +416,6 @@ abstract class AppLocalizations {
   /// **'Genres'**
   String get fieldGenres;
 
-  /// No description provided for @fieldGenresHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Type a genre and press Enter'**
-  String get fieldGenresHint;
-
   /// No description provided for @rehearseQuestion.
   ///
   /// In en, this message translates to:
@@ -530,11 +524,59 @@ abstract class AppLocalizations {
   /// **'Enter a real date of birth.'**
   String get errBirthDateInvalid;
 
-  /// No description provided for @tagMax.
+  /// No description provided for @genresChoose.
   ///
   /// In en, this message translates to:
-  /// **'You can add up to 10'**
-  String get tagMax;
+  /// **'Choose genres'**
+  String get genresChoose;
+
+  /// No description provided for @genresChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change genres'**
+  String get genresChange;
+
+  /// No description provided for @genresSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search genres'**
+  String get genresSearch;
+
+  /// No description provided for @genresDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get genresDone;
+
+  /// No description provided for @genresMax.
+  ///
+  /// In en, this message translates to:
+  /// **'You can pick up to 10 genres.'**
+  String get genresMax;
+
+  /// No description provided for @genresNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No genre matches that.'**
+  String get genresNoResults;
+
+  /// No description provided for @noClipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re hidden from the feed'**
+  String get noClipsTitle;
+
+  /// No description provided for @noClipsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Musicians without an audio clip don\'t appear when others swipe. Add at least one so people can hear you.'**
+  String get noClipsBody;
+
+  /// No description provided for @noClipsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a clip'**
+  String get noClipsAction;
 
   /// No description provided for @deckEverywhere.
   ///
@@ -553,18 +595,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{where}, {count, plural, =1{1 filter} other{{count} filters}}'**
   String deckWithFilters(String where, int count);
-
-  /// No description provided for @swipeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Swipe right to Jam, left to Pass'**
-  String get swipeHint;
-
-  /// No description provided for @swipeHintWeb.
-  ///
-  /// In en, this message translates to:
-  /// **'Swipe right to Jam, left to Pass, or use the arrow keys'**
-  String get swipeHintWeb;
 
   /// No description provided for @stampJam.
   ///
@@ -1016,11 +1046,119 @@ abstract class AppLocalizations {
   /// **'Couldn\'t send your report. Check your connection and try again.'**
   String get errReport;
 
+  /// No description provided for @navAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a clip'**
+  String get navAdd;
+
+  /// No description provided for @recordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New clip'**
+  String get recordTitle;
+
+  /// No description provided for @recordStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting the microphone…'**
+  String get recordStarting;
+
+  /// No description provided for @recordRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get recordRecording;
+
+  /// No description provided for @recordLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording stops by itself at 2:00.'**
+  String get recordLimit;
+
+  /// No description provided for @recordStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get recordStop;
+
+  /// No description provided for @recordDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded {length}'**
+  String recordDone(String length);
+
+  /// No description provided for @recordSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to profile'**
+  String get recordSave;
+
+  /// No description provided for @recordListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen back'**
+  String get recordListen;
+
+  /// No description provided for @recordStopListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop listening'**
+  String get recordStopListening;
+
+  /// No description provided for @recordAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Record again'**
+  String get recordAgain;
+
+  /// No description provided for @recordUploadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a file instead'**
+  String get recordUploadFile;
+
+  /// No description provided for @errMicDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'OCTAVA can\'t use your microphone. Allow it in your browser or phone settings, then try again.'**
+  String get errMicDenied;
+
+  /// No description provided for @errRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t record. Try again.'**
+  String get errRecord;
+
+  /// No description provided for @errRecordShort.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s too short. Record at least a second.'**
+  String get errRecordShort;
+
   /// No description provided for @clipsInfo.
   ///
   /// In en, this message translates to:
-  /// **'Up to 5 clips, 2 minutes each. Your first clip plays on your card.'**
+  /// **'Up to 5 clips, 2 minutes each. Star one to make it your card\'s song; otherwise your first clip plays.'**
   String get clipsInfo;
+
+  /// No description provided for @clipMakeSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this your card\'s song'**
+  String get clipMakeSong;
+
+  /// No description provided for @clipIsSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Your card\'s song'**
+  String get clipIsSong;
+
+  /// No description provided for @errClipSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change your card\'s song. Check your connection and try again.'**
+  String get errClipSong;
 
   /// No description provided for @clipAdded.
   ///
@@ -1615,6 +1753,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Website'**
   String get linkWebsite;
+
+  /// No description provided for @genreRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Rock'**
+  String get genreRock;
+
+  /// No description provided for @genrePop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pop'**
+  String get genrePop;
+
+  /// No description provided for @genreIndie.
+  ///
+  /// In en, this message translates to:
+  /// **'Indie'**
+  String get genreIndie;
+
+  /// No description provided for @genreAltRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternative rock'**
+  String get genreAltRock;
+
+  /// No description provided for @genrePunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Punk'**
+  String get genrePunk;
+
+  /// No description provided for @genrePostPunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-punk'**
+  String get genrePostPunk;
+
+  /// No description provided for @genreHardcore.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardcore'**
+  String get genreHardcore;
+
+  /// No description provided for @genreMetal.
+  ///
+  /// In en, this message translates to:
+  /// **'Metal'**
+  String get genreMetal;
+
+  /// No description provided for @genreGrunge.
+  ///
+  /// In en, this message translates to:
+  /// **'Grunge'**
+  String get genreGrunge;
+
+  /// No description provided for @genreMathRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Math rock'**
+  String get genreMathRock;
+
+  /// No description provided for @genrePostRock.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-rock'**
+  String get genrePostRock;
+
+  /// No description provided for @genreShoegaze.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoegaze'**
+  String get genreShoegaze;
+
+  /// No description provided for @genreDreamPop.
+  ///
+  /// In en, this message translates to:
+  /// **'Dream pop'**
+  String get genreDreamPop;
+
+  /// No description provided for @genreSynthPop.
+  ///
+  /// In en, this message translates to:
+  /// **'Synth-pop'**
+  String get genreSynthPop;
+
+  /// No description provided for @genreCityPop.
+  ///
+  /// In en, this message translates to:
+  /// **'City pop'**
+  String get genreCityPop;
+
+  /// No description provided for @genreDisco.
+  ///
+  /// In en, this message translates to:
+  /// **'Disco'**
+  String get genreDisco;
+
+  /// No description provided for @genreFunk.
+  ///
+  /// In en, this message translates to:
+  /// **'Funk'**
+  String get genreFunk;
+
+  /// No description provided for @genreSoul.
+  ///
+  /// In en, this message translates to:
+  /// **'Soul'**
+  String get genreSoul;
+
+  /// No description provided for @genreNeoSoul.
+  ///
+  /// In en, this message translates to:
+  /// **'Neo-soul'**
+  String get genreNeoSoul;
+
+  /// No description provided for @genreRAndB.
+  ///
+  /// In en, this message translates to:
+  /// **'R&B'**
+  String get genreRAndB;
+
+  /// No description provided for @genreHipHop.
+  ///
+  /// In en, this message translates to:
+  /// **'Hip-hop'**
+  String get genreHipHop;
+
+  /// No description provided for @genreRap.
+  ///
+  /// In en, this message translates to:
+  /// **'Rap'**
+  String get genreRap;
+
+  /// No description provided for @genreJazz.
+  ///
+  /// In en, this message translates to:
+  /// **'Jazz'**
+  String get genreJazz;
+
+  /// No description provided for @genreBlues.
+  ///
+  /// In en, this message translates to:
+  /// **'Blues'**
+  String get genreBlues;
+
+  /// No description provided for @genreGospel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gospel'**
+  String get genreGospel;
+
+  /// No description provided for @genreElectronic.
+  ///
+  /// In en, this message translates to:
+  /// **'Electronic'**
+  String get genreElectronic;
+
+  /// No description provided for @genreTechno.
+  ///
+  /// In en, this message translates to:
+  /// **'Techno'**
+  String get genreTechno;
+
+  /// No description provided for @genreHouse.
+  ///
+  /// In en, this message translates to:
+  /// **'House'**
+  String get genreHouse;
+
+  /// No description provided for @genreAmbient.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambient'**
+  String get genreAmbient;
+
+  /// No description provided for @genreLoFi.
+  ///
+  /// In en, this message translates to:
+  /// **'Lo-fi'**
+  String get genreLoFi;
+
+  /// No description provided for @genreExperimental.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental'**
+  String get genreExperimental;
+
+  /// No description provided for @genreFolk.
+  ///
+  /// In en, this message translates to:
+  /// **'Folk'**
+  String get genreFolk;
+
+  /// No description provided for @genreIndieFolk.
+  ///
+  /// In en, this message translates to:
+  /// **'Indie folk'**
+  String get genreIndieFolk;
+
+  /// No description provided for @genreGeorgianFolk.
+  ///
+  /// In en, this message translates to:
+  /// **'Georgian folk'**
+  String get genreGeorgianFolk;
+
+  /// No description provided for @genreSingerSongwriter.
+  ///
+  /// In en, this message translates to:
+  /// **'Singer-songwriter'**
+  String get genreSingerSongwriter;
+
+  /// No description provided for @genreCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get genreCountry;
+
+  /// No description provided for @genreReggae.
+  ///
+  /// In en, this message translates to:
+  /// **'Reggae'**
+  String get genreReggae;
+
+  /// No description provided for @genreSka.
+  ///
+  /// In en, this message translates to:
+  /// **'Ska'**
+  String get genreSka;
+
+  /// No description provided for @genreLatin.
+  ///
+  /// In en, this message translates to:
+  /// **'Latin'**
+  String get genreLatin;
+
+  /// No description provided for @genreWorld.
+  ///
+  /// In en, this message translates to:
+  /// **'World music'**
+  String get genreWorld;
+
+  /// No description provided for @genreClassical.
+  ///
+  /// In en, this message translates to:
+  /// **'Classical'**
+  String get genreClassical;
+
+  /// No description provided for @genreSoundtrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Soundtrack'**
+  String get genreSoundtrack;
+
+  /// No description provided for @bandEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the roles your band needs'**
+  String get bandEdit;
+
+  /// No description provided for @bandRolesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who does your band need?'**
+  String get bandRolesTitle;
+
+  /// No description provided for @bandRolesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Room for up to {max} people besides you.'**
+  String bandRolesHint(int max);
+
+  /// No description provided for @bandRolesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max}'**
+  String bandRolesCount(int count, int max);
+
+  /// No description provided for @bandRolesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one role.'**
+  String get bandRolesEmpty;
+
+  /// No description provided for @bandRolesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get bandRolesSave;
+
+  /// No description provided for @roleMore.
+  ///
+  /// In en, this message translates to:
+  /// **'One more'**
+  String get roleMore;
+
+  /// No description provided for @roleFewer.
+  ///
+  /// In en, this message translates to:
+  /// **'One fewer'**
+  String get roleFewer;
+
+  /// No description provided for @roleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{instrument} ×{count}'**
+  String roleCount(String instrument, int count);
+
+  /// No description provided for @sectionBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Your band needs'**
+  String get sectionBand;
+
+  /// No description provided for @bandChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change roles'**
+  String get bandChange;
+
+  /// No description provided for @bandDefaultNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Not chosen yet, so these are the usual roles.'**
+  String get bandDefaultNote;
+
+  /// No description provided for @matchNoSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Your band isn\'t looking for {instrument} right now, but you can still say hi.'**
+  String matchNoSlot(String instrument);
+
+  /// No description provided for @errSaveBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your band\'s roles. Check your connection and try again.'**
+  String get errSaveBand;
 }
 
 class _AppLocalizationsDelegate

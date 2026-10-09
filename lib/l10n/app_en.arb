@@ -67,7 +67,6 @@
   },
   "pickInstrumentError": "Pick at least one instrument",
   "fieldGenres": "Genres",
-  "fieldGenresHint": "Type a genre and press Enter",
   "rehearseQuestion": "How often can you rehearse?",
   "gearQuestion": "What do you have?",
   "fieldLookingFor": "What are you looking for? (optional)",
@@ -86,7 +85,15 @@
   "errSaveProfile": "Couldn't save your profile. Try again in a moment.",
   "errUnder16": "OCTAVA is for people aged 16 and over.",
   "errBirthDateInvalid": "Enter a real date of birth.",
-  "tagMax": "You can add up to 10",
+  "genresChoose": "Choose genres",
+  "genresChange": "Change genres",
+  "genresSearch": "Search genres",
+  "genresDone": "Done",
+  "genresMax": "You can pick up to 10 genres.",
+  "genresNoResults": "No genre matches that.",
+  "noClipsTitle": "You're hidden from the feed",
+  "noClipsBody": "Musicians without an audio clip don't appear when others swipe. Add at least one so people can hear you.",
+  "noClipsAction": "Record a clip",
   "deckEverywhere": "Everywhere",
   "deckWithin": "Within {km} km",
   "@deckWithin": {
@@ -107,8 +114,6 @@
       }
     }
   },
-  "swipeHint": "Swipe right to Jam, left to Pass",
-  "swipeHintWeb": "Swipe right to Jam, left to Pass, or use the arrow keys",
   "stampJam": "Jam",
   "stampPass": "Pass",
   "actionJam": "Jam",
@@ -364,7 +369,32 @@
   "errBlock": "Couldn't block. Try again.",
   "errBlockOffline": "Couldn't block. Check your connection and try again.",
   "errReport": "Couldn't send your report. Check your connection and try again.",
-  "clipsInfo": "Up to 5 clips, 2 minutes each. Your first clip plays on your card.",
+  "navAdd": "Record a clip",
+  "recordTitle": "New clip",
+  "recordStarting": "Starting the microphone…",
+  "recordRecording": "Recording",
+  "recordLimit": "Recording stops by itself at 2:00.",
+  "recordStop": "Stop",
+  "recordDone": "Recorded {length}",
+  "@recordDone": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  },
+  "recordSave": "Add to profile",
+  "recordListen": "Listen back",
+  "recordStopListening": "Stop listening",
+  "recordAgain": "Record again",
+  "recordUploadFile": "Upload a file instead",
+  "errMicDenied": "OCTAVA can't use your microphone. Allow it in your browser or phone settings, then try again.",
+  "errRecord": "Couldn't record. Try again.",
+  "errRecordShort": "That's too short. Record at least a second.",
+  "clipsInfo": "Up to 5 clips, 2 minutes each. Star one to make it your card's song; otherwise your first clip plays.",
+  "clipMakeSong": "Make this your card's song",
+  "clipIsSong": "Your card's song",
+  "errClipSong": "Couldn't change your card's song. Check your connection and try again.",
   "clipAdded": "Clip added to your profile.",
   "deleteClipTitle": "Delete this clip?",
   "deleteClipBody": "\"{title}\" will be removed from your profile.",
@@ -498,5 +528,95 @@
   "gearCar": "Car",
   "gearRehearsalSpace": "Rehearsal space",
   "gearHomeStudio": "Home studio",
-  "linkWebsite": "Website"
+  "linkWebsite": "Website",
+  "genreRock": "Rock",
+  "genrePop": "Pop",
+  "genreIndie": "Indie",
+  "genreAltRock": "Alternative rock",
+  "genrePunk": "Punk",
+  "genrePostPunk": "Post-punk",
+  "genreHardcore": "Hardcore",
+  "genreMetal": "Metal",
+  "genreGrunge": "Grunge",
+  "genreMathRock": "Math rock",
+  "genrePostRock": "Post-rock",
+  "genreShoegaze": "Shoegaze",
+  "genreDreamPop": "Dream pop",
+  "genreSynthPop": "Synth-pop",
+  "genreCityPop": "City pop",
+  "genreDisco": "Disco",
+  "genreFunk": "Funk",
+  "genreSoul": "Soul",
+  "genreNeoSoul": "Neo-soul",
+  "genreRAndB": "R&B",
+  "genreHipHop": "Hip-hop",
+  "genreRap": "Rap",
+  "genreJazz": "Jazz",
+  "genreBlues": "Blues",
+  "genreGospel": "Gospel",
+  "genreElectronic": "Electronic",
+  "genreTechno": "Techno",
+  "genreHouse": "House",
+  "genreAmbient": "Ambient",
+  "genreLoFi": "Lo-fi",
+  "genreExperimental": "Experimental",
+  "genreFolk": "Folk",
+  "genreIndieFolk": "Indie folk",
+  "genreGeorgianFolk": "Georgian folk",
+  "genreSingerSongwriter": "Singer-songwriter",
+  "genreCountry": "Country",
+  "genreReggae": "Reggae",
+  "genreSka": "Ska",
+  "genreLatin": "Latin",
+  "genreWorld": "World music",
+  "genreClassical": "Classical",
+  "genreSoundtrack": "Soundtrack",
+  "bandEdit": "Choose the roles your band needs",
+  "bandRolesTitle": "Who does your band need?",
+  "bandRolesHint": "Room for up to {max} people besides you.",
+  "@bandRolesHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "bandRolesCount": "{count} of {max}",
+  "@bandRolesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "bandRolesEmpty": "Pick at least one role.",
+  "bandRolesSave": "Save",
+  "roleMore": "One more",
+  "roleFewer": "One fewer",
+  "roleCount": "{instrument} ×{count}",
+  "@roleCount": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sectionBand": "Your band needs",
+  "bandChange": "Change roles",
+  "bandDefaultNote": "Not chosen yet, so these are the usual roles.",
+  "matchNoSlot": "Your band isn't looking for {instrument} right now, but you can still say hi.",
+  "@matchNoSlot": {
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      }
+    }
+  },
+  "errSaveBand": "Couldn't save your band's roles. Check your connection and try again."
 }

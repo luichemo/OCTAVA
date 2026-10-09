@@ -31,13 +31,14 @@ class FakeClipRepository implements ClipRepository {
   Future<MyClip> upload({
     required Uint8List bytes,
     required String fileName,
+    int? knownSeconds,
   }) async {
     if (rejectWith != null) throw UserFacingException(rejectWith!);
     final clip = MyClip(
       id: 'c${list.length}',
       path: 'me/${list.length}.mp3',
       title: fileName,
-      seconds: 42,
+      seconds: knownSeconds ?? 42,
     );
     list.add(clip);
     return clip;
@@ -46,6 +47,11 @@ class FakeClipRepository implements ClipRepository {
   @override
   Future<void> delete(MyClip clip) async =>
       list.removeWhere((c) => c.id == clip.id);
+
+  String? featuredId;
+
+  @override
+  Future<void> setFeatured(String? clipId) async => featuredId = clipId;
 
   @override
   Future<String> playbackUrl(String path) async =>
@@ -284,6 +290,26 @@ void main() {
       await tester.pumpAndSettle();
       expect(clips.list, isEmpty);
       expect(player.playing.value, isNull);
+    });
+
+    testWidgets("starring a clip makes it the card's song", (tester) async {
+      final clips = FakeClipRepository();
+      await pump(tester, section(clips, FakeClipPlayer()));
+      await tester.tap(find.text('Add a clip'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add a clip'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip("Make this your card's song").last);
+      await tester.pumpAndSettle();
+      expect(clips.featuredId, 'c1');
+      expect(find.byTooltip("Your card's song"), findsOneWidget);
+
+      // Tapping the star again clears it (the first clip plays then).
+      await tester.tap(find.byTooltip("Your card's song"));
+      await tester.pumpAndSettle();
+      expect(clips.featuredId, isNull);
+      expect(find.byTooltip("Your card's song"), findsNothing);
     });
 
     testWidgets('explains a rejected upload', (tester) async {

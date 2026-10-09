@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 
 import '../data/avatar_repository.dart';
+import '../data/band_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/location_repository.dart';
 import '../data/profile_options.dart';
@@ -11,9 +12,11 @@ import '../models/profile_draft.dart';
 import '../models/profile_link.dart';
 import '../theme.dart';
 import '../widgets/avatar_section.dart';
+import '../widgets/band_roles_sheet.dart';
 import '../widgets/clips_section.dart';
 import '../widgets/location_section.dart';
-import '../widgets/tag_input.dart';
+import '../widgets/genre_picker.dart';
+import '../widgets/record_sheet.dart';
 import 'card_preview_screen.dart';
 
 import 'package:intl/intl.dart';
@@ -34,7 +37,15 @@ class OnboardingScreen extends StatefulWidget {
     this.player,
     this.avatars,
     this.location,
+    this.bandNeeds,
+    this.onSignOut,
   });
+
+  /// "Your band needs" section, shown when editing.
+  final BandNeedsRepository? bandNeeds;
+
+  /// Shows "Sign out" in the app bar when editing.
+  final VoidCallback? onSignOut;
 
   /// Avatar section, shown when editing.
   final AvatarRepository? avatars;
@@ -85,11 +96,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   bool get _editing => widget.initial != null;
 
+  // Clips, for the "hidden from the feed" warning. Null until loaded.
+  int? _clipCount;
+  int _clipsVersion = 0;
+
+  // Counted here too: the clips section is far down the (lazy) list and
+  // only reports once it's scrolled into view.
+  Future<void> _countClips() async {
+    try {
+      final n = (await widget.clips!.myClips()).length;
+      if (mounted) {
+        setState(() {
+          _clipCount = n;
+        });
+      }
+    } catch (_) {
+      // No warning is better than a wrong one; the section shows the error.
+    }
+  }
+
+  Future<void> _recordFromWarning() async {
+    await showRecordSheet(context, clips: widget.clips!);
+    if (mounted) {
+      setState(() {
+        _clipsVersion++;
+      });
+      await _countClips();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     final p = widget.initial;
     if (p == null) return;
+    if (widget.clips != null) _countClips();
     _name.text = p.displayName;
     _area.text = p.area;
     _lookingFor.text = p.lookingFor;
@@ -228,7 +269,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: _editing ? AppBar(backgroundColor: colors.surface) : null,
+      appBar: _editing
+          ? AppBar(
+              backgroundColor: colors.surface,
+              actions: [
+                if (widget.onSignOut != null)
+                  TextButton.icon(
+                    onPressed: () {
+                      // Back to the first screen, which becomes sign-in.
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                      widget.onSignOut!();
+                    },
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: Text(context.t.signOut),
+                  ),
+              ],
+            )
+          : null,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -267,6 +324,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         label: Text(context.t.seeYourCard),
                       ),
                     ),
+                  ],
+                  if (_editing && widget.clips != null && _clipCount == 0) ...[
+                    const SizedBox(height: 16),
+                    _NoClipsWarning(onRecord: _recordFromWarning),
                   ],
                   if (_editing && widget.avatars != null) ...[
                     _Section(context.t.sectionAvatar),
@@ -311,6 +372,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       counterText: '',
                     ),
                   ),
+                  if (_editing && widget.bandNeeds != null) ...[
+                    _Section(context.t.sectionBand),
+                    BandNeedsSection(
+                      repository: widget.bandNeeds!,
+                      // The first instrument is the main one.
+                      myRole: _instruments.keys.firstOrNull,
+                    ),
+                  ],
                   if (_editing && widget.location != null) ...[
                     _Section(context.t.sectionLocation),
                     LocationSection(location: widget.location!),
@@ -376,11 +445,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   const SizedBox(height: 18),
-                  TagInput(
-                    label: context.t.fieldGenres,
-                    hint: context.t.fieldGenresHint,
-                    values: _genres,
-                    onChanged: () => setState(() {}),
+                  Text(
+                    context.t.fieldGenres,
+                    style: TextStyle(color: colors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 8),
+                  GenrePicker(
+                    selected: _genres,
+                    max: 10,
+                    onChanged: (picked) => setState(() {
+                      _genres
+                        ..clear()
+                        ..addAll(picked);
+                    }),
                   ),
                   _Section(context.t.sectionWant),
                   Wrap(
@@ -491,7 +568,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       widget.clips != null &&
                       widget.player != null) ...[
                     _Section(context.t.sectionClips),
-                    ClipsSection(clips: widget.clips!, player: widget.player!),
+                    ClipsSection(
+                      // A new key reloads the list after recording from the warning.
+                      key: ValueKey(_clipsVersion),
+                      clips: widget.clips!,
+                      player: widget.player!,
+                      onCountChanged: (n) => setState(() {
+                        _clipCount = n;
+                      }),
+                    ),
                   ],
                   if (_editing) ...[
                     _Section(context.t.sectionLanguage),
@@ -551,4 +636,51 @@ class _Section extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Shown while the person has no audio clips: they don't appear in decks.
+class _NoClipsWarning extends StatelessWidget {
+  const _NoClipsWarning({required this.onRecord});
+
+  final VoidCallback onRecord;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.tertiaryContainer,
+        border: Border.all(color: OctavaColors.pink, width: 2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              const Icon(Icons.visibility_off_outlined),
+              Expanded(
+                child: Text(
+                  context.t.noClipsTitle,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Text(context.t.noClipsBody),
+          FilledButton.icon(
+            onPressed: onRecord,
+            icon: const Icon(Icons.mic_rounded),
+            label: Text(context.t.noClipsAction),
+          ),
+        ],
+      ),
+    );
+  }
 }

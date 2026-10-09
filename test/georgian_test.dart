@@ -35,7 +35,7 @@ void main() {
         filterStore: MemoryFilterStore(),
         onOpenProfile: () async {},
         onOpenMatches: () {},
-        onSignOut: () {},
+        onRecord: () {},
       ),
     );
 

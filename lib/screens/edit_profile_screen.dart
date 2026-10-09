@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
+import '../data/band_repository.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../models/profile_draft.dart';
@@ -18,6 +19,8 @@ class EditProfileScreen extends StatefulWidget {
     this.player,
     this.avatars,
     this.location,
+    this.bandNeeds,
+    this.onSignOut,
   });
 
   final ProfileRepository repository;
@@ -25,6 +28,8 @@ class EditProfileScreen extends StatefulWidget {
   final ClipPlayer? player;
   final AvatarRepository? avatars;
   final LocationRepository? location;
+  final BandNeedsRepository? bandNeeds;
+  final VoidCallback? onSignOut;
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -79,6 +84,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           player: widget.player,
           avatars: widget.avatars,
           location: widget.location,
+          bandNeeds: widget.bandNeeds,
+          onSignOut: widget.onSignOut,
           onDone: () {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(context.t.profileSaved)));

@@ -100,6 +100,8 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.ensureVisible(find.text('Create profile'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Create profile'));
       await tester.pumpAndSettle();
 
@@ -118,6 +120,8 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.ensureVisible(find.text('Create profile'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Create profile'));
       await tester.pumpAndSettle();
 
@@ -137,7 +141,15 @@ void main() {
       await pump(tester, ProfileGate(repository: repo));
 
       expect(find.text('Your band'), findsOneWidget);
+      // Sign out is on the profile screen.
+      repo.saved = const ProfileDraft(
+        displayName: 'Luka',
+        instruments: {'vocals': 'pro'},
+      );
+      await tester.tap(find.text('Profile'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Sign out'));
+      await tester.pumpAndSettle();
       expect(repo.signOuts, 1);
     });
 

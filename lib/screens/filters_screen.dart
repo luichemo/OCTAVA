@@ -5,7 +5,7 @@ import '../l10n/l10n.dart';
 import '../data/profile_options.dart';
 import '../models/deck_filters.dart';
 import '../theme.dart';
-import '../widgets/tag_input.dart';
+import '../widgets/genre_picker.dart';
 
 /// Choose who shows up in the deck. Pops with the new [DeckFilters], or null
 /// when left with the back button.
@@ -161,11 +161,13 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 _Heading(context.t.fieldGenres),
                 Text(context.t.filterGenresHint, style: hint),
                 const SizedBox(height: 8),
-                TagInput(
-                  label: context.t.fieldGenres,
-                  hint: context.t.fieldGenresHint,
-                  values: _genres,
-                  onChanged: () => setState(() {}),
+                GenrePicker(
+                  selected: _genres,
+                  onChanged: (picked) => setState(() {
+                    _genres
+                      ..clear()
+                      ..addAll(picked);
+                  }),
                 ),
                 _Heading(context.t.filterGoals),
                 _chips<String>(goalLabels, _goals.contains, (id, on) {

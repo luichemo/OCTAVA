@@ -1,0 +1,109 @@
+-- OCTAVA: a musician picks one of their clips as their card's song.
+-- * profiles.featured_clip_id: null means "the first clip". Clients can read
+--   and set it; a trigger makes sure it's one of their own clips.
+-- * Deleting that clip clears it (on delete set null).
+-- * get_deck lists the featured clip first, so cards play it.
+
+alter table public.profiles
+  add column featured_clip_id uuid references public.audio_clips (id) on delete set null;
+grant select (featured_clip_id), update (featured_clip_id) on public.profiles to authenticated;
+
+create function public.check_featured_clip()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.featured_clip_id is not null and not exists (
+    select 1 from public.audio_clips a where a.id = new.featured_clip_id and a.profile_id = new.id
+  ) then
+    raise exception 'You can only pick one of your own clips' using errcode = 'check_violation';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger profiles_check_featured_clip
+  before insert or update of featured_clip_id on public.profiles
+  for each row execute function public.check_featured_clip();
+
+revoke execute on function public.check_featured_clip() from public, anon, authenticated;
+
+-- Same as before, except the featured clip comes first in "clips".
+create or replace function public.get_deck(
+  max_km double precision default 25,
+  instrument_ids text[] default null,
+  min_skill public.skill_level default null,
+  genre_filter text[] default null,
+  goal_filter public.goal[] default null,
+  frequency_filter public.rehearsal_frequency[] default null,
+  max_results int default 20
+)
+returns table (
+  id uuid,
+  display_name text,
+  age int,
+  area text,
+  distance_km int,
+  looking_for text,
+  genres text[],
+  influences text[],
+  goals public.goal[],
+  rehearsal_frequency public.rehearsal_frequency,
+  availability_note text,
+  has_own_gear boolean,
+  has_car boolean,
+  has_rehearsal_space boolean,
+  has_home_studio boolean,
+  avatar_path text,
+  instruments jsonb,
+  links jsonb,
+  clips jsonb
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with me as (
+    select p.id, p.lat, p.lng from public.profiles p where p.id = auth.uid()
+  ),
+  candidates as (
+    select p.*,
+      case when me.lat is not null and p.lat is not null
+        then private.distance_km(me.lat, me.lng, p.lat, p.lng) end as km
+    from public.profiles p, me
+    where p.id <> me.id
+      and private.same_age_group(p.id)
+      and not private.is_blocked_between(me.id, p.id)
+      and not exists (select 1 from public.swipes s where s.swiper_id = me.id and s.target_id = p.id)
+      and (genre_filter is null or p.genres && (select array_agg(lower(g)) from unnest(genre_filter) g))
+      and (goal_filter is null or p.goals && goal_filter)
+      and (frequency_filter is null or p.rehearsal_frequency = any (frequency_filter))
+      and (instrument_ids is null or exists (
+        select 1 from public.profile_instruments pi
+        where pi.profile_id = p.id
+          and pi.instrument_id = any (instrument_ids)
+          and (min_skill is null or pi.skill >= min_skill)
+      ))
+  )
+  select
+    c.id, c.display_name, private.age_of(c.id), c.area,
+    case when c.km is not null then greatest(1, round(c.km))::int end,
+    c.looking_for, c.genres, c.influences, c.goals, c.rehearsal_frequency,
+    c.availability_note, c.has_own_gear, c.has_car, c.has_rehearsal_space, c.has_home_studio,
+    c.avatar_path,
+    coalesce((select jsonb_agg(jsonb_build_object('instrument', pi.instrument_id, 'skill', pi.skill, 'is_primary', pi.is_primary)
+                               order by pi.is_primary desc, pi.instrument_id)
+              from public.profile_instruments pi where pi.profile_id = c.id), '[]'::jsonb),
+    coalesce((select jsonb_agg(jsonb_build_object('kind', l.kind, 'url', l.url))
+              from public.profile_links l where l.profile_id = c.id), '[]'::jsonb),
+    coalesce((select jsonb_agg(jsonb_build_object('id', a.id, 'path', a.storage_path, 'title', a.title, 'seconds', a.duration_seconds)
+                               order by (a.id = c.featured_clip_id) desc, a.created_at)
+              from public.audio_clips a where a.profile_id = c.id), '[]'::jsonb)
+  from candidates c
+  where max_km is null or c.km is null or c.km <= max_km
+  order by c.km asc nulls last, c.created_at desc
+  limit least(greatest(max_results, 1), 50);
+$$;
+

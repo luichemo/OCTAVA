@@ -5,11 +5,13 @@ import '../l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/avatar_repository.dart';
+import '../data/band_repository.dart';
 import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
+import '../widgets/record_sheet.dart';
 import '../data/safety_repository.dart';
 import '../models/musician.dart';
 import 'auth_screen.dart';
@@ -43,6 +45,7 @@ class AuthGate extends StatelessWidget {
           safety: SupabaseSafetyRepository(client),
           clips: SupabaseClipRepository(client),
           avatars: SupabaseAvatarRepository(client),
+          bandNeeds: SupabaseBandNeeds(client),
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
         );
@@ -63,9 +66,13 @@ class ProfileGate extends StatefulWidget {
     this.avatars,
     this.location,
     this.filterStore,
+    this.bandNeeds,
   });
 
   final ProfileRepository repository;
+
+  /// The roles your band needs (the "Your band" row).
+  final BandNeedsRepository? bandNeeds;
 
   /// People to swipe on once the profile is ready.
   final DeckSource deck;
@@ -114,6 +121,8 @@ class _ProfileGateState extends State<ProfileGate> {
         player: _player,
         avatars: widget.avatars,
         location: widget.location,
+        bandNeeds: widget.bandNeeds,
+        onSignOut: widget.repository.signOut,
       ),
     ),
   );
@@ -168,7 +177,9 @@ class _ProfileGateState extends State<ProfileGate> {
           ),
           ProfileStatus.ready => SwipeScreen(
             source: widget.deck,
-            onSignOut: widget.repository.signOut,
+            onRecord: widget.clips == null
+                ? null
+                : () => showRecordSheet(context, clips: widget.clips!),
             onOpenMatches: widget.chat == null ? null : _openMatches,
             onOpenChat: widget.chat == null ? null : _openChat,
             safety: widget.safety,
@@ -177,6 +188,7 @@ class _ProfileGateState extends State<ProfileGate> {
             avatars: widget.avatars,
             location: widget.location,
             filterStore: widget.filterStore,
+            bandNeeds: widget.bandNeeds,
           ),
           final status => OnboardingScreen(
             repository: widget.repository,

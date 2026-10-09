@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
+import '../data/profile_options.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 import 'avatar_section.dart';
@@ -203,7 +204,9 @@ class MusicianCard extends StatelessWidget {
                   if (m.clipSeconds != null) _Clip(musician: m, player: player),
                   if (m.genres.isNotEmpty)
                     Text(
-                      context.t.plays(listJoin(m.genres)),
+                      context.t.plays(
+                        listJoin([for (final g in m.genres) genreLabel(g)]),
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 15),

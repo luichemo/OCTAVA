@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
+import '../theme.dart';
 
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
@@ -16,7 +17,11 @@ class ClipsSection extends StatefulWidget {
     required this.clips,
     required this.player,
     this.pickFile,
+    this.onCountChanged,
   });
+
+  /// Told how many clips there are, after loading and every change.
+  final ValueChanged<int>? onCountChanged;
 
   final ClipRepository clips;
   final ClipPlayer player;
@@ -135,6 +140,30 @@ class _ClipsSectionState extends State<ClipsSection> {
     }
   }
 
+  Future<void> _toggleSong(MyClip clip) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final newId = clip.featured ? null : clip.id;
+    try {
+      await widget.clips.setFeatured(newId);
+      if (mounted) {
+        setState(() {
+          _list = [
+            for (final c in _list ?? <MyClip>[])
+              MyClip(
+                id: c.id,
+                path: c.path,
+                title: c.title,
+                seconds: c.seconds,
+                featured: c.id == newId,
+              ),
+          ];
+        });
+      }
+    } on UserFacingException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   Future<void> _play(MyClip clip) async {
     try {
       await widget.player.toggle(clip.path);
@@ -146,8 +175,21 @@ class _ClipsSectionState extends State<ClipsSection> {
     }
   }
 
+  int? _reported;
+
+  void _report() {
+    final n = _list?.length;
+    if (n == null || n == _reported) return;
+    _reported = n;
+    // After this frame: the parent can't be rebuilt during our build.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => widget.onCountChanged?.call(n),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    _report();
     final colors = Theme.of(context).colorScheme;
     if (_loadError != null) {
       return Row(
@@ -201,10 +243,27 @@ class _ClipsSectionState extends State<ClipsSection> {
                   subtitle: Text(
                     '${clip.seconds ~/ 60}:${(clip.seconds % 60).toString().padLeft(2, '0')}',
                   ),
-                  trailing: IconButton(
-                    tooltip: context.t.deleteClip,
-                    onPressed: () => _delete(clip),
-                    icon: const Icon(Icons.delete_outline_rounded),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: clip.featured
+                            ? context.t.clipIsSong
+                            : context.t.clipMakeSong,
+                        isSelected: clip.featured,
+                        onPressed: () => _toggleSong(clip),
+                        icon: const Icon(Icons.star_outline_rounded),
+                        selectedIcon: const Icon(
+                          Icons.star_rounded,
+                          color: OctavaColors.pink,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: context.t.deleteClip,
+                        onPressed: () => _delete(clip),
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
+                    ],
                   ),
                 ),
             ],

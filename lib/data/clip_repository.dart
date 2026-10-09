@@ -14,9 +14,13 @@ class MyClip {
     required this.path,
     required this.seconds,
     this.title,
+    this.featured = false,
   });
 
   final String id;
+
+  /// The clip chosen as the card's song.
+  final bool featured;
 
   /// Path in the `clips` storage bucket.
   final String path;
@@ -47,9 +51,19 @@ abstract interface class ClipRepository {
 
   /// Uploads a file and adds it to your profile. Checks the type, size and
   /// length first and explains any problem with a [UserFacingException].
-  Future<MyClip> upload({required Uint8List bytes, required String fileName});
+  /// [knownSeconds] skips measuring, e.g. for a fresh recording whose length
+  /// the recorder already knows.
+  Future<MyClip> upload({
+    required Uint8List bytes,
+    required String fileName,
+    int? knownSeconds,
+  });
 
   Future<void> delete(MyClip clip);
+
+  /// Makes [clipId] the song on your card, or clears the choice with null
+  /// (then your first clip plays).
+  Future<void> setFeatured(String? clipId);
 
   /// A temporary link for playing a clip.
   Future<String> playbackUrl(String path);
@@ -70,6 +84,12 @@ class SupabaseClipRepository implements ClipRepository {
           .select('id, storage_path, title, duration_seconds')
           .eq('profile_id', _uid)
           .order('created_at');
+      final profile = await _client
+          .from('profiles')
+          .select('featured_clip_id')
+          .eq('id', _uid)
+          .single();
+      final featuredId = profile['featured_clip_id'] as String?;
       return [
         for (final r in rows)
           MyClip(
@@ -77,6 +97,7 @@ class SupabaseClipRepository implements ClipRepository {
             path: r['storage_path'] as String,
             title: r['title'] as String?,
             seconds: r['duration_seconds'] as int,
+            featured: r['id'] == featuredId,
           ),
       ];
     } catch (_) {
@@ -88,6 +109,7 @@ class SupabaseClipRepository implements ClipRepository {
   Future<MyClip> upload({
     required Uint8List bytes,
     required String fileName,
+    int? knownSeconds,
   }) async {
     final ext = fileName.contains('.')
         ? fileName.split('.').last.toLowerCase()
@@ -114,8 +136,9 @@ class SupabaseClipRepository implements ClipRepository {
       throw UserFacingException(L10n.current.errClipUpload);
     }
 
-    // Measure the uploaded file; remove it again if it can't be used.
-    final seconds = await _measure(path);
+    // Measure the uploaded file (unless the length is known); remove it again
+    // if it can't be used.
+    final seconds = knownSeconds ?? await _measure(path);
     if (seconds == null || seconds > maxClipSeconds) {
       await _bucket.remove([path]).catchError((_) => <FileObject>[]);
       throw UserFacingException(
@@ -150,6 +173,18 @@ class SupabaseClipRepository implements ClipRepository {
         throw UserFacingException(L10n.current.errClipsMax);
       }
       throw UserFacingException(L10n.current.errClipSave);
+    }
+  }
+
+  @override
+  Future<void> setFeatured(String? clipId) async {
+    try {
+      await _client
+          .from('profiles')
+          .update({'featured_clip_id': clipId})
+          .eq('id', _uid);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipSong);
     }
   }
 

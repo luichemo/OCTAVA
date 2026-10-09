@@ -74,3 +74,55 @@ Map<String, String> get gearLabels {
     'has_home_studio': t.gearHomeStudio,
   };
 }
+
+/// Genres: same ids and order as the `genres` table.
+Map<String, String> get genreLabels {
+  final t = L10n.current;
+  return {
+    'rock': t.genreRock,
+    'pop': t.genrePop,
+    'indie': t.genreIndie,
+    'alt-rock': t.genreAltRock,
+    'punk': t.genrePunk,
+    'post-punk': t.genrePostPunk,
+    'hardcore': t.genreHardcore,
+    'metal': t.genreMetal,
+    'grunge': t.genreGrunge,
+    'math-rock': t.genreMathRock,
+    'post-rock': t.genrePostRock,
+    'shoegaze': t.genreShoegaze,
+    'dream-pop': t.genreDreamPop,
+    'synth-pop': t.genreSynthPop,
+    'city-pop': t.genreCityPop,
+    'disco': t.genreDisco,
+    'funk': t.genreFunk,
+    'soul': t.genreSoul,
+    'neo-soul': t.genreNeoSoul,
+    'r-and-b': t.genreRAndB,
+    'hip-hop': t.genreHipHop,
+    'rap': t.genreRap,
+    'jazz': t.genreJazz,
+    'blues': t.genreBlues,
+    'gospel': t.genreGospel,
+    'electronic': t.genreElectronic,
+    'techno': t.genreTechno,
+    'house': t.genreHouse,
+    'ambient': t.genreAmbient,
+    'lo-fi': t.genreLoFi,
+    'experimental': t.genreExperimental,
+    'folk': t.genreFolk,
+    'indie-folk': t.genreIndieFolk,
+    'georgian-folk': t.genreGeorgianFolk,
+    'singer-songwriter': t.genreSingerSongwriter,
+    'country': t.genreCountry,
+    'reggae': t.genreReggae,
+    'ska': t.genreSka,
+    'latin': t.genreLatin,
+    'world': t.genreWorld,
+    'classical': t.genreClassical,
+    'soundtrack': t.genreSoundtrack,
+  };
+}
+
+/// A genre id's label (the id itself for anything unknown).
+String genreLabel(String id) => genreLabels[id] ?? id;

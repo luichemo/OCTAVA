@@ -193,13 +193,22 @@ class SupabaseProfileRepository implements ProfileRepository {
           .select('avatar_path')
           .eq('id', _uid)
           .single();
-      final clip = await _client
+      // The card's song: the featured clip, else the first one.
+      final featured = await _client
+          .from('profiles')
+          .select('featured_clip_id')
+          .eq('id', _uid)
+          .single();
+      final clips = await _client
           .from('audio_clips')
-          .select('storage_path, duration_seconds')
+          .select('id, storage_path, duration_seconds')
           .eq('profile_id', _uid)
-          .order('created_at')
-          .limit(1)
-          .maybeSingle();
+          .order('created_at');
+      final clip =
+          clips
+              .where((c) => c['id'] == featured['featured_clip_id'])
+              .firstOrNull ??
+          clips.firstOrNull;
       return Musician(
         id: _uid,
         name: draft.displayName,

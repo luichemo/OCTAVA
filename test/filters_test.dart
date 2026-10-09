@@ -142,7 +142,7 @@ void main() {
     });
   });
 
-  testWidgets('the bottom bar holds profile, matches and sign out', (
+  testWidgets('the bottom bar holds profile, record and matches', (
     tester,
   ) async {
     var opened = <String>[];
@@ -151,17 +151,19 @@ void main() {
       SwipeScreen(
         onOpenProfile: () async => opened.add('profile'),
         onOpenMatches: () => opened.add('matches'),
-        onSignOut: () => opened.add('sign out'),
+        onRecord: () => opened.add('record'),
       ),
     );
-    // Choosing is by swiping now: no Pass or Jam buttons.
+    // Choosing is by swiping: no Pass or Jam buttons, and no hint text.
     expect(find.widgetWithText(FilledButton, 'Jam'), findsNothing);
-    expect(find.widgetWithText(OutlinedButton, 'Pass'), findsNothing);
+    expect(find.textContaining('Swipe right'), findsNothing);
+    expect(find.text('Sign out'), findsNothing);
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Record a clip'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Matches'));
-    await tester.tap(find.text('Sign out'));
-    expect(opened, ['profile', 'matches', 'sign out']);
+    expect(opened, ['profile', 'record', 'matches']);
     opened = [];
   });
 }

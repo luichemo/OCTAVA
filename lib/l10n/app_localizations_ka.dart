@@ -181,9 +181,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get fieldGenres => 'ჟანრები';
 
   @override
-  String get fieldGenresHint => 'ჩაწერე ჟანრი და დააჭირე Enter-ს';
-
-  @override
   String get rehearseQuestion => 'რამდენად ხშირად შეგიძლია რეპეტიცია?';
 
   @override
@@ -243,7 +240,32 @@ class AppLocalizationsKa extends AppLocalizations {
   String get errBirthDateInvalid => 'შეიყვანე რეალური დაბადების თარიღი.';
 
   @override
-  String get tagMax => 'შეგიძლია დაამატო 10-მდე';
+  String get genresChoose => 'აირჩიე ჟანრები';
+
+  @override
+  String get genresChange => 'ჟანრების შეცვლა';
+
+  @override
+  String get genresSearch => 'ჟანრის ძებნა';
+
+  @override
+  String get genresDone => 'მზადაა';
+
+  @override
+  String get genresMax => 'შეგიძლია აირჩიო 10 ჟანრამდე.';
+
+  @override
+  String get genresNoResults => 'ასეთი ჟანრი არ მოიძებნა.';
+
+  @override
+  String get noClipsTitle => 'ფიდში არ ჩანხარ';
+
+  @override
+  String get noClipsBody =>
+      'მუსიკოსები, რომლებსაც აუდიოჩანაწერი არ აქვთ, სხვებს არ უჩნდებათ. დაამატე ერთი მაინც, რომ მოგისმინონ.';
+
+  @override
+  String get noClipsAction => 'ჩანაწერის გაკეთება';
 
   @override
   String get deckEverywhere => 'ყველგან';
@@ -257,12 +279,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String deckWithFilters(String where, int count) {
     return '$where, $count ფილტრი';
   }
-
-  @override
-  String get swipeHint => 'მარჯვნივ — არ მეყო, მარცხნივ — მეყო';
-
-  @override
-  String get swipeHintWeb => 'მარჯვნივ — არ მეყო, მარცხნივ — მეყო (ან ისრები)';
 
   @override
   String get stampJam => 'არ მეყო';
@@ -550,8 +566,66 @@ class AppLocalizationsKa extends AppLocalizations {
       'საჩივარი ვერ გაიგზავნა. შეამოწმე ინტერნეტი და სცადე თავიდან.';
 
   @override
+  String get navAdd => 'ჩანაწერის გაკეთება';
+
+  @override
+  String get recordTitle => 'ახალი ჩანაწერი';
+
+  @override
+  String get recordStarting => 'მიკროფონი ირთვება…';
+
+  @override
+  String get recordRecording => 'მიმდინარეობს ჩაწერა';
+
+  @override
+  String get recordLimit => 'ჩაწერა 2:00-ზე თავისით შეწყდება.';
+
+  @override
+  String get recordStop => 'გაჩერება';
+
+  @override
+  String recordDone(String length) {
+    return 'ჩაიწერა: $length';
+  }
+
+  @override
+  String get recordSave => 'პროფილში დამატება';
+
+  @override
+  String get recordListen => 'მოსმენა';
+
+  @override
+  String get recordStopListening => 'მოსმენის შეწყვეტა';
+
+  @override
+  String get recordAgain => 'თავიდან ჩაწერა';
+
+  @override
+  String get recordUploadFile => 'ან ატვირთე ფაილი';
+
+  @override
+  String get errMicDenied =>
+      'OCTAVA-ს არ აქვს მიკროფონის გამოყენების ნებართვა. დაუშვი ის ბრაუზერის ან ტელეფონის პარამეტრებში და სცადე თავიდან.';
+
+  @override
+  String get errRecord => 'ჩაწერა ვერ მოხერხდა. სცადე თავიდან.';
+
+  @override
+  String get errRecordShort => 'ძალიან მოკლეა. ჩაწერე მინიმუმ ერთი წამი.';
+
+  @override
   String get clipsInfo =>
-      '5-მდე ჩანაწერი, თითო 2 წუთამდე. პირველი ჩანაწერი შენს ბარათზე ჟღერს.';
+      '5-მდე ჩანაწერი, თითო 2 წუთამდე. ვარსკვლავით მონიშნე ის, რომელიც შენს ბარათზე უნდა ჟღერდეს; თორემ პირველი ჩანაწერი ჟღერს.';
+
+  @override
+  String get clipMakeSong => 'გახადე ბარათის სიმღერა';
+
+  @override
+  String get clipIsSong => 'შენი ბარათის სიმღერა';
+
+  @override
+  String get errClipSong =>
+      'ბარათის სიმღერის შეცვლა ვერ მოხერხდა. შეამოწმე ინტერნეტი და სცადე თავიდან.';
 
   @override
   String get clipAdded => 'ჩანაწერი დაემატა პროფილს.';
@@ -890,4 +964,182 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get linkWebsite => 'ვებგვერდი';
+
+  @override
+  String get genreRock => 'როკი';
+
+  @override
+  String get genrePop => 'პოპი';
+
+  @override
+  String get genreIndie => 'ინდი';
+
+  @override
+  String get genreAltRock => 'ალტერნატიული როკი';
+
+  @override
+  String get genrePunk => 'პანკი';
+
+  @override
+  String get genrePostPunk => 'პოსტ-პანკი';
+
+  @override
+  String get genreHardcore => 'ჰარდკორი';
+
+  @override
+  String get genreMetal => 'მეტალი';
+
+  @override
+  String get genreGrunge => 'გრანჯი';
+
+  @override
+  String get genreMathRock => 'მეთ-როკი';
+
+  @override
+  String get genrePostRock => 'პოსტ-როკი';
+
+  @override
+  String get genreShoegaze => 'შუგეიზი';
+
+  @override
+  String get genreDreamPop => 'დრიმ-პოპი';
+
+  @override
+  String get genreSynthPop => 'სინთ-პოპი';
+
+  @override
+  String get genreCityPop => 'სითი-პოპი';
+
+  @override
+  String get genreDisco => 'დისკო';
+
+  @override
+  String get genreFunk => 'ფანკი';
+
+  @override
+  String get genreSoul => 'სოული';
+
+  @override
+  String get genreNeoSoul => 'ნეო-სოული';
+
+  @override
+  String get genreRAndB => 'R&B';
+
+  @override
+  String get genreHipHop => 'ჰიპ-ჰოპი';
+
+  @override
+  String get genreRap => 'რეპი';
+
+  @override
+  String get genreJazz => 'ჯაზი';
+
+  @override
+  String get genreBlues => 'ბლუზი';
+
+  @override
+  String get genreGospel => 'გოსპელი';
+
+  @override
+  String get genreElectronic => 'ელექტრონული';
+
+  @override
+  String get genreTechno => 'ტექნო';
+
+  @override
+  String get genreHouse => 'ჰაუსი';
+
+  @override
+  String get genreAmbient => 'ემბიენტი';
+
+  @override
+  String get genreLoFi => 'ლო-ფაი';
+
+  @override
+  String get genreExperimental => 'ექსპერიმენტული';
+
+  @override
+  String get genreFolk => 'ფოლკი';
+
+  @override
+  String get genreIndieFolk => 'ინდი-ფოლკი';
+
+  @override
+  String get genreGeorgianFolk => 'ქართული ხალხური';
+
+  @override
+  String get genreSingerSongwriter => 'ავტორ-შემსრულებელი';
+
+  @override
+  String get genreCountry => 'ქანთრი';
+
+  @override
+  String get genreReggae => 'რეგი';
+
+  @override
+  String get genreSka => 'სკა';
+
+  @override
+  String get genreLatin => 'ლათინო';
+
+  @override
+  String get genreWorld => 'მსოფლიო მუსიკა';
+
+  @override
+  String get genreClassical => 'კლასიკური';
+
+  @override
+  String get genreSoundtrack => 'საუნდტრეკი';
+
+  @override
+  String get bandEdit => 'აირჩიე, ვინ სჭირდება შენს ბენდს';
+
+  @override
+  String get bandRolesTitle => 'ვინ სჭირდება შენს ბენდს?';
+
+  @override
+  String bandRolesHint(int max) {
+    return 'შენს გარდა მაქსიმუმ $max ადგილი.';
+  }
+
+  @override
+  String bandRolesCount(int count, int max) {
+    return '$count / $max';
+  }
+
+  @override
+  String get bandRolesEmpty => 'აირჩიე ერთი როლი მაინც.';
+
+  @override
+  String get bandRolesSave => 'შენახვა';
+
+  @override
+  String get roleMore => 'კიდევ ერთი';
+
+  @override
+  String get roleFewer => 'ერთით ნაკლები';
+
+  @override
+  String roleCount(String instrument, int count) {
+    return '$instrument ×$count';
+  }
+
+  @override
+  String get sectionBand => 'ვინ სჭირდება ბენდს';
+
+  @override
+  String get bandChange => 'როლების შეცვლა';
+
+  @override
+  String get bandDefaultNote =>
+      'ჯერ არ აგირჩევია, ამიტომ ეს ჩვეულებრივი როლებია.';
+
+  @override
+  String matchNoSlot(String instrument) {
+    return 'შენს ბენდს ახლა ადგილი „$instrument“ არ სჭირდება, მაგრამ მაინც შეგიძლია მიესალმო.';
+  }
+
+  @override
+  String get errSaveBand =>
+      'ბენდის როლები ვერ შევინახე. შეამოწმე ინტერნეტი და სცადე თავიდან.';
 }

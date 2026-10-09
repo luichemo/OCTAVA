@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
@@ -9,15 +8,18 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import '../data/avatar_repository.dart';
+import '../data/band_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
+import '../models/band.dart';
 import '../models/deck_filters.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 import '../widgets/band_lineup.dart';
+import '../widgets/band_roles_sheet.dart';
 import '../widgets/musician_card.dart';
 import '../widgets/safety_sheet.dart';
 import 'filters_screen.dart';
@@ -28,7 +30,7 @@ class SwipeScreen extends StatefulWidget {
   const SwipeScreen({
     super.key,
     this.source = const SampleDeck(),
-    this.onSignOut,
+    this.onRecord,
     this.onOpenMatches,
     this.onOpenChat,
     this.safety,
@@ -37,7 +39,12 @@ class SwipeScreen extends StatefulWidget {
     this.avatars,
     this.location,
     this.filterStore,
+    this.bandNeeds,
   });
+
+  /// The roles your band needs. Defaults to keeping them only while the app
+  /// runs.
+  final BandNeedsRepository? bandNeeds;
 
   /// Sharing your location, for distances. Without it there's no prompt.
   final LocationRepository? location;
@@ -58,8 +65,8 @@ class SwipeScreen extends StatefulWidget {
   /// Where people come from and swipes go.
   final DeckSource source;
 
-  /// Shows a Sign out button when set.
-  final VoidCallback? onSignOut;
+  /// Shows the ➕ button (record or upload a clip) in the bottom bar when set.
+  final VoidCallback? onRecord;
 
   /// Block and report from a card. Without it cards have no flag button.
   final SafetyRepository? safety;
@@ -77,10 +84,15 @@ class SwipeScreen extends StatefulWidget {
 
 class _SwipeScreenState extends State<SwipeScreen>
     with SingleTickerProviderStateMixin {
-  // Role -> member. A Map keeps insertion order, which is the display order.
-  Map<String, String?> _band = {};
+  // The lineup is rebuilt from these three whenever one changes.
+  String? _myRole;
+  Map<String, int>? _needs; // null until chosen: the default roles
+  List<BandMember> _members = [];
+  List<BandSlot> _band = [];
   List<Musician> _queue = [];
-  String? _justFilled;
+  int? _justFilled; // index in _band
+  late final BandNeedsRepository _bandNeeds =
+      widget.bandNeeds ?? MemoryBandNeeds();
   bool _loading = true;
   String? _loadError;
 
@@ -115,14 +127,18 @@ class _SwipeScreenState extends State<SwipeScreen>
     }
     _hasLocation = await widget.location?.hasLocation() ?? false;
     try {
-      // Both requests run at the same time, like Promise.all.
-      final (band, deck) = await (
-        widget.source.loadLineup(),
+      // The requests run at the same time, like Promise.all.
+      final (band, needs, deck) = await (
+        widget.source.loadBand(),
+        _bandNeeds.load(),
         widget.source.loadDeck(_filters, hasLocation: _hasLocation),
       ).wait;
       if (!mounted) return;
       setState(() {
-        _band = band;
+        _myRole = band.myRole;
+        _members = band.members;
+        _needs = needs;
+        _rebuildBand();
         _queue = deck;
         _loading = false;
         _loadError = null;
@@ -131,6 +147,7 @@ class _SwipeScreenState extends State<SwipeScreen>
       final error = [
         e.errors.$1,
         e.errors.$2,
+        e.errors.$3,
       ].whereType<UserFacingException>().firstOrNull;
       if (!mounted) return;
       setState(() {
@@ -189,8 +206,36 @@ class _SwipeScreenState extends State<SwipeScreen>
     super.dispose();
   }
 
-  bool _fitsOpenSlot(Musician m) =>
-      _band.containsKey(m.instrumentId) && _band[m.instrumentId] == null;
+  void _rebuildBand() {
+    _band = buildLineup(myRole: _myRole, needs: _needs, members: _members);
+  }
+
+  int _openSlotFor(Musician m) =>
+      _band.indexWhere((s) => s.role == m.instrumentId && s.member == null);
+
+  bool _fitsOpenSlot(Musician m) => _openSlotFor(m) >= 0;
+
+  Future<void> _editBand() async {
+    final chosen = await showBandRolesSheet(
+      context,
+      needs: _needs ?? defaultBandNeeds(_myRole),
+    );
+    if (chosen == null || !mounted) return;
+    try {
+      await _bandNeeds.save(chosen);
+    } on UserFacingException catch (e) {
+      if (mounted) _toast(e.message);
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _needs = chosen;
+      _justFilled = null;
+      _rebuildBand();
+    });
+    // People who fill an open role come first, so the order may change.
+    _reload();
+  }
 
   Color _toneFor(Musician m) => const [
     OctavaColors.pink,
@@ -276,12 +321,18 @@ class _SwipeScreenState extends State<SwipeScreen>
   }
 
   Future<void> _showMatch(Musician m, String matchId) async {
-    final filledSlot = _fitsOpenSlot(m);
-    final holder = _band[m.instrumentId];
+    final open = _openSlotFor(m);
+    final filledSlot = open >= 0;
+    // Who has this role already, if no slot of it is open.
+    final holder = _band
+        .where((s) => s.role == m.instrumentId)
+        .firstOrNull
+        ?.member;
     if (filledSlot) {
       setState(() {
-        _band[m.instrumentId!] = m.name;
-        _justFilled = m.instrumentId;
+        _members = [..._members, (name: m.name, role: m.instrumentId)];
+        _rebuildBand();
+        _justFilled = open;
       });
     }
     final saidHi = await showDialog<bool>(
@@ -290,12 +341,11 @@ class _SwipeScreenState extends State<SwipeScreen>
         title: context.t.matchTitle(m.name),
         body: filledSlot
             ? context.t.matchSlotFilled(m.instrument)
+            : holder == null
+            ? context.t.matchNoSlot(m.instrument.toLowerCase())
             : holder == youMarker
             ? context.t.matchSlotYours(m.instrument.toLowerCase())
-            : context.t.matchSlotTaken(
-                holder ?? '',
-                m.instrument.toLowerCase(),
-              ),
+            : context.t.matchSlotTaken(holder, m.instrument.toLowerCase()),
       ),
     );
     if (saidHi != true || !mounted) return;
@@ -417,7 +467,11 @@ class _SwipeScreenState extends State<SwipeScreen>
                         ],
                       ),
                       const SizedBox(height: 14),
-                      BandLineup(band: _band, justFilled: _justFilled),
+                      BandLineup(
+                        band: _band,
+                        justFilled: _justFilled,
+                        onEdit: _editBand,
+                      ),
                       if (widget.location != null &&
                           !_loading &&
                           !_hasLocation) ...[
@@ -465,25 +519,10 @@ class _SwipeScreenState extends State<SwipeScreen>
                           },
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        canSwipe
-                            ? (kIsWeb
-                                  ? context.t.swipeHintWeb
-                                  : context.t.swipeHint)
-                            : ' ',
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
                       if (widget.onOpenProfile != null ||
                           widget.onOpenMatches != null ||
-                          widget.onSignOut != null) ...[
-                        const SizedBox(height: 8),
+                          widget.onRecord != null) ...[
+                        const SizedBox(height: 10),
                         _BottomBar(
                           onProfile: widget.onOpenProfile == null
                               ? null
@@ -493,7 +532,12 @@ class _SwipeScreenState extends State<SwipeScreen>
                                   if (mounted) _reload();
                                 },
                           onMatches: widget.onOpenMatches,
-                          onSignOut: widget.onSignOut,
+                          onRecord: widget.onRecord == null
+                              ? null
+                              : () async {
+                                  await widget.player?.stop();
+                                  widget.onRecord!();
+                                },
                         ),
                       ],
                     ],
@@ -695,12 +739,13 @@ class _LocationPrompt extends StatelessWidget {
 }
 
 /// Bottom navigation: Profile, Matches and Sign out, with labels.
+/// Bottom navigation: Profile, a round ➕ (record a clip) and Matches.
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({this.onProfile, this.onMatches, this.onSignOut});
+  const _BottomBar({this.onProfile, this.onMatches, this.onRecord});
 
   final VoidCallback? onProfile;
   final VoidCallback? onMatches;
-  final VoidCallback? onSignOut;
+  final VoidCallback? onRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -720,17 +765,26 @@ class _BottomBar extends StatelessWidget {
               label: context.t.navProfile,
               onTap: onProfile!,
             ),
+          if (onRecord != null)
+            Expanded(
+              child: Center(
+                child: IconButton.filled(
+                  tooltip: context.t.navAdd,
+                  onPressed: onRecord,
+                  style: IconButton.styleFrom(
+                    backgroundColor: OctavaColors.pink,
+                    foregroundColor: OctavaColors.ink,
+                    minimumSize: const Size(56, 56),
+                  ),
+                  icon: const Icon(Icons.add_rounded, size: 32),
+                ),
+              ),
+            ),
           if (onMatches != null)
             _BarButton(
               icon: Icons.chat_bubble_outline_rounded,
               label: context.t.navMatches,
               onTap: onMatches!,
-            ),
-          if (onSignOut != null)
-            _BarButton(
-              icon: Icons.logout_rounded,
-              label: context.t.signOut,
-              onTap: onSignOut!,
             ),
         ],
       ),
