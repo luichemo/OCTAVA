@@ -12,6 +12,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(const OctavaApp(home: SwipeScreen()));
+    await tester.pumpAndSettle(); // the deck loads asynchronously
   }
 
   testWidgets('shows the band lineup and the first musician', (tester) async {
@@ -73,7 +74,7 @@ void main() {
     expect(find.text('Nika wants to jam too'), findsNothing);
   });
 
-  testWidgets('after everyone, shows the empty state and can start over', (
+  testWidgets('after everyone, shows the empty state and can check again', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -83,9 +84,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(find.text("You've heard everyone nearby"), findsOneWidget);
+    expect(find.text("You've heard everyone"), findsOneWidget);
 
-    await tester.tap(find.text('Start over'));
+    await tester.tap(find.text('Check again'));
     await tester.pumpAndSettle();
 
     expect(find.text('Nika, 24'), findsOneWidget);

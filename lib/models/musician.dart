@@ -1,38 +1,84 @@
 import 'dart:math';
 import 'dart:ui';
 
-/// A musician shown on a swipe card. Until Supabase is wired in, these come
-/// from lib/data/sample_musicians.dart.
+import '../data/profile_options.dart';
+
+/// A musician shown on a swipe card: from the database (`get_deck`), or the
+/// sample people in lib/data/sample_musicians.dart.
 class Musician {
   const Musician({
+    this.id,
     required this.name,
     required this.age,
     required this.instrument,
-    required this.area,
-    required this.km,
-    required this.genres,
-    required this.lookingFor,
-    required this.likesYou,
+    this.area,
+    this.km,
+    this.genres = const [],
+    this.lookingFor,
+    this.likesYou = false,
     this.clipSeconds = 30,
   });
 
+  /// Builds a card from one row returned by the `get_deck` database function.
+  factory Musician.fromDeckRow(Map<String, dynamic> row) {
+    final instruments = (row['instruments'] as List? ?? const [])
+        .cast<Map<String, dynamic>>();
+    final primary =
+        instruments.where((i) => i['is_primary'] == true).firstOrNull ??
+        instruments.firstOrNull;
+    final clips = (row['clips'] as List? ?? const [])
+        .cast<Map<String, dynamic>>();
+    return Musician(
+      id: row['id'] as String,
+      name: row['display_name'] as String,
+      age: row['age'] as int,
+      instrument: instrumentLabels[primary?['instrument']] ?? 'Musician',
+      area: row['area'] as String?,
+      km: (row['distance_km'] as num?)?.toDouble(),
+      genres: (row['genres'] as List? ?? const []).cast<String>(),
+      lookingFor: row['looking_for'] as String?,
+      clipSeconds: clips.firstOrNull?['seconds'] as int?,
+    );
+  }
+
+  /// Database id. Null for sample musicians.
+  final String? id;
   final String name;
   final int age;
 
-  /// Matches a role in the band lineup, e.g. "Drums".
+  /// Main instrument's label, e.g. "Drums". Matches a band lineup role.
   final String instrument;
-  final String area;
-  final double km;
+  final String? area;
+
+  /// Distance from you; null when either of you hasn't shared a location.
+  final double? km;
   final List<String> genres;
-  final String lookingFor;
+  final String? lookingFor;
 
-  /// Whether this person already swiped right on you, so a Jam is a match.
+  /// Sample data only: this person already chose Jam on you, so a Jam is a
+  /// match. Real matches are decided by the database.
   final bool likesYou;
-  final int clipSeconds;
 
-  // A stable seed from the name, so each card's artwork looks the same on
-  // every run and platform (String.hashCode isn't guaranteed to be stable).
-  int get _seed => name.codeUnits.fold(17, (h, c) => (h * 31 + c) & 0x7fffffff);
+  /// Length of the first audio clip; null when there are no clips.
+  final int? clipSeconds;
+
+  /// Stable identity for widget keys.
+  String get key => id ?? name;
+
+  /// "Vera, 3 km away", "3 km away", "Vera", or "".
+  String get whereText {
+    final distance = km == null
+        ? null
+        : '${km! % 1 == 0 ? km!.toInt() : km} km away';
+    return [
+      area,
+      distance,
+    ].whereType<String>().where((s) => s.isNotEmpty).join(', ');
+  }
+
+  // A stable seed from the id or name, so each card's artwork looks the same
+  // on every run and platform (String.hashCode isn't guaranteed to be stable).
+  int get _seed => key.codeUnits.fold(17, (h, c) => (h * 31 + c) & 0x7fffffff);
 
   /// Where the halftone portrait's "spotlight" sits, as fractions of its size.
   Offset get spotlight {
@@ -45,6 +91,9 @@ class Musician {
     final r = Random(_seed + 1);
     return List.generate(36, (_) => 0.2 + r.nextDouble() * 0.8);
   }
+
+  /// 0, 1 or 2: which portrait colour this card uses.
+  int get toneIndex => _seed % 3;
 }
 
 /// "a", "a and b", "a, b and c".

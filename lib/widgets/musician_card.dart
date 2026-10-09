@@ -127,7 +127,7 @@ class MusicianCard extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          '${m.area}, ${m.km} km away',
+                          m.whereText,
                           style: TextStyle(
                             fontSize: 14,
                             color: colors.onSurfaceVariant,
@@ -157,12 +157,13 @@ class MusicianCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  _Clip(musician: m),
-                  Text(
-                    'Plays ${listJoin(m.genres)}',
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                  if (!compact)
+                  if (m.clipSeconds != null) _Clip(musician: m),
+                  if (m.genres.isNotEmpty)
+                    Text(
+                      'Plays ${listJoin(m.genres)}',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                  if (!compact && (m.lookingFor ?? '').isNotEmpty)
                     Text(
                       '“${m.lookingFor}”',
                       style: TextStyle(
@@ -234,7 +235,7 @@ class _Clip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final seconds = musician.clipSeconds;
+    final seconds = musician.clipSeconds!;
     return Row(
       spacing: 10,
       children: [

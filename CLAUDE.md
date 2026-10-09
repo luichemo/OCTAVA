@@ -46,7 +46,7 @@ iOS can't be built on this Windows machine; it needs a Mac or a macOS CI runner.
 
 ## Code layout
 
-Sign-up and profile setup use Supabase. The swipe screen still uses sample data, and all its state lives in it (`setState`). No state-management package has been chosen yet.
+Sign-up, profile setup and swiping use Supabase. Screen state lives in each screen (`setState`). No state-management package has been chosen yet.
 - `lib/main.dart`: initialises Supabase, then runs `OctavaApp` (MaterialApp with light and dark themes). `OctavaApp(home:)` defaults to `AuthGate`; tests pass their own home so they don't need Supabase.
 - `lib/config/supabase_config.dart`: project URL and publishable key. These are public by design; never add the secret/service_role key or the DB password.
 - `lib/screens/auth_gate.dart`: `AuthGate` listens to Supabase auth. Signed out → `AuthScreen`; signed in → `ProfileGate`, which asks the repository for a `ProfileStatus` (needsBirthDate / needsProfile / ready) and shows `OnboardingScreen` or `SwipeScreen`.
@@ -54,7 +54,8 @@ Sign-up and profile setup use Supabase. The swipe screen still uses sample data,
 - `lib/data/repositories.dart`: `AuthRepository` / `ProfileRepository` interfaces with Supabase implementations. Errors become `UserFacingException` with wording for people; messages raised by our own DB rules (codes P0001/23514, not "new row…" constraint text) pass through. Screens take repositories as parameters; `test/signup_flow_test.dart` has fakes.
 - `lib/data/profile_options.dart`: labels for DB enum values and instrument ids (keys must match the DB). `lib/models/profile_draft.dart` builds the `profiles` and `profile_instruments` rows.
 - Dart gotcha that caused a real bug: `setState(() => _x = someFuture())` returns the Future, so `setState` throws and nothing redraws. Use a block body: `setState(() { _x = someFuture(); })`.
-- `lib/screens/swipe_screen.dart`: holds the band lineup (`Map<String, String?>` of role → member), the card queue, and the drag offset, which one `AnimationController` animates for fly-off and snap-back. It also contains the match dialog, the empty state, and arrow-key shortcuts. A Jam on someone with `likesYou` is a match and fills their instrument's slot if it's open.
+- `lib/screens/swipe_screen.dart`: takes a `DeckSource` (`lib/data/deck.dart`) and loads the band lineup (`Map<String, String?>` of role → member) and the card queue from it. The drag offset is animated by one `AnimationController` for fly-off and snap-back. Each swipe is saved while the card flies away; if saving fails, the card comes back with a message. It also contains the match dialog, the empty/error states, and arrow-key shortcuts.
+- `lib/data/deck.dart`: `SupabaseDeck` (`get_deck` with no distance limit until location exists; `record_swipe`, where a non-null match id means a match). The lineup is the five usual roles plus your own main instrument as "You", filled from your matches' main instruments. `SampleDeck` holds the 8 sample people (their `likesYou` decides matches) and is the default in tests.
 - `lib/widgets/musician_card.dart`: the card. `HalftonePainter` draws the riso portrait (dots grow away from a per-musician spotlight); the instrument name overlaps the portrait with a multiply blend in light mode. The audio clip's play button is disabled until real clips exist.
 - `lib/widgets/band_lineup.dart`: the "Your band" slots, which flash pink when filled.
 - `lib/models/musician.dart` and `lib/data/sample_musicians.dart`: the `Musician` model (spotlight and waveform come from a stable name-based seed) and the 8 sample people from the prototype.
@@ -76,6 +77,7 @@ How v1 fits together:
 - **Public API (RPC):** only `get_deck(max_km, instrument_ids, min_skill, genre_filter, goal_filter, frequency_filter, max_results)`, `record_swipe(target, decision)` (returns the match id on a mutual Jam, else null), and `set_my_location(lat, lng)`. Helpers live in the unexposed `private` schema; signed-in users can execute only the ones RLS policies call.
 - **Tables clients write directly:** profile tables (own rows), `messages` (insert in own match, if `can_message`), `blocks` (own), `reports` (insert only; read them in the dashboard). Swipes and matches are written only by `record_swipe`; either person can delete (unmatch) a match.
 - **Realtime:** `matches` and `messages` are in the `supabase_realtime` publication (RLS applies).
+- **Test data:** `supabase/seed/test_musicians.sql` adds the 8 sample musicians as adult profiles that can't sign in (emails `@test.octava.invalid`, fixed ids ending `a1`–`a8`). Nika, Luka, Tamar and Dato have already chosen Jam on every real adult profile that existed when the script ran. `supabase/seed/remove_test_musicians.sql` deletes them and everything linked to them. They are currently in the database.
 - **Rule tests:** `supabase/tests/rules_check.sql` acts as fake users in one block and always ends with an exception, so it rolls itself back. All checks should read PASS. Re-run it after any schema or policy change, and also run the Supabase security and performance advisors.
 
 ## Keeping this file current

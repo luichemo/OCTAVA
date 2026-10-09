@@ -5,24 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import '../data/sample_musicians.dart';
+import '../data/deck.dart';
+import '../data/repositories.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 import '../widgets/band_lineup.dart';
 import '../widgets/musician_card.dart';
-
-enum Decision { pass, jam }
 
 /// The main screen: your band lineup, a deck of musician cards to drag or
 /// tap through, and Pass / Jam buttons.
 class SwipeScreen extends StatefulWidget {
   const SwipeScreen({
     super.key,
-    this.musicians = sampleMusicians,
+    this.source = const SampleDeck(),
     this.onSignOut,
   });
 
-  final List<Musician> musicians;
+  /// Where people come from and swipes go.
+  final DeckSource source;
 
   /// Shows a Sign out button when set.
   final VoidCallback? onSignOut;
@@ -33,16 +33,12 @@ class SwipeScreen extends StatefulWidget {
 
 class _SwipeScreenState extends State<SwipeScreen>
     with SingleTickerProviderStateMixin {
-  // A Map literal keeps insertion order, which is the lineup's display order.
-  final Map<String, String?> _band = {
-    'Guitar': 'You',
-    'Drums': null,
-    'Bass': null,
-    'Vocals': null,
-    'Keys': null,
-  };
-  late List<Musician> _queue = List.of(widget.musicians);
+  // Role -> member. A Map keeps insertion order, which is the display order.
+  Map<String, String?> _band = {};
+  List<Musician> _queue = [];
   String? _justFilled;
+  bool _loading = true;
+  String? _loadError;
 
   // How far the top card has been dragged. Drives position, tilt and stamps.
   Offset _drag = Offset.zero;
@@ -59,6 +55,42 @@ class _SwipeScreenState extends State<SwipeScreen>
       final a = _animOffset;
       if (a != null) setState(() => _drag = a.value);
     });
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      // Both requests run at the same time, like Promise.all.
+      final (band, deck) = await (
+        widget.source.loadLineup(),
+        widget.source.loadDeck(),
+      ).wait;
+      if (!mounted) return;
+      setState(() {
+        _band = band;
+        _queue = deck;
+        _loading = false;
+        _loadError = null;
+      });
+    } on ParallelWaitError catch (e) {
+      final error = [
+        e.errors.$1,
+        e.errors.$2,
+      ].whereType<UserFacingException>().firstOrNull;
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _loadError = error?.message ?? "Couldn't load musicians. Try again.";
+      });
+    }
+  }
+
+  void _reload() {
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
+    _load();
   }
 
   @override
@@ -70,11 +102,11 @@ class _SwipeScreenState extends State<SwipeScreen>
   bool _fitsOpenSlot(Musician m) =>
       _band.containsKey(m.instrument) && _band[m.instrument] == null;
 
-  Color _toneFor(Musician m) {
-    const tones = [OctavaColors.pink, OctavaColors.yellow, OctavaColors.aqua];
-    final i = widget.musicians.indexOf(m);
-    return tones[max(i, 0) % tones.length];
-  }
+  Color _toneFor(Musician m) => const [
+    OctavaColors.pink,
+    OctavaColors.yellow,
+    OctavaColors.aqua,
+  ][m.toneIndex];
 
   Future<void> _animateTo(Offset target, Duration duration, Curve curve) async {
     if (MediaQuery.of(context).disableAnimations) {
@@ -113,6 +145,9 @@ class _SwipeScreenState extends State<SwipeScreen>
     _busy = true;
     final musician = _queue.first;
     final direction = decision == Decision.jam ? 1.0 : -1.0;
+    // Save while the card flies away. _attempt never throws, so a failure
+    // can't go unhandled while the animation runs.
+    final saving = _attempt(widget.source.swipe(musician, decision));
     await _animateTo(
       Offset(direction * _deckWidth * 1.4, 30),
       const Duration(milliseconds: 350),
@@ -126,13 +161,23 @@ class _SwipeScreenState extends State<SwipeScreen>
     });
     _busy = false;
 
+    final outcome = await saving;
+    if (!mounted) return;
+    if (outcome is UserFacingException) {
+      // Not saved: put the card back so the person can try again.
+      setState(() => _queue = [musician, ..._queue]);
+      _toast(outcome.message);
+      return;
+    }
+    final matched = outcome == true;
+
     if (decision == Decision.pass) {
       SemanticsService.sendAnnouncement(
         View.of(context),
         'Passed on ${musician.name}.',
         TextDirection.ltr,
       );
-    } else if (musician.likesYou) {
+    } else if (matched) {
       await _showMatch(musician);
     } else {
       _toast('You asked ${musician.name} to jam');
@@ -183,22 +228,29 @@ class _SwipeScreenState extends State<SwipeScreen>
       );
   }
 
-  void _startOver() {
-    setState(() => _queue = List.of(widget.musicians));
+  /// The swipe's result (true for a match), or the error to show.
+  Future<Object> _attempt(Future<bool> swipe) async {
+    try {
+      return await swipe;
+    } on UserFacingException catch (e) {
+      return e;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final empty = _queue.isEmpty;
+    final canSwipe = !_loading && _loadError == null && _queue.isNotEmpty;
 
     // Arrow keys mirror the buttons (useful in the browser preview).
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
-            _decide(Decision.jam),
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
-            _decide(Decision.pass),
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+          if (canSwipe) _decide(Decision.jam);
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+          if (canSwipe) _decide(Decision.pass);
+        },
       },
       child: Focus(
         autofocus: true,
@@ -225,7 +277,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Tbilisi, within 10 km',
+                              widget.source.description,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: colors.onSurfaceVariant,
@@ -252,9 +304,28 @@ class _SwipeScreenState extends State<SwipeScreen>
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             _deckWidth = constraints.maxWidth;
-                            return empty
-                                ? _EmptyDeck(onStartOver: _startOver)
-                                : _buildDeck();
+                            if (_loading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (_loadError != null) {
+                              return _DeckMessage(
+                                title: 'Something went wrong',
+                                body: _loadError!,
+                                action: 'Try again',
+                                onAction: _reload,
+                              );
+                            }
+                            if (_queue.isEmpty) {
+                              return _DeckMessage(
+                                title: "You've heard everyone",
+                                body: "That's everyone for now. New musicians join every week.",
+                                action: 'Check again',
+                                onAction: _reload,
+                              );
+                            }
+                            return _buildDeck();
                           },
                         ),
                       ),
@@ -265,18 +336,18 @@ class _SwipeScreenState extends State<SwipeScreen>
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
-                              onPressed: empty
-                                  ? null
-                                  : () => _decide(Decision.pass),
+                              onPressed: canSwipe
+                                  ? () => _decide(Decision.pass)
+                                  : null,
                               icon: const Icon(Icons.close_rounded),
                               label: const Text('Pass'),
                             ),
                           ),
                           Expanded(
                             child: FilledButton.icon(
-                              onPressed: empty
-                                  ? null
-                                  : () => _decide(Decision.jam),
+                              onPressed: canSwipe
+                                  ? () => _decide(Decision.jam)
+                                  : null,
                               icon: const Icon(Icons.music_note_rounded),
                               label: const Text('Jam'),
                             ),
@@ -320,7 +391,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                   child: Transform.scale(
                     scale: 0.96,
                     child: MusicianCard(
-                      key: ValueKey(next.name),
+                      key: ValueKey(next.key),
                       musician: next,
                       tone: _toneFor(next),
                       fitsOpenSlot: _fitsOpenSlot(next),
@@ -339,7 +410,7 @@ class _SwipeScreenState extends State<SwipeScreen>
               child: Transform.rotate(
                 angle: _drag.dx / 18 * pi / 180,
                 child: MusicianCard(
-                  key: ValueKey(top.name),
+                  key: ValueKey(top.key),
                   musician: top,
                   tone: _toneFor(top),
                   fitsOpenSlot: _fitsOpenSlot(top),
@@ -402,10 +473,19 @@ class _MatchDialog extends StatelessWidget {
   }
 }
 
-class _EmptyDeck extends StatelessWidget {
-  const _EmptyDeck({required this.onStartOver});
+/// Fills the deck area when there are no cards: nobody left, or an error.
+class _DeckMessage extends StatelessWidget {
+  const _DeckMessage({
+    required this.title,
+    required this.body,
+    required this.action,
+    required this.onAction,
+  });
 
-  final VoidCallback onStartOver;
+  final String title;
+  final String body;
+  final String action;
+  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -421,18 +501,9 @@ class _EmptyDeck extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 12,
         children: [
-          Text(
-            "You've heard everyone nearby",
-            style: displayStyle(size: 48, color: colors.onSurface),
-          ),
-          Text(
-            "You've seen every musician within 10 km. New people join every week.",
-            style: TextStyle(color: colors.onSurfaceVariant),
-          ),
-          OutlinedButton(
-            onPressed: onStartOver,
-            child: const Text('Start over'),
-          ),
+          Text(title, style: displayStyle(size: 48, color: colors.onSurface)),
+          Text(body, style: TextStyle(color: colors.onSurfaceVariant)),
+          OutlinedButton(onPressed: onAction, child: Text(action)),
         ],
       ),
     );

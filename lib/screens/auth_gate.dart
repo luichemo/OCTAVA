@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../data/deck.dart';
 import '../data/repositories.dart';
 import 'auth_screen.dart';
 import 'onboarding_screen.dart';
@@ -25,6 +26,7 @@ class AuthGate extends StatelessWidget {
         return ProfileGate(
           key: ValueKey(user.id),
           repository: SupabaseProfileRepository(client),
+          deck: SupabaseDeck(client),
         );
       },
     );
@@ -33,9 +35,16 @@ class AuthGate extends StatelessWidget {
 
 /// For a signed-in person: finish setting up the profile, or go to swiping.
 class ProfileGate extends StatefulWidget {
-  const ProfileGate({super.key, required this.repository});
+  const ProfileGate({
+    super.key,
+    required this.repository,
+    this.deck = const SampleDeck(),
+  });
 
   final ProfileRepository repository;
+
+  /// People to swipe on once the profile is ready.
+  final DeckSource deck;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -69,6 +78,7 @@ class _ProfileGateState extends State<ProfileGate> {
             body: Center(child: CircularProgressIndicator()),
           ),
           ProfileStatus.ready => SwipeScreen(
+            source: widget.deck,
             onSignOut: widget.repository.signOut,
           ),
           final status => OnboardingScreen(
