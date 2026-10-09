@@ -6,7 +6,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Nika',
     age: 24,
-    instrument: 'Drums',
+    instrumentId: 'drums',
     area: 'Vera',
     km: 1.2,
     genres: ['post-punk', 'math rock'],
@@ -16,7 +16,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Mariam',
     age: 27,
-    instrument: 'Bass',
+    instrumentId: 'bass',
     area: 'Sololaki',
     km: 2.4,
     genres: ['funk', 'neo-soul'],
@@ -27,7 +27,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Luka',
     age: 22,
-    instrument: 'Vocals',
+    instrumentId: 'vocals',
     area: 'Saburtalo',
     km: 4.1,
     genres: ['alt rock', 'grunge'],
@@ -37,7 +37,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Tamar',
     age: 30,
-    instrument: 'Keys',
+    instrumentId: 'keys',
     area: 'Vake',
     km: 3.0,
     genres: ['jazz', 'synth-pop'],
@@ -48,7 +48,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Giorgi',
     age: 26,
-    instrument: 'Drums',
+    instrumentId: 'drums',
     area: 'Didube',
     km: 6.5,
     genres: ['metal', 'hardcore'],
@@ -58,7 +58,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Ana',
     age: 25,
-    instrument: 'Vocals',
+    instrumentId: 'vocals',
     area: 'Mtatsminda',
     km: 1.8,
     genres: ['indie folk', 'dream pop'],
@@ -68,7 +68,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Dato',
     age: 29,
-    instrument: 'Bass',
+    instrumentId: 'bass',
     area: 'Nadzaladevi',
     km: 5.2,
     genres: ['post-rock', 'shoegaze'],
@@ -78,7 +78,7 @@ const sampleMusicians = <Musician>[
   Musician(
     name: 'Salome',
     age: 23,
-    instrument: 'Keys',
+    instrumentId: 'keys',
     area: 'Avlabari',
     km: 2.9,
     genres: ['city pop', 'disco'],

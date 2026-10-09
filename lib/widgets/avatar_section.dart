@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/avatar_repository.dart';
 import '../data/repositories.dart';
 import '../theme.dart';
@@ -104,21 +106,19 @@ class _AvatarSectionState extends State<AvatarSection> {
             spacing: 8,
             children: [
               Text(
-                _generating
-                    ? 'Painting your avatar… this takes a few seconds.'
-                    : 'A riso-print illustration made by AI from your main instrument and genres.',
+                _generating ? context.t.avatarPainting : context.t.avatarInfo,
                 style: TextStyle(color: colors.onSurfaceVariant),
               ),
               OutlinedButton.icon(
                 onPressed: _generating || _loading ? null : _generate,
                 icon: const Icon(Icons.auto_awesome_rounded),
                 label: Text(
-                  path == null ? 'Generate my avatar' : 'Make a new one',
+                  path == null ? context.t.avatarGenerate : context.t.avatarNew,
                 ),
               ),
               if (_remaining != null)
                 Text(
-                  _remaining == 1 ? '1 more today' : '$_remaining more today',
+                  context.t.avatarRemaining(_remaining!),
                   style: TextStyle(
                     fontSize: 13,
                     color: colors.onSurfaceVariant,

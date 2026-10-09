@@ -40,6 +40,9 @@ dependencies:
   url_launcher: ^6.3.3
   geolocator: ^14.0.1
   shared_preferences: ^2.5.6
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,6 +65,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Generates AppLocalizations from lib/l10n/*.arb (see l10n.yaml).
+  generate: true
+
   # Bundled from Google Fonts (OFL licences in assets/fonts/).
   fonts:
     - family: InstrumentSans
@@ -74,6 +80,16 @@ flutter:
     - family: BigShouldersDisplay
       fonts:
         - asset: assets/fonts/BigShouldersDisplay-Black.ttf
+          weight: 900
+    # Georgian letters; used as a fallback by every text style (see theme.dart).
+    - family: NotoSansGeorgian
+      fonts:
+        - asset: assets/fonts/NotoSansGeorgian-400.ttf
+        - asset: assets/fonts/NotoSansGeorgian-600.ttf
+          weight: 600
+        - asset: assets/fonts/NotoSansGeorgian-700.ttf
+          weight: 700
+        - asset: assets/fonts/NotoSansGeorgian-900.ttf
           weight: 900
 
   # To add assets to your application, add an assets section, like this:

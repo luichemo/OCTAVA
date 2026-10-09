@@ -87,11 +87,11 @@ void main() {
   });
 
   test('location text copes with missing parts', () {
-    const nowhere = Musician(name: 'X', age: 30, instrument: 'Bass');
+    const nowhere = Musician(name: 'X', age: 30, instrumentId: 'bass');
     const onlyArea = Musician(
       name: 'Y',
       age: 30,
-      instrument: 'Bass',
+      instrumentId: 'bass',
       area: 'Vake',
     );
     expect(nowhere.whereText, '');

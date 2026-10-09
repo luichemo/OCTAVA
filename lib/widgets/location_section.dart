@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 
@@ -68,9 +70,7 @@ class _LocationSectionState extends State<LocationSection> {
       spacing: 8,
       children: [
         Text(
-          sharing
-              ? "You share an approximate location (to about 1 km). People see how far away you are, never where you are."
-              : "You don't share a location, so nobody sees distances to you and distance filters are off.",
+          sharing ? context.t.locationSharing : context.t.locationNotSharing,
           style: TextStyle(color: colors.onSurfaceVariant),
         ),
         Wrap(
@@ -83,10 +83,12 @@ class _LocationSectionState extends State<LocationSection> {
                   : () => _run(
                       widget.location.shareCurrentLocation,
                       sharing: true,
-                      done: 'Location saved.',
+                      done: context.t.locationSaved,
                     ),
               icon: const Icon(Icons.my_location_rounded),
-              label: Text(sharing ? 'Update location' : 'Share location'),
+              label: Text(
+                sharing ? context.t.updateLocation : context.t.shareLocation,
+              ),
             ),
             if (sharing)
               TextButton(
@@ -95,9 +97,9 @@ class _LocationSectionState extends State<LocationSection> {
                     : () => _run(
                         widget.location.stopSharing,
                         sharing: false,
-                        done: 'You no longer share a location.',
+                        done: context.t.locationStopped,
                       ),
-                child: const Text('Stop sharing'),
+                child: Text(context.t.stopSharing),
               ),
           ],
         ),

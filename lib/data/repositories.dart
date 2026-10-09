@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/musician.dart';
 import '../models/profile_draft.dart';
-import 'profile_options.dart';
+import '../l10n/l10n.dart';
 
 /// Where the signed-in user is in setting up their account.
 enum ProfileStatus { needsBirthDate, needsProfile, ready }
@@ -15,7 +15,7 @@ class UserFacingException implements Exception {
   String toString() => message;
 }
 
-const _offline = "Couldn't reach OCTAVA. Check your connection and try again.";
+String get _offline => L10n.current.errOffline;
 
 // `abstract interface class` = a TypeScript interface: screens depend on these,
 // so tests can pass in fakes instead of talking to Supabase.
@@ -57,9 +57,7 @@ class SupabaseAuthRepository implements AuthRepository {
       // Supabase hides whether an email is taken: a "fake" user comes back
       // with no identities. Tell the person to sign in instead.
       if (response.user?.identities?.isEmpty ?? false) {
-        throw const UserFacingException(
-          'There is already an account with this email. Sign in instead.',
-        );
+        throw UserFacingException(L10n.current.errEmailTaken);
       }
       return response.session == null;
     } on AuthException catch (e) {
@@ -67,7 +65,7 @@ class SupabaseAuthRepository implements AuthRepository {
     } on UserFacingException {
       rethrow;
     } catch (_) {
-      throw const UserFacingException(_offline);
+      throw UserFacingException(_offline);
     }
   }
 
@@ -81,20 +79,18 @@ class SupabaseAuthRepository implements AuthRepository {
     } on AuthException catch (e) {
       throw UserFacingException(_authMessage(e));
     } catch (_) {
-      throw const UserFacingException(_offline);
+      throw UserFacingException(_offline);
     }
   }
 
   static String _authMessage(AuthException e) => switch (e.code) {
-    'invalid_credentials' => "That email and password don't match an account.",
-    'email_not_confirmed' =>
-      'Confirm your email first: open the link we sent you, then sign in.',
-    'user_already_exists' || 'email_exists' =>
-      'There is already an account with this email. Sign in instead.',
-    'weak_password' => 'Choose a stronger password: at least 8 characters, mixing letters and numbers.',
-    'email_address_invalid' => 'Enter a valid email address.',
-    'over_email_send_rate_limit' || 'over_request_rate_limit' =>
-      'Too many attempts. Wait a minute and try again.',
+    'invalid_credentials' => L10n.current.errBadLogin,
+    'email_not_confirmed' => L10n.current.errEmailNotConfirmed,
+    'user_already_exists' || 'email_exists' => L10n.current.errEmailTaken,
+    'weak_password' => L10n.current.errWeakPassword,
+    'email_address_invalid' => L10n.current.errEmailInvalid,
+    'over_email_send_rate_limit' ||
+    'over_request_rate_limit' => L10n.current.errTooManyAttempts,
     _ => e.message,
   };
 }
@@ -121,7 +117,7 @@ class SupabaseProfileRepository implements ProfileRepository {
           .maybeSingle();
       return profile == null ? ProfileStatus.needsProfile : ProfileStatus.ready;
     } catch (_) {
-      throw const UserFacingException(_offline);
+      throw UserFacingException(_offline);
     }
   }
 
@@ -174,7 +170,7 @@ class SupabaseProfileRepository implements ProfileRepository {
         links: links,
       );
     } catch (_) {
-      throw const UserFacingException(_offline);
+      throw UserFacingException(_offline);
     }
   }
 
@@ -208,8 +204,7 @@ class SupabaseProfileRepository implements ProfileRepository {
         id: _uid,
         name: draft.displayName,
         age: now.year - born.year - (hadBirthday ? 0 : 1),
-        instrument:
-            instrumentLabels[draft.instruments.keys.firstOrNull] ?? 'Musician',
+        instrumentId: draft.instruments.keys.firstOrNull,
         area: draft.area.isEmpty ? null : draft.area,
         genres: draft.genres,
         lookingFor: draft.lookingFor.isEmpty ? null : draft.lookingFor,
@@ -219,7 +214,7 @@ class SupabaseProfileRepository implements ProfileRepository {
         avatarPath: avatar['avatar_path'] as String?,
       );
     } catch (_) {
-      throw const UserFacingException(_offline);
+      throw UserFacingException(_offline);
     }
   }
 
@@ -260,12 +255,16 @@ class SupabaseProfileRepository implements ProfileRepository {
       final ownRule =
           (e.code == 'P0001' || e.code == '23514') &&
           !e.message.startsWith('new row');
-      if (ownRule) throw UserFacingException(e.message);
-      throw const UserFacingException(
-        "Couldn't save your profile. Try again in a moment.",
-      );
+      // The database's own rules answer in English; show them translated.
+      if (ownRule && e.message.contains('16')) {
+        throw UserFacingException(L10n.current.errUnder16);
+      }
+      if (ownRule && e.message.contains('real date')) {
+        throw UserFacingException(L10n.current.errBirthDateInvalid);
+      }
+      throw UserFacingException(L10n.current.errSaveProfile);
     } catch (_) {
-      throw const UserFacingException(_offline);
+      throw UserFacingException(_offline);
     }
   }
 }

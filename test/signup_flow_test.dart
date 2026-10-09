@@ -39,7 +39,7 @@ class FakeProfileRepository implements ProfileRepository {
     id: 'me',
     name: saved!.displayName,
     age: 30,
-    instrument: 'Vocals',
+    instrumentId: 'vocals',
     links: saved!.links,
     clipSeconds: null,
   );

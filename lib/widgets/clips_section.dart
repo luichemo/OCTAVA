@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
 
@@ -64,17 +66,12 @@ class _ClipsSectionState extends State<ClipsSection> {
 
   Future<void> _add() async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = context.t;
     final (String, Uint8List)? picked;
     try {
       picked = await (widget.pickFile ?? _systemPicker)();
     } catch (_) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Couldn't open your files. Restart the app and try again.",
-          ),
-        ),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(t.errOpenFiles)));
       return;
     }
     if (picked == null) return;
@@ -91,9 +88,7 @@ class _ClipsSectionState extends State<ClipsSection> {
           _list = [...?_list, clip];
         });
       }
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Clip added to your profile.')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(t.clipAdded)));
     } on UserFacingException catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
     } finally {
@@ -110,18 +105,18 @@ class _ClipsSectionState extends State<ClipsSection> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete this clip?'),
+        title: Text(context.t.deleteClipTitle),
         content: Text(
-          '"${clip.title ?? 'Clip'}" will be removed from your profile.',
+          context.t.deleteClipBody(clip.title ?? context.t.clipFallback),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.t.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(context.t.delete),
           ),
         ],
       ),
@@ -145,13 +140,8 @@ class _ClipsSectionState extends State<ClipsSection> {
       await widget.player.toggle(clip.path);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Couldn't play the clip. Check your connection and try again.",
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(context.t.errClipPlay)));
       }
     }
   }
@@ -165,7 +155,7 @@ class _ClipsSectionState extends State<ClipsSection> {
           Expanded(
             child: Text(_loadError!, style: TextStyle(color: colors.error)),
           ),
-          TextButton(onPressed: _load, child: const Text('Try again')),
+          TextButton(onPressed: _load, child: Text(context.t.tryAgain)),
         ],
       );
     }
@@ -181,7 +171,7 @@ class _ClipsSectionState extends State<ClipsSection> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Up to 5 clips, 2 minutes each. Your first clip plays on your card.',
+          context.t.clipsInfo,
           style: TextStyle(color: colors.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
@@ -193,7 +183,9 @@ class _ClipsSectionState extends State<ClipsSection> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: IconButton.outlined(
-                    tooltip: playingPath == clip.path ? 'Stop' : 'Play',
+                    tooltip: playingPath == clip.path
+                        ? context.t.stop
+                        : context.t.play,
                     onPressed: () => _play(clip),
                     icon: Icon(
                       playingPath == clip.path
@@ -202,7 +194,7 @@ class _ClipsSectionState extends State<ClipsSection> {
                     ),
                   ),
                   title: Text(
-                    clip.title ?? 'Clip',
+                    clip.title ?? context.t.clipFallback,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -210,7 +202,7 @@ class _ClipsSectionState extends State<ClipsSection> {
                     '${clip.seconds ~/ 60}:${(clip.seconds % 60).toString().padLeft(2, '0')}',
                   ),
                   trailing: IconButton(
-                    tooltip: 'Delete clip',
+                    tooltip: context.t.deleteClip,
                     onPressed: () => _delete(clip),
                     icon: const Icon(Icons.delete_outline_rounded),
                   ),
@@ -229,8 +221,10 @@ class _ClipsSectionState extends State<ClipsSection> {
               : const Icon(Icons.upload_rounded),
           label: Text(
             _uploading
-                ? 'Uploading…'
-                : (list.length >= maxClips ? 'You have 5 clips' : 'Add a clip'),
+                ? context.t.uploading
+                : (list.length >= maxClips
+                      ? context.t.clipsFull
+                      : context.t.addClip),
           ),
         ),
       ],

@@ -21,9 +21,13 @@ class OctavaColors {
   static const darkPinkTint = Color(0xFF5A2A57);
 }
 
+/// Neither main font has Georgian letters; Noto Sans Georgian fills in.
+const georgianFallback = ['NotoSansGeorgian'];
+
 /// Big Shoulders Display for headings and the wordmark.
 TextStyle displayStyle({double size = 32, Color? color}) => TextStyle(
   fontFamily: 'BigShouldersDisplay',
+  fontFamilyFallback: georgianFallback,
   fontSize: size,
   fontWeight: FontWeight.w900,
   height: 0.95,
@@ -56,10 +60,12 @@ ThemeData octavaTheme(Brightness brightness) {
     colorScheme: scheme,
     useMaterial3: true,
     fontFamily: 'InstrumentSans',
+    fontFamilyFallback: georgianFallback,
   );
   // Big pill buttons: pink "Jam" style (filled) and outlined "Pass" style.
   const buttonText = TextStyle(
     fontFamily: 'InstrumentSans',
+    fontFamilyFallback: georgianFallback,
     fontSize: 20,
     fontWeight: FontWeight.w700,
   );
@@ -86,6 +92,7 @@ ThemeData octavaTheme(Brightness brightness) {
       side: BorderSide(color: scheme.outlineVariant, width: 1.5),
       labelStyle: TextStyle(
         fontFamily: 'InstrumentSans',
+        fontFamilyFallback: georgianFallback,
         color: ink,
         fontWeight: FontWeight.w600,
       ),

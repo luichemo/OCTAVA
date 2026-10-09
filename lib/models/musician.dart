@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import '../data/profile_options.dart';
 import 'profile_link.dart';
+import '../l10n/l10n.dart';
 
 /// A musician shown on a swipe card: from the database (`get_deck`), or the
 /// sample people in lib/data/sample_musicians.dart.
@@ -11,7 +12,7 @@ class Musician {
     this.id,
     required this.name,
     required this.age,
-    required this.instrument,
+    this.instrumentId,
     this.area,
     this.km,
     this.genres = const [],
@@ -36,7 +37,7 @@ class Musician {
       id: row['id'] as String,
       name: row['display_name'] as String,
       age: row['age'] as int,
-      instrument: instrumentLabels[primary?['instrument']] ?? 'Musician',
+      instrumentId: primary?['instrument'] as String?,
       area: row['area'] as String?,
       km: (row['distance_km'] as num?)?.toDouble(),
       genres: (row['genres'] as List? ?? const []).cast<String>(),
@@ -57,8 +58,11 @@ class Musician {
   final String name;
   final int age;
 
-  /// Main instrument's label, e.g. "Drums". Matches a band lineup role.
-  final String instrument;
+  /// Main instrument's id, e.g. "drums". Matches a band lineup role.
+  final String? instrumentId;
+
+  /// Main instrument's label in the app's language, e.g. "Drums".
+  String get instrument => instrumentLabel(instrumentId);
   final String? area;
 
   /// Distance from you; null when either of you hasn't shared a location.
@@ -89,7 +93,7 @@ class Musician {
   String get whereText {
     final distance = km == null
         ? null
-        : '${km! % 1 == 0 ? km!.toInt() : km} km away';
+        : L10n.current.kmAway('${km! % 1 == 0 ? km!.toInt() : km}');
     return [
       area,
       distance,
@@ -119,5 +123,5 @@ class Musician {
 /// "a", "a and b", "a, b and c".
 String listJoin(List<String> items) {
   if (items.length < 2) return items.join();
-  return '${items.sublist(0, items.length - 1).join(', ')} and ${items.last}';
+  return '${items.sublist(0, items.length - 1).join(', ')} ${L10n.current.listAnd} ${items.last}';
 }

@@ -149,6 +149,6 @@ void main() {
       formatMessageTime(DateTime(2026, 10, 8, 23, 0), now: now),
       'Yesterday',
     );
-    expect(formatMessageTime(DateTime(2026, 9, 30, 12, 0), now: now), '30 Sep');
+    expect(formatMessageTime(DateTime(2026, 9, 30, 12, 0), now: now), 'Sep 30');
   });
 }

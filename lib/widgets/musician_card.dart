@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
+import '../l10n/l10n.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/avatar_repository.dart';
@@ -53,7 +56,7 @@ class MusicianCard extends StatelessWidget {
     final m = musician;
 
     return Semantics(
-      label: '${m.name}, ${m.age}, ${m.instrument.toLowerCase()}',
+      label: context.t.cardSemantics(m.name, m.age, m.instrument.toLowerCase()),
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
@@ -90,7 +93,7 @@ class MusicianCard extends StatelessWidget {
                     top: 18,
                     left: 16,
                     child: _Stamp(
-                      label: 'Jam',
+                      label: context.t.stampJam,
                       opacity: jamStamp,
                       angle: -12,
                       background: OctavaColors.pink,
@@ -101,7 +104,7 @@ class MusicianCard extends StatelessWidget {
                     top: 18,
                     right: 16,
                     child: _Stamp(
-                      label: 'Pass',
+                      label: context.t.stampPass,
                       opacity: passStamp,
                       angle: 12,
                       background: colors.surfaceContainer,
@@ -115,16 +118,21 @@ class MusicianCard extends StatelessWidget {
                     right: 18,
                     bottom: -headingSize * 0.34,
                     child: ExcludeSemantics(
-                      child: Text(
-                        m.instrument,
-                        maxLines: 1,
-                        style: displayStyle(size: headingSize).copyWith(
-                          height: 0.85,
-                          foreground: Paint()
-                            ..color = colors.onSurface
-                            ..blendMode = dark
-                                ? BlendMode.srcOver
-                                : BlendMode.multiply,
+                      // Long names (Georgian especially) shrink to the card width.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          m.instrument,
+                          maxLines: 1,
+                          style: displayStyle(size: headingSize).copyWith(
+                            height: 0.85,
+                            foreground: Paint()
+                              ..color = colors.onSurface
+                              ..blendMode = dark
+                                  ? BlendMode.srcOver
+                                  : BlendMode.multiply,
+                          ),
                         ),
                       ),
                     ),
@@ -143,7 +151,7 @@ class MusicianCard extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '${m.name}, ${m.age}',
+                        context.t.nameAge(m.name, m.age),
                         style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.w700,
@@ -164,7 +172,7 @@ class MusicianCard extends StatelessWidget {
                       ),
                       if (onSafety != null)
                         IconButton(
-                          tooltip: 'Block or report',
+                          tooltip: context.t.blockOrReport,
                           onPressed: onSafety,
                           icon: const Icon(Icons.flag_outlined, size: 20),
                           color: colors.onSurfaceVariant,
@@ -183,7 +191,9 @@ class MusicianCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        'Fits your open ${m.instrument.toLowerCase()} slot',
+                        context.t.fitsSlot(m.instrument.toLowerCase()),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -193,7 +203,9 @@ class MusicianCard extends StatelessWidget {
                   if (m.clipSeconds != null) _Clip(musician: m, player: player),
                   if (m.genres.isNotEmpty)
                     Text(
-                      'Plays ${listJoin(m.genres)}',
+                      context.t.plays(listJoin(m.genres)),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 15),
                     ),
                   if (!compact && m.links.isNotEmpty)
@@ -219,7 +231,9 @@ class MusicianCard extends StatelessWidget {
                     ),
                   if (!compact && (m.lookingFor ?? '').isNotEmpty)
                     Text(
-                      '“${m.lookingFor}”',
+                      context.t.quoted(m.lookingFor!),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 15,
                         color: colors.onSurfaceVariant,
@@ -327,16 +341,11 @@ class _Clip extends StatelessWidget {
 
   Future<void> _toggle(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
+    final t = context.t;
     try {
       await player!.toggle(musician.clipPath!);
     } catch (_) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Couldn't play the clip. Check your connection and try again.",
-          ),
-        ),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(t.errClipPlay)));
     }
   }
 
@@ -356,10 +365,10 @@ class _Clip extends StatelessWidget {
         IconButton.outlined(
           onPressed: onPressed,
           tooltip: onPressed == null
-              ? 'No clip to play'
+              ? context.t.noClip
               : (playing
-                    ? "Stop ${musician.name}'s clip"
-                    : "Play ${musician.name}'s clip"),
+                    ? context.t.stopClipOf(musician.name)
+                    : context.t.playClipOf(musician.name)),
           icon: Icon(playing ? Icons.stop_rounded : Icons.play_arrow_rounded),
         ),
         Expanded(

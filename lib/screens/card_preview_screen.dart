@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
@@ -41,7 +43,7 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
       appBar: AppBar(
         backgroundColor: colors.surface,
         title: Text(
-          'Your card',
+          context.t.yourCard,
           style: displayStyle(size: 30, color: colors.onSurface),
         ),
       ),
@@ -70,8 +72,7 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'This is how other musicians see you. Distance shows for them once '
-                        'you both share a location.',
+                        context.t.cardPreviewInfo,
                         style: TextStyle(color: colors.onSurfaceVariant),
                       ),
                       const SizedBox(height: 14),

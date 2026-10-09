@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/location_repository.dart';
@@ -56,7 +58,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     onPressed: () => setState(() {
                       _profile = widget.repository.loadMyProfile();
                     }),
-                    child: const Text('Try again'),
+                    child: Text(context.t.tryAgain),
                   ),
                 ],
               ),
@@ -79,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           location: widget.location,
           onDone: () {
             ScaffoldMessenger.of(context)
-                .showSnackBar(const SnackBar(content: Text('Profile saved.')));
+                .showSnackBar(SnackBar(content: Text(context.t.profileSaved)));
             Navigator.of(context).pop();
           },
         );

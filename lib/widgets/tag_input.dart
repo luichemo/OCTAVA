@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 /// A text field that turns entries into removable chips (max 10).
 class TagInput extends StatefulWidget {
   const TagInput({
@@ -52,9 +54,9 @@ class _TagInputState extends State<TagInput> {
           textInputAction: TextInputAction.done,
           decoration: InputDecoration(
             labelText: widget.label,
-            hintText: full ? 'You can add up to 10' : widget.hint,
+            hintText: full ? context.t.tagMax : widget.hint,
             suffixIcon: IconButton(
-              tooltip: 'Add',
+              tooltip: context.t.add,
               onPressed: full ? null : _add,
               icon: const Icon(Icons.add_rounded),
             ),

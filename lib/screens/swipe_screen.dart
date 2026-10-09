@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../l10n/l10n.dart';
+
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -132,7 +135,7 @@ class _SwipeScreenState extends State<SwipeScreen>
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _loadError = error?.message ?? "Couldn't load musicians. Try again.";
+        _loadError = error?.message ?? context.t.errLoadMusiciansShort;
       });
     }
   }
@@ -187,7 +190,7 @@ class _SwipeScreenState extends State<SwipeScreen>
   }
 
   bool _fitsOpenSlot(Musician m) =>
-      _band.containsKey(m.instrument) && _band[m.instrument] == null;
+      _band.containsKey(m.instrumentId) && _band[m.instrumentId] == null;
 
   Color _toneFor(Musician m) => const [
     OctavaColors.pink,
@@ -262,32 +265,37 @@ class _SwipeScreenState extends State<SwipeScreen>
     if (decision == Decision.pass) {
       SemanticsService.sendAnnouncement(
         View.of(context),
-        'Passed on ${musician.name}.',
+        context.t.passedOn(musician.name),
         TextDirection.ltr,
       );
     } else if (matchId != null) {
       await _showMatch(musician, matchId);
     } else {
-      _toast('You asked ${musician.name} to jam');
+      _toast(context.t.askedToJam(musician.name));
     }
   }
 
   Future<void> _showMatch(Musician m, String matchId) async {
     final filledSlot = _fitsOpenSlot(m);
-    final holder = _band[m.instrument];
+    final holder = _band[m.instrumentId];
     if (filledSlot) {
       setState(() {
-        _band[m.instrument] = m.name;
-        _justFilled = m.instrument;
+        _band[m.instrumentId!] = m.name;
+        _justFilled = m.instrumentId;
       });
     }
     final saidHi = await showDialog<bool>(
       context: context,
       builder: (context) => _MatchDialog(
-        title: '${m.name} wants to jam too',
+        title: context.t.matchTitle(m.name),
         body: filledSlot
-            ? '${m.instrument} is now filled in your band. Say hi and plan a first rehearsal.'
-            : '$holder already plays ${m.instrument.toLowerCase()} in your band, but you can still say hi.',
+            ? context.t.matchSlotFilled(m.instrument)
+            : holder == youMarker
+            ? context.t.matchSlotYours(m.instrument.toLowerCase())
+            : context.t.matchSlotTaken(
+                holder ?? '',
+                m.instrument.toLowerCase(),
+              ),
       ),
     );
     if (saidHi != true || !mounted) return;
@@ -295,7 +303,7 @@ class _SwipeScreenState extends State<SwipeScreen>
     if (openChat != null) {
       openChat(matchId, m);
     } else {
-      _toast('You said hi to ${m.name}');
+      _toast(context.t.saidHi(m.name));
     }
   }
 
@@ -431,25 +439,25 @@ class _SwipeScreenState extends State<SwipeScreen>
                             }
                             if (_loadError != null) {
                               return _DeckMessage(
-                                title: 'Something went wrong',
+                                title: context.t.loadErrorTitle,
                                 body: _loadError!,
-                                action: 'Try again',
+                                action: context.t.tryAgain,
                                 onAction: _reload,
                               );
                             }
                             if (_queue.isEmpty && _filters.activeCount > 0) {
                               return _DeckMessage(
-                                title: 'Nobody matches',
-                                body: 'Nobody matches your filters right now. Try fewer filters or a bigger distance.',
-                                action: 'Change filters',
+                                title: context.t.noMatchTitle,
+                                body: context.t.noMatchBody,
+                                action: context.t.changeFilters,
                                 onAction: _openFilters,
                               );
                             }
                             if (_queue.isEmpty) {
                               return _DeckMessage(
-                                title: "You've heard everyone",
-                                body: "That's everyone for now. New musicians join every week.",
-                                action: 'Check again',
+                                title: context.t.heardEveryoneTitle,
+                                body: context.t.heardEveryoneBody,
+                                action: context.t.checkAgain,
                                 onAction: _reload,
                               );
                             }
@@ -461,10 +469,12 @@ class _SwipeScreenState extends State<SwipeScreen>
                       Text(
                         canSwipe
                             ? (kIsWeb
-                                  ? 'Swipe right to Jam, left to Pass, or use the arrow keys'
-                                  : 'Swipe right to Jam, left to Pass')
+                                  ? context.t.swipeHintWeb
+                                  : context.t.swipeHint)
                             : ' ',
                         textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           color: colors.onSurfaceVariant,
@@ -527,9 +537,9 @@ class _SwipeScreenState extends State<SwipeScreen>
           // Swiping is the only control, so give screen readers named actions.
           child: Semantics(
             customSemanticsActions: {
-              const CustomSemanticsAction(label: 'Jam'): () =>
+              CustomSemanticsAction(label: context.t.actionJam): () =>
                   _decide(Decision.jam),
-              const CustomSemanticsAction(label: 'Pass'): () =>
+              CustomSemanticsAction(label: context.t.actionPass): () =>
                   _decide(Decision.pass),
             },
             child: GestureDetector(
@@ -594,12 +604,12 @@ class _MatchDialog extends StatelessWidget {
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Say hi'),
+                child: Text(context.t.sayHi),
               ),
               const SizedBox(height: 10),
               OutlinedButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Keep swiping'),
+                child: Text(context.t.keepSwiping),
               ),
             ],
           ),
@@ -666,15 +676,17 @@ class _LocationPrompt extends StatelessWidget {
         children: [
           const Icon(Icons.location_on_outlined, size: 20),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             child: Text(
-              'See how far away people are.',
+              context.t.locationPrompt,
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
           TextButton(
             onPressed: busy ? null : onShare,
-            child: Text(busy ? 'Finding you…' : 'Share location'),
+            child: Text(
+              busy ? context.t.findingYou : context.t.shareLocationShort,
+            ),
           ),
         ],
       ),
@@ -705,19 +717,19 @@ class _BottomBar extends StatelessWidget {
           if (onProfile != null)
             _BarButton(
               icon: Icons.person_outline_rounded,
-              label: 'Profile',
+              label: context.t.navProfile,
               onTap: onProfile!,
             ),
           if (onMatches != null)
             _BarButton(
               icon: Icons.chat_bubble_outline_rounded,
-              label: 'Matches',
+              label: context.t.navMatches,
               onTap: onMatches!,
             ),
           if (onSignOut != null)
             _BarButton(
               icon: Icons.logout_rounded,
-              label: 'Sign out',
+              label: context.t.signOut,
               onTap: onSignOut!,
             ),
         ],

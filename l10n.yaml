@@ -1,0 +1,7 @@
+# Flutter translations: edit lib/l10n/app_en.arb (the template) and
+# lib/l10n/app_ka.arb, then `flutter gen-l10n` (or any build) regenerates
+# lib/l10n/app_localizations*.dart.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+nullable-getter: false

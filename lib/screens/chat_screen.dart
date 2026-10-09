@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/chat_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
@@ -78,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           if (widget.safety != null)
             IconButton(
-              tooltip: 'Block or report',
+              tooltip: context.t.blockOrReport,
               icon: const Icon(Icons.more_vert_rounded),
               onPressed: () async {
                 final blocked = await showSafetyOptions(
@@ -117,11 +119,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     stream: _messages,
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
-                        return const Center(
+                        return Center(
                           child: Padding(
                             padding: EdgeInsets.all(24),
                             child: Text(
-                              "Couldn't load messages. Check your connection, then go back and open the chat again.",
+                              context.t.chatLoadError,
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -136,7 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(24),
                             child: Text(
-                              'You and ${widget.name} both want to jam. Say hi and plan a first rehearsal.',
+                              context.t.chatEmpty(widget.name),
                               textAlign: TextAlign.center,
                               style: TextStyle(color: colors.onSurfaceVariant),
                             ),
@@ -173,14 +175,14 @@ class _ChatScreenState extends State<ChatScreen> {
                           textCapitalization: TextCapitalization.sentences,
                           textInputAction: TextInputAction.send,
                           onSubmitted: (_) => _send(),
-                          decoration: const InputDecoration(
-                            hintText: 'Message',
+                          decoration: InputDecoration(
+                            hintText: context.t.messageHint,
                             counterText: '',
                           ),
                         ),
                       ),
                       IconButton.filled(
-                        tooltip: 'Send',
+                        tooltip: context.t.send,
                         onPressed: _sending ? null : _send,
                         style: IconButton.styleFrom(
                           backgroundColor: OctavaColors.pink,

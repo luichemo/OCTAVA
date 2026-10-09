@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/chat.dart';
 import 'profile_options.dart';
 import 'repositories.dart';
+import '../l10n/l10n.dart';
 
 /// Matches and one-on-one messages.
 abstract interface class ChatRepository {
@@ -80,9 +81,7 @@ class SupabaseChatRepository implements ChatRepository {
       summaries.sort((a, b) => b.lastActivity.compareTo(a.lastActivity));
       return summaries;
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't load your matches. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errLoadMatches);
     }
   }
 
@@ -105,15 +104,11 @@ class SupabaseChatRepository implements ChatRepository {
       // 42501: the row-level rules refused it (blocked, unmatched, or the
       // age rule after a birthday).
       if (e.code == '42501') {
-        throw const UserFacingException(
-          "You can't send messages in this chat anymore.",
-        );
+        throw UserFacingException(L10n.current.errSendBlocked);
       }
-      throw const UserFacingException("Couldn't send your message. Try again.");
+      throw UserFacingException(L10n.current.errSend);
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't send your message. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errSendOffline);
     }
   }
 
@@ -123,7 +118,8 @@ class SupabaseChatRepository implements ChatRepository {
     final primary =
         list.where((i) => i['is_primary'] == true).firstOrNull ??
         list.firstOrNull;
-    return instrumentLabels[primary?['instrument_id']] ?? 'Musician';
+    return instrumentLabels[primary?['instrument_id']] ??
+        L10n.current.musicianFallback;
   }
 }
 

@@ -1,3 +1,5 @@
+import '../l10n/l10n.dart';
+
 /// What the swipe deck is filtered by. Maps onto get_deck's parameters.
 class DeckFilters {
   const DeckFilters({
@@ -46,11 +48,11 @@ class DeckFilters {
 
   /// Header text, e.g. "Within 25 km, 2 filters".
   String describe({required bool hasLocation}) {
+    final t = L10n.current;
     final where = hasLocation && maxKm != null
-        ? 'Within $maxKm km'
-        : 'Everywhere';
-    final n = activeCount;
-    return n == 0 ? where : '$where, $n ${n == 1 ? 'filter' : 'filters'}';
+        ? t.deckWithin(maxKm!)
+        : t.deckEverywhere;
+    return activeCount == 0 ? where : t.deckWithFilters(where, activeCount);
   }
 
   /// Parameters for the get_deck database function. Null means "any".

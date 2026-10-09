@@ -2,9 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/deck_filters.dart';
 import '../models/musician.dart';
-import 'profile_options.dart';
 import 'repositories.dart';
 import 'sample_musicians.dart';
+import '../l10n/l10n.dart';
+import '../widgets/band_lineup.dart';
 
 enum Decision { pass, jam }
 
@@ -36,13 +37,11 @@ class SampleDeck implements DeckSource {
     DeckFilters filters, {
     required bool hasLocation,
   }) async {
-    final instruments = {
-      for (final id in filters.instruments) instrumentLabels[id],
-    };
+    final instruments = filters.instruments;
     final genres = {for (final g in filters.genres) g.toLowerCase()};
     return [
       for (final m in musicians)
-        if ((instruments.isEmpty || instruments.contains(m.instrument)) &&
+        if ((instruments.isEmpty || instruments.contains(m.instrumentId)) &&
             (genres.isEmpty ||
                 m.genres.any((g) => genres.contains(g.toLowerCase()))))
           m,
@@ -57,11 +56,11 @@ class SampleDeck implements DeckSource {
 
   @override
   Future<Map<String, String?>> loadLineup() async => {
-    'Guitar': 'You',
-    'Drums': null,
-    'Bass': null,
-    'Vocals': null,
-    'Keys': null,
+    'guitar': youMarker,
+    'drums': null,
+    'bass': null,
+    'vocals': null,
+    'keys': null,
   };
 }
 
@@ -71,7 +70,7 @@ class SupabaseDeck implements DeckSource {
   SupabaseDeck(this._client);
   final SupabaseClient _client;
 
-  static const _roles = ['Vocals', 'Guitar', 'Bass', 'Drums', 'Keys'];
+  static const _roles = ['vocals', 'guitar', 'bass', 'drums', 'keys'];
 
   @override
   Future<List<Musician>> loadDeck(
@@ -88,9 +87,7 @@ class SupabaseDeck implements DeckSource {
           Musician.fromDeckRow(row as Map<String, dynamic>),
       ];
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't load musicians. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errLoadMusicians);
     }
   }
 
@@ -102,9 +99,7 @@ class SupabaseDeck implements DeckSource {
         params: {'target': musician.id, 'decision': decision.name},
       ) as String?;
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't save that. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errSaveSwipe);
     }
   }
 
@@ -133,14 +128,14 @@ class SupabaseDeck implements DeckSource {
         final primary =
             list.where((i) => i['is_primary'] == true).firstOrNull ??
             list.firstOrNull;
-        return instrumentLabels[primary?['instrument_id']];
+        return primary?['instrument_id'] as String?;
       }
 
       final myRole = roleOf(people.firstWhere((p) => p['id'] == me));
       final band = <String, String?>{
         // An instrument outside the usual five gets its own slot, first.
-        if (myRole != null && !_roles.contains(myRole)) myRole: 'You',
-        for (final role in _roles) role: role == myRole ? 'You' : null,
+        if (myRole != null && !_roles.contains(myRole)) myRole: youMarker,
+        for (final role in _roles) role: role == myRole ? youMarker : null,
       };
       for (final person in people.where((p) => p['id'] != me)) {
         final role = roleOf(person);
@@ -150,9 +145,7 @@ class SupabaseDeck implements DeckSource {
       }
       return band;
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't load your band. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errLoadBand);
     }
   }
 }

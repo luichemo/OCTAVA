@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'repositories.dart';
+import '../l10n/l10n.dart';
 
 /// Blocking and reporting people.
 abstract interface class SafetyRepository {
@@ -11,13 +12,13 @@ abstract interface class SafetyRepository {
 }
 
 /// `report_reason` enum → what people see when picking one.
-const reportReasonLabels = <String, String>{
-  'harassment': 'Harassment or hate',
-  'inappropriate': 'Inappropriate messages or content',
-  'spam': 'Spam or a scam',
-  'fake_profile': 'Fake profile',
-  'underage': 'Seems to be under 16',
-  'other': 'Something else',
+Map<String, String> get reportReasonLabels => {
+  'harassment': L10n.current.reasonHarassment,
+  'inappropriate': L10n.current.reasonInappropriate,
+  'spam': L10n.current.reasonSpam,
+  'fake_profile': L10n.current.reasonFake,
+  'underage': L10n.current.reasonUnderage,
+  'other': L10n.current.reasonOther,
 };
 
 class SupabaseSafetyRepository implements SafetyRepository {
@@ -31,11 +32,9 @@ class SupabaseSafetyRepository implements SafetyRepository {
       await _client.from('blocks').insert({'blocked_id': userId});
     } on PostgrestException catch (e) {
       if (e.code == '23505') return; // already blocked
-      throw const UserFacingException("Couldn't block. Try again.");
+      throw UserFacingException(L10n.current.errBlock);
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't block. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errBlockOffline);
     }
   }
 
@@ -48,9 +47,7 @@ class SupabaseSafetyRepository implements SafetyRepository {
         if (details.trim().isNotEmpty) 'details': details.trim(),
       });
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't send your report. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errReport);
     }
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/chat_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
@@ -55,7 +57,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       appBar: AppBar(
         backgroundColor: colors.surface,
         title: Text(
-          'Matches',
+          context.t.navMatches,
           style: displayStyle(size: 32, color: colors.onSurface),
         ),
       ),
@@ -69,8 +71,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 return _Message(
                   text: snapshot.error is UserFacingException
                       ? (snapshot.error as UserFacingException).message
-                      : "Couldn't load your matches.",
-                  action: 'Try again',
+                      : context.t.errLoadMatches,
+                  action: context.t.tryAgain,
                   onAction: _refresh,
                 );
               }
@@ -79,11 +81,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (matches.isEmpty) {
-                return const _Message(
-                  text:
-                      'No matches yet. When someone you chose Jam on chooses Jam on you too, '
-                      'they appear here.',
-                );
+                return _Message(text: context.t.matchesEmpty);
               }
               return RefreshIndicator(
                 onRefresh: _refresh,
@@ -116,9 +114,9 @@ class _MatchTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final preview = match.lastMessage == null
-        ? 'New match. Say hi!'
+        ? context.t.newMatchSayHi
         : (match.lastMessageIsMine
-              ? 'You: ${match.lastMessage}'
+              ? context.t.youPrefix(match.lastMessage!)
               : match.lastMessage!);
     return ListTile(
       onTap: onTap,

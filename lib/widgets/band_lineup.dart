@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../theme.dart';
+import '../data/profile_options.dart';
+
+/// Marks your own slot in a lineup map (shown as "You").
+const youMarker = '@you';
 
 /// The "Your band" row: one slot per role, filled with a member's name or
 /// "Open". [justFilled] briefly flashes pink when a match fills a slot.
 class BandLineup extends StatelessWidget {
   const BandLineup({super.key, required this.band, this.justFilled});
 
-  /// Role → member name (null while the slot is open). Order is display order.
+  /// Instrument id → member name ([youMarker] for you, null while open).
+  /// Order is display order.
   final Map<String, String?> band;
   final String? justFilled;
 
@@ -19,7 +26,7 @@ class BandLineup extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your band',
+          context.t.yourBand,
           style: TextStyle(
             color: colors.onSurfaceVariant,
             fontWeight: FontWeight.w600,
@@ -60,20 +67,47 @@ class BandLineup extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Text(
-                          role,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                        // Long names (e.g. Georgian "დასარტყამები") shrink to
+                        // fit the slot instead of wrapping.
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              instrumentLabel(role),
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
-                        Text(
-                          who ?? 'Open',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colors.onSurfaceVariant,
-                          ),
+                        // "Open" shrinks to fit (it's long in Georgian);
+                        // member names end with "…" instead.
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: who == null
+                              ? FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    context.t.slotOpen,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: colors.onSurfaceVariant,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  who == youMarker ? context.t.slotYou : who,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colors.onSurfaceVariant,
+                                  ),
+                                ),
                         ),
                       ],
                     ),

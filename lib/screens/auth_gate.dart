@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../l10n/l10n.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/avatar_repository.dart';
@@ -208,8 +211,8 @@ class _Problem extends StatelessWidget {
             spacing: 16,
             children: [
               Text(message, textAlign: TextAlign.center),
-              FilledButton(onPressed: onRetry, child: const Text('Try again')),
-              TextButton(onPressed: onSignOut, child: const Text('Sign out')),
+              FilledButton(onPressed: onRetry, child: Text(context.t.tryAgain)),
+              TextButton(onPressed: onSignOut, child: Text(context.t.signOut)),
             ],
           ),
         ),

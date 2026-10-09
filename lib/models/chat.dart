@@ -1,3 +1,7 @@
+import '../l10n/l10n.dart';
+
+import 'package:intl/intl.dart';
+
 /// One of your matches, as listed on the Matches screen.
 class MatchSummary {
   const MatchSummary({
@@ -50,28 +54,14 @@ class ChatMessage {
   final DateTime sentAt;
 }
 
-/// "14:05" for today, "Yesterday", or "12 Oct".
+/// "14:05" for today, "Yesterday", or a short date like "Oct 12", in the
+/// app's language.
 String formatMessageTime(DateTime t, {DateTime? now}) {
   final today = now ?? DateTime.now();
   final day = DateTime(t.year, t.month, t.day);
   final todayDay = DateTime(today.year, today.month, today.day);
-  if (day == todayDay) {
-    return '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
-  }
-  if (todayDay.difference(day).inDays == 1) return 'Yesterday';
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${t.day} ${months[t.month - 1]}';
+  final locale = L10n.current.localeName;
+  if (day == todayDay) return DateFormat.Hm(locale).format(t);
+  if (todayDay.difference(day).inDays == 1) return L10n.current.yesterday;
+  return DateFormat.MMMd(locale).format(t);
 }

@@ -5,6 +5,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'repositories.dart';
+import '../l10n/l10n.dart';
 
 /// One of your own audio clips.
 class MyClip {
@@ -79,9 +80,7 @@ class SupabaseClipRepository implements ClipRepository {
           ),
       ];
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't load your clips. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errClipsLoad);
     }
   }
 
@@ -95,19 +94,13 @@ class SupabaseClipRepository implements ClipRepository {
         : '';
     final mime = clipMimeTypes[ext];
     if (mime == null) {
-      throw const UserFacingException(
-        'Use an MP3, M4A, AAC, WAV, OGG, WEBM or FLAC file.',
-      );
+      throw UserFacingException(L10n.current.errClipType);
     }
     if (bytes.length > maxClipBytes) {
-      throw const UserFacingException(
-        'That file is over 10 MB. Try a shorter or more compressed clip.',
-      );
+      throw UserFacingException(L10n.current.errClipSize);
     }
     if ((await myClips()).length >= maxClips) {
-      throw const UserFacingException(
-        'You can have up to 5 clips. Delete one to add another.',
-      );
+      throw UserFacingException(L10n.current.errClipsMax);
     }
 
     final path = '$_uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
@@ -118,9 +111,7 @@ class SupabaseClipRepository implements ClipRepository {
         fileOptions: FileOptions(contentType: mime),
       );
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't upload your clip. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errClipUpload);
     }
 
     // Measure the uploaded file; remove it again if it can't be used.
@@ -129,7 +120,7 @@ class SupabaseClipRepository implements ClipRepository {
       await _bucket.remove([path]).catchError((_) => <FileObject>[]);
       throw UserFacingException(
         seconds == null
-            ? "Couldn't play that file. Try exporting it as MP3 or M4A."
+            ? L10n.current.errClipUnreadable
             : 'Clips can be up to 2 minutes. This one is ${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}.',
       );
     }
@@ -154,12 +145,11 @@ class SupabaseClipRepository implements ClipRepository {
       );
     } catch (e) {
       await _bucket.remove([path]).catchError((_) => <FileObject>[]);
-      if (e is PostgrestException &&
-          e.code == '23514' &&
-          !e.message.startsWith('new row')) {
-        throw UserFacingException(e.message); // e.g. the 5-clip limit
+      // The database's 5-clip rule (a race with another upload).
+      if (e is PostgrestException && e.message.contains('up to 5 clips')) {
+        throw UserFacingException(L10n.current.errClipsMax);
       }
-      throw const UserFacingException("Couldn't save your clip. Try again.");
+      throw UserFacingException(L10n.current.errClipSave);
     }
   }
 
@@ -169,9 +159,7 @@ class SupabaseClipRepository implements ClipRepository {
       await _client.from('audio_clips').delete().eq('id', clip.id);
       await _bucket.remove([clip.path]);
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't delete the clip. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errClipDelete);
     }
   }
 
@@ -180,9 +168,7 @@ class SupabaseClipRepository implements ClipRepository {
     try {
       return await _bucket.createSignedUrl(path, 60 * 60);
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't play the clip. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errClipPlay);
     }
   }
 

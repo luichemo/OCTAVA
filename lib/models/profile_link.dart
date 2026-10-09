@@ -1,3 +1,5 @@
+import '../l10n/l10n.dart';
+
 /// A link on a profile, such as a YouTube video or a SoundCloud page.
 class ProfileLink {
   const ProfileLink({required this.kind, required this.url});
@@ -34,7 +36,7 @@ class ProfileLink {
   final String kind;
   final String url;
 
-  String get label => linkKindLabels[kind] ?? 'Website';
+  String get label => linkKindLabels[kind] ?? L10n.current.linkWebsite;
 
   @override
   bool operator ==(Object other) =>
@@ -45,12 +47,12 @@ class ProfileLink {
 }
 
 /// `link_kind` enum → label.
-const linkKindLabels = <String, String>{
+Map<String, String> get linkKindLabels => {
   'youtube': 'YouTube',
   'tiktok': 'TikTok',
   'instagram': 'Instagram',
   'spotify': 'Spotify',
   'soundcloud': 'SoundCloud',
   'bandcamp': 'Bandcamp',
-  'other': 'Website',
+  'other': L10n.current.linkWebsite,
 };

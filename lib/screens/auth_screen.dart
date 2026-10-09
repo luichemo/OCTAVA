@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/repositories.dart';
 import '../theme.dart';
+import '../widgets/language_picker.dart';
 
 /// Create an account or sign in with email and password. When this succeeds,
 /// Supabase's auth state changes and AuthGate moves on by itself.
@@ -18,8 +21,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _creating =
-      false; // Opens on "Sign in"; returning users are the common case.
+  bool _creating = false; // Opens on context.t.authSignIn; returning users are the common case.
   bool _busy = false;
   String? _error;
   String? _notice;
@@ -47,9 +49,7 @@ class _AuthScreenState extends State<AuthScreen> {
         if (needsConfirmation && mounted) {
           setState(() {
             _creating = false;
-            _notice =
-                'Check your email: we sent you a link to confirm your account. '
-                'Open it, then sign in here.';
+            _notice = context.t.authCheckEmail;
           });
         }
       } else {
@@ -65,7 +65,9 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final action = _creating ? 'Create account' : 'Sign in';
+    final action = _creating
+        ? context.t.authCreateAccount
+        : context.t.authSignIn;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -79,13 +81,17 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      const Align(
+                        alignment: Alignment.centerRight,
+                        child: LanguageToggle(),
+                      ),
                       Text(
                         'OCTAVA',
                         style: displayStyle(size: 72, color: colors.onSurface),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Find people to make music with.',
+                        context.t.authTagline,
                         style: TextStyle(
                           fontSize: 17,
                           color: colors.onSurfaceVariant,
@@ -97,12 +103,14 @@ class _AuthScreenState extends State<AuthScreen> {
                         keyboardType: TextInputType.emailAddress,
                         autofillHints: const [AutofillHints.email],
                         textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(labelText: 'Email'),
+                        decoration: InputDecoration(
+                          labelText: context.t.authEmail,
+                        ),
                         validator: (v) =>
                             v != null &&
                                 RegExp(r'^\S+@\S+\.\S+$').hasMatch(v.trim())
                             ? null
-                            : 'Enter your email address',
+                            : context.t.authEmailError,
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
@@ -115,17 +123,17 @@ class _AuthScreenState extends State<AuthScreen> {
                         ],
                         onFieldSubmitted: (_) => _submit(),
                         decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: context.t.authPassword,
                           helperText: _creating
-                              ? 'At least 8 characters'
+                              ? context.t.authPasswordHelper
                               : null,
                         ),
                         validator: (v) {
                           if (v == null || v.isEmpty) {
-                            return 'Enter your password';
+                            return context.t.authPasswordEmpty;
                           }
                           if (_creating && v.length < 8) {
-                            return 'Use at least 8 characters';
+                            return context.t.authPasswordShort;
                           }
                           return null;
                         },
@@ -173,8 +181,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               }),
                         child: Text(
                           _creating
-                              ? 'I already have an account'
-                              : 'Create a new account',
+                              ? context.t.authHaveAccount
+                              : context.t.authNewAccount,
                         ),
                       ),
                     ],

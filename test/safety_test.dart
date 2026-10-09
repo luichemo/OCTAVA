@@ -33,8 +33,8 @@ class IdDeck extends SampleDeck {
     DeckFilters filters, {
     required bool hasLocation,
   }) async => const [
-    Musician(id: 'nika-id', name: 'Nika', age: 24, instrument: 'Drums'),
-    Musician(id: 'mariam-id', name: 'Mariam', age: 27, instrument: 'Bass'),
+    Musician(id: 'nika-id', name: 'Nika', age: 24, instrumentId: 'drums'),
+    Musician(id: 'mariam-id', name: 'Mariam', age: 27, instrumentId: 'bass'),
   ];
 }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/profile_options.dart';
 import '../models/deck_filters.dart';
 import '../theme.dart';
@@ -80,10 +82,10 @@ class _FiltersScreenState extends State<FiltersScreen> {
       appBar: AppBar(
         backgroundColor: colors.surface,
         title: Text(
-          'Filters',
+          context.t.filtersTitle,
           style: displayStyle(size: 32, color: colors.onSurface),
         ),
-        actions: [TextButton(onPressed: _reset, child: const Text('Reset'))],
+        actions: [TextButton(onPressed: _reset, child: Text(context.t.reset))],
       ),
       body: SafeArea(
         child: Center(
@@ -92,12 +94,9 @@ class _FiltersScreenState extends State<FiltersScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
-                const _Heading('Distance'),
+                _Heading(context.t.filterDistance),
                 if (!widget.hasLocation)
-                  Text(
-                    'Share your location to filter by distance. Until then you see everyone.',
-                    style: hint,
-                  )
+                  Text(context.t.filterDistanceNoLocation, style: hint)
                 else
                   Wrap(
                     spacing: 8,
@@ -105,14 +104,14 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     children: [
                       for (final km in DeckFilters.distanceChoices)
                         ChoiceChip(
-                          label: Text('$km km'),
+                          label: Text(context.t.kmShort(km)),
                           selected: _maxKm == km,
                           onSelected: (_) => setState(() {
                             _maxKm = km;
                           }),
                         ),
                       ChoiceChip(
-                        label: const Text('Anywhere'),
+                        label: Text(context.t.anywhere),
                         selected: _maxKm == null,
                         onSelected: (_) => setState(() {
                           _maxKm = null;
@@ -120,11 +119,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
                       ),
                     ],
                   ),
-                const _Heading('Instruments'),
-                Text(
-                  'Show only people who play these. Leave empty for everyone.',
-                  style: hint,
-                ),
+                _Heading(context.t.filterInstruments),
+                Text(context.t.filterInstrumentsHint, style: hint),
                 const SizedBox(height: 8),
                 _chips<String>(instrumentLabels, _instruments.contains, (
                   id,
@@ -132,19 +128,16 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 ) {
                   on ? _instruments.add(id) : _instruments.remove(id);
                 }),
-                const _Heading('Lowest skill level'),
+                _Heading(context.t.filterSkill),
                 if (_instruments.isEmpty)
-                  Text(
-                    'Pick instruments first; the skill level applies to them.',
-                    style: hint,
-                  )
+                  Text(context.t.filterSkillNeedsInstruments, style: hint)
                 else
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       ChoiceChip(
-                        label: const Text('Any'),
+                        label: Text(context.t.any),
                         selected: _minSkill == null,
                         onSelected: (_) => setState(() {
                           _minSkill = null;
@@ -153,7 +146,11 @@ class _FiltersScreenState extends State<FiltersScreen> {
                       for (final MapEntry(key: id, value: label)
                           in skillLabels.entries)
                         ChoiceChip(
-                          label: Text(id == 'pro' ? label : '$label or better'),
+                          label: Text(
+                            id == 'pro'
+                                ? label
+                                : context.t.skillOrBetter(label),
+                          ),
                           selected: _minSkill == id,
                           onSelected: (_) => setState(() {
                             _minSkill = id;
@@ -161,23 +158,20 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         ),
                     ],
                   ),
-                const _Heading('Genres'),
-                Text(
-                  'Show people who play at least one of these.',
-                  style: hint,
-                ),
+                _Heading(context.t.fieldGenres),
+                Text(context.t.filterGenresHint, style: hint),
                 const SizedBox(height: 8),
                 TagInput(
-                  label: 'Genres',
-                  hint: 'Type a genre and press Enter',
+                  label: context.t.fieldGenres,
+                  hint: context.t.fieldGenresHint,
                   values: _genres,
                   onChanged: () => setState(() {}),
                 ),
-                const _Heading('Goals'),
+                _Heading(context.t.filterGoals),
                 _chips<String>(goalLabels, _goals.contains, (id, on) {
                   on ? _goals.add(id) : _goals.remove(id);
                 }),
-                const _Heading('Rehearses'),
+                _Heading(context.t.filterRehearses),
                 _chips<String>(frequencyLabels, _frequencies.contains, (
                   id,
                   on,
@@ -187,7 +181,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                 const SizedBox(height: 28),
                 FilledButton(
                   onPressed: _apply,
-                  child: const Text('Show musicians'),
+                  child: Text(context.t.showMusicians),
                 ),
               ],
             ),

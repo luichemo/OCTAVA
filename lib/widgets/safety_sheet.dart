@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 
@@ -21,18 +23,14 @@ Future<bool> showSafetyOptions(
         children: [
           ListTile(
             leading: const Icon(Icons.block_rounded),
-            title: Text('Block $name'),
-            subtitle: const Text(
-              "You won't see each other and can't message. They aren't told.",
-            ),
+            title: Text(context.t.blockName(name)),
+            subtitle: Text(context.t.blockSubtitle),
             onTap: () => Navigator.pop(context, 'block'),
           ),
           ListTile(
             leading: const Icon(Icons.flag_outlined),
-            title: Text('Report $name'),
-            subtitle: const Text(
-              'Tell us about something wrong. Reports are private.',
-            ),
+            title: Text(context.t.reportName(name)),
+            subtitle: Text(context.t.reportSubtitle),
             onTap: () => Navigator.pop(context, 'report'),
           ),
           const SizedBox(height: 8),
@@ -43,11 +41,12 @@ Future<bool> showSafetyOptions(
   if (choice == null || !context.mounted) return false;
 
   final messenger = ScaffoldMessenger.of(context);
+  final t = context.t;
   try {
     if (choice == 'block') {
       if (!await _confirmBlock(context, name)) return false;
       await safety.block(userId);
-      messenger.showSnackBar(SnackBar(content: Text('You blocked $name.')));
+      messenger.showSnackBar(SnackBar(content: Text(t.blockedName(name))));
       return true;
     }
     if (!context.mounted) return false;
@@ -61,9 +60,7 @@ Future<bool> showSafetyOptions(
     messenger.showSnackBar(
       SnackBar(
         content: Text(
-          report.alsoBlock
-              ? 'Thanks for reporting. You also blocked $name.'
-              : 'Thanks for reporting. We review every report.',
+          report.alsoBlock ? t.reportThanksBlocked(name) : t.reportThanks,
         ),
       ),
     );
@@ -78,19 +75,16 @@ Future<bool> _confirmBlock(BuildContext context, String name) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text('Block $name?'),
-      content: Text(
-        "You won't see each other on OCTAVA anymore, and neither of you can send "
-        "messages. $name won't be told.",
-      ),
+      title: Text(context.t.blockConfirmTitle(name)),
+      content: Text(context.t.blockConfirmBody(name)),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(context.t.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: Text('Block $name'),
+          child: Text(context.t.blockName(name)),
         ),
       ],
     ),
@@ -127,13 +121,13 @@ class _ReportDialogState extends State<_ReportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Report ${widget.name}'),
+      title: Text(context.t.reportName(widget.name)),
       scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("What's wrong?"),
+          Text(context.t.whatsWrong),
           const SizedBox(height: 4),
           // RadioGroup holds the selected value for the radios inside it.
           RadioGroup<String>(
@@ -160,8 +154,8 @@ class _ReportDialogState extends State<_ReportDialog> {
             maxLength: 1000,
             minLines: 2,
             maxLines: 4,
-            decoration: const InputDecoration(
-              labelText: 'Details (optional)',
+            decoration: InputDecoration(
+              labelText: context.t.reportDetails,
               alignLabelWithHint: true,
             ),
           ),
@@ -170,7 +164,7 @@ class _ReportDialogState extends State<_ReportDialog> {
             onChanged: (v) => setState(() {
               _alsoBlock = v ?? false;
             }),
-            title: Text('Also block ${widget.name}'),
+            title: Text(context.t.alsoBlock(widget.name)),
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
           ),
@@ -179,7 +173,7 @@ class _ReportDialogState extends State<_ReportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(context.t.cancel),
         ),
         FilledButton(
           onPressed: _reason == null
@@ -188,7 +182,7 @@ class _ReportDialogState extends State<_ReportDialog> {
                   context,
                   _Report(_reason!, _details.text, _alsoBlock),
                 ),
-          child: const Text('Send report'),
+          child: Text(context.t.sendReport),
         ),
       ],
     );

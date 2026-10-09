@@ -331,7 +331,7 @@ class _ClipDeck extends SampleDeck {
       id: 'ana',
       name: 'Ana',
       age: 25,
-      instrument: 'Vocals',
+      instrumentId: 'vocals',
       clipSeconds: 30,
       clipPath: 'ana/1.mp3',
     ),

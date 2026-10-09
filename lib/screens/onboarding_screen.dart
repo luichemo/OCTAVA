@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
+
 import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/location_repository.dart';
@@ -13,6 +15,10 @@ import '../widgets/clips_section.dart';
 import '../widgets/location_section.dart';
 import '../widgets/tag_input.dart';
 import 'card_preview_screen.dart';
+
+import 'package:intl/intl.dart';
+
+import '../widgets/language_picker.dart';
 
 /// The profile form. First-time setup asks for the date of birth (once, can't
 /// be changed); given [initial], it edits an existing profile instead and adds
@@ -99,9 +105,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final link = ProfileLink.fromInput(_linkInput.text);
     setState(() {
       if (link == null) {
-        _linkError = 'Paste a full web address, like youtube.com/watch?v=…';
+        _linkError = context.t.linkInvalid;
       } else if (_links.length >= 6) {
-        _linkError = 'You can add up to 6 links.';
+        _linkError = context.t.linkMax;
       } else {
         if (!_links.contains(link)) _links.add(link);
         _linkInput.clear();
@@ -129,7 +135,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       firstDate: DateTime(1900),
       lastDate: latest,
       initialEntryMode: DatePickerEntryMode.input,
-      helpText: 'Your date of birth',
+      helpText: context.t.birthDatePickerTitle,
     );
     if (picked != null) {
       setState(() {
@@ -143,19 +149,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Is your date of birth right?'),
-        content: Text(
-          '${formatDate(_birthDate!)}. You can\'t change it later, '
-          'because it decides who you can meet on OCTAVA.',
-        ),
+        title: Text(context.t.confirmBirthDateTitle),
+        content: Text(context.t.confirmBirthDateBody(formatDate(_birthDate!))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Change it'),
+            child: Text(context.t.confirmBirthDateNo),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Yes, it's right"),
+            child: Text(context.t.confirmBirthDateYes),
           ),
         ],
       ),
@@ -175,14 +178,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         formOk && _instruments.isNotEmpty && _linkInput.text.trim().isEmpty;
     setState(() {
       _instrumentError = _instruments.isEmpty
-          ? 'Pick at least one instrument'
+          ? context.t.pickInstrumentError
           : null;
       // The problems may be scrolled out of view, so say so next to the button.
       _error = valid
           ? null
           : (_linkError != null
-                ? 'Check the link: it isn\'t a web address we can use.'
-                : 'Some answers are missing. Check the fields marked in red above.');
+                ? context.t.linkCheckError
+                : context.t.answersMissing);
     });
     if (!valid) return;
     if (_needsBirthDate && !await _confirmBirthDate()) return;
@@ -236,12 +239,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
                 children: [
                   Text(
-                    _editing ? 'Your profile' : 'Set up your profile',
+                    _editing
+                        ? context.t.profileTitle
+                        : context.t.profileSetUpTitle,
                     style: displayStyle(size: 44, color: colors.onSurface),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'This is what other musicians see when they swipe.',
+                    context.t.profileSubtitle,
                     style: TextStyle(color: colors.onSurfaceVariant),
                   ),
                   if (_editing) ...[
@@ -259,25 +264,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
                         icon: const Icon(Icons.visibility_outlined),
-                        label: const Text('See your card'),
+                        label: Text(context.t.seeYourCard),
                       ),
                     ),
                   ],
                   if (_editing && widget.avatars != null) ...[
-                    _Section('Avatar'),
+                    _Section(context.t.sectionAvatar),
                     AvatarSection(avatars: widget.avatars!),
                   ],
-                  _Section('About you'),
+                  _Section(context.t.sectionAbout),
                   TextFormField(
                     controller: _name,
                     maxLength: 40,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
+                    decoration: InputDecoration(
+                      labelText: context.t.fieldName,
                       counterText: '',
                     ),
                     validator: (v) => (v ?? '').trim().isEmpty
-                        ? 'Enter the name people will see'
+                        ? context.t.fieldNameError
                         : null,
                   ),
                   if (_needsBirthDate) ...[
@@ -286,13 +291,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       controller: _birthDateText,
                       readOnly: true,
                       onTap: _pickBirthDate,
-                      decoration: const InputDecoration(
-                        labelText: 'Date of birth',
-                        helperText: 'OCTAVA is for ages 16 and over. Others only see your age.',
+                      decoration: InputDecoration(
+                        labelText: context.t.fieldBirthDate,
+                        helperText: context.t.fieldBirthDateHelper,
                         suffixIcon: Icon(Icons.calendar_today_rounded),
                       ),
                       validator: (_) => _birthDate == null
-                          ? 'Enter your date of birth'
+                          ? context.t.fieldBirthDateError
                           : null,
                     ),
                   ],
@@ -300,17 +305,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   TextFormField(
                     controller: _area,
                     maxLength: 60,
-                    decoration: const InputDecoration(
-                      labelText: 'Area (optional)',
-                      hintText: 'e.g. Vake, Tbilisi',
+                    decoration: InputDecoration(
+                      labelText: context.t.fieldArea,
+                      hintText: context.t.fieldAreaHint,
                       counterText: '',
                     ),
                   ),
                   if (_editing && widget.location != null) ...[
-                    _Section('Location'),
+                    _Section(context.t.sectionLocation),
                     LocationSection(location: widget.location!),
                   ],
-                  _Section('What you play'),
+                  _Section(context.t.sectionPlay),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -345,7 +350,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           Expanded(
                             child: Text(
                               i == 0
-                                  ? '${instrumentLabels[id]} (main)'
+                                  ? context.t.instrumentMain(
+                                      instrumentLabels[id]!,
+                                    )
                                   : instrumentLabels[id]!,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
@@ -370,12 +377,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   const SizedBox(height: 18),
                   TagInput(
-                    label: 'Genres',
-                    hint: 'Type a genre and press Enter',
+                    label: context.t.fieldGenres,
+                    hint: context.t.fieldGenresHint,
                     values: _genres,
                     onChanged: () => setState(() {}),
                   ),
-                  _Section('What you want'),
+                  _Section(context.t.sectionWant),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -393,7 +400,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'How often can you rehearse?',
+                    context.t.rehearseQuestion,
                     style: TextStyle(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 8),
@@ -413,7 +420,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'What do you have?',
+                    context.t.gearQuestion,
                     style: TextStyle(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 8),
@@ -438,25 +445,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     maxLength: 300,
                     minLines: 2,
                     maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'What are you looking for? (optional)',
-                      hintText:
-                          'e.g. A band that rehearses weekly and plays shows',
+                    decoration: InputDecoration(
+                      labelText: context.t.fieldLookingFor,
+                      hintText: context.t.fieldLookingForHint,
                       alignLabelWithHint: true,
                     ),
                   ),
                   if (_editing) ...[
-                    _Section('Links'),
+                    _Section(context.t.sectionLinks),
                     TextField(
                       controller: _linkInput,
                       keyboardType: TextInputType.url,
                       onSubmitted: (_) => _addLink(),
                       decoration: InputDecoration(
-                        labelText: 'YouTube, TikTok, SoundCloud, Spotify…',
-                        hintText: 'Paste a link and press Enter',
+                        labelText: context.t.linksLabel,
+                        hintText: context.t.linksHint,
                         errorText: _linkError,
                         suffixIcon: IconButton(
-                          tooltip: 'Add link',
+                          tooltip: context.t.addLink,
                           onPressed: _addLink,
                           icon: const Icon(Icons.add_rounded),
                         ),
@@ -473,7 +479,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         trailing: IconButton(
-                          tooltip: 'Remove link',
+                          tooltip: context.t.removeLink,
                           onPressed: () => setState(() {
                             _links.remove(link);
                           }),
@@ -484,8 +490,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   if (_editing &&
                       widget.clips != null &&
                       widget.player != null) ...[
-                    _Section('Audio clips'),
+                    _Section(context.t.sectionClips),
                     ClipsSection(clips: widget.clips!, player: widget.player!),
+                  ],
+                  if (_editing) ...[
+                    _Section(context.t.sectionLanguage),
+                    const LanguageSection(),
                   ],
                   if (_error != null)
                     Padding(
@@ -506,7 +516,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             dimension: 22,
                             child: CircularProgressIndicator(strokeWidth: 3),
                           )
-                        : Text(_editing ? 'Save changes' : 'Create profile'),
+                        : Text(
+                            _editing
+                                ? context.t.saveChanges
+                                : context.t.createProfile,
+                          ),
                   ),
                 ],
               ),
@@ -518,24 +532,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-/// "12 March 2001".
-String formatDate(DateTime d) {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return '${d.day} ${months[d.month - 1]} ${d.year}';
-}
+/// A full date in the app's language, e.g. "March 12, 2001".
+String formatDate(DateTime d) =>
+    DateFormat.yMMMMd(L10n.current.localeName).format(d);
 
 class _Section extends StatelessWidget {
   const _Section(this.title);

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'repositories.dart';
+import '../l10n/l10n.dart';
 
 /// AI avatars made by the `generate-avatar` Edge Function (Cloudflare
 /// Workers AI), stored in the private `avatars` bucket.
@@ -33,9 +34,7 @@ class SupabaseAvatarRepository implements AvatarRepository {
           .single();
       return row['avatar_path'] as String?;
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't load your avatar. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errAvatarLoad);
     }
   }
 
@@ -49,16 +48,18 @@ class SupabaseAvatarRepository implements AvatarRepository {
         remaining: data['remaining'] as int,
       );
     } on FunctionException catch (e) {
-      // The function words its errors for people (daily limit, not set up, ...).
+      // The function answers in English; pick the translated message by status.
       final details = e.details;
-      final message = details is Map ? details['error'] as String? : null;
-      throw UserFacingException(
-        message ?? "Couldn't make an avatar right now. Try again.",
-      );
+      final t = L10n.current;
+      throw UserFacingException(switch (e.status) {
+        429 when details is Map && details['remaining'] == 0 =>
+          t.errAvatarDaily,
+        429 => t.errAvatarBusy,
+        503 => t.errAvatarNotReady,
+        _ => t.errAvatarGeneric,
+      });
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't make an avatar. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errAvatarOffline);
     }
   }
 

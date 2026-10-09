@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/deck_filters.dart';
 import 'repositories.dart';
+import '../l10n/l10n.dart';
 
 /// Sharing your approximate location, which makes distances work.
 abstract interface class LocationRepository {
@@ -34,9 +35,7 @@ class DeviceLocationRepository implements LocationRepository {
   @override
   Future<void> shareCurrentLocation() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-      throw const UserFacingException(
-        'Location is turned off on this device. Turn it on and try again.',
-      );
+      throw UserFacingException(L10n.current.errLocationOff);
     }
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -44,9 +43,7 @@ class DeviceLocationRepository implements LocationRepository {
     }
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      throw const UserFacingException(
-        "OCTAVA isn't allowed to use your location. Allow it in your browser or phone settings, then try again.",
-      );
+      throw UserFacingException(L10n.current.errLocationDenied);
     }
     final Position position;
     try {
@@ -58,9 +55,7 @@ class DeviceLocationRepository implements LocationRepository {
         ),
       );
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't find your location. Try again in a moment.",
-      );
+      throw UserFacingException(L10n.current.errLocationFind);
     }
     try {
       await _client.rpc(
@@ -68,9 +63,7 @@ class DeviceLocationRepository implements LocationRepository {
         params: {'lat': position.latitude, 'lng': position.longitude},
       );
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't save your location. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errLocationSave);
     }
   }
 
@@ -79,9 +72,7 @@ class DeviceLocationRepository implements LocationRepository {
     try {
       await _client.rpc('set_my_location', params: {'lat': null, 'lng': null});
     } catch (_) {
-      throw const UserFacingException(
-        "Couldn't remove your location. Check your connection and try again.",
-      );
+      throw UserFacingException(L10n.current.errLocationRemove);
     }
   }
 }
