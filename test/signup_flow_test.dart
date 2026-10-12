@@ -169,6 +169,21 @@ void main() {
       expect(find.text('Create account'), findsOneWidget); // the tab
     });
 
+    testWidgets('shows the 16+ notice only when creating an account', (
+      tester,
+    ) async {
+      await pump(tester, AuthScreen(auth: FakeAuthRepository()));
+      expect(find.text('16+ musicians only'), findsNothing);
+
+      await tester.tap(find.text('Create account')); // the tab
+      await tester.pumpAndSettle();
+      expect(find.text('16+ musicians only'), findsOneWidget);
+
+      await tester.tap(find.text('Sign in')); // the tab
+      await tester.pumpAndSettle();
+      expect(find.text('16+ musicians only'), findsNothing);
+    });
+
     testWidgets('checks the email and password before sending', (tester) async {
       final auth = FakeAuthRepository();
       await pump(tester, AuthScreen(auth: auth));
@@ -179,7 +194,10 @@ void main() {
         find.widgetWithText(TextFormField, 'Email'),
         'not-an-email',
       );
-      await tester.enterText(find.widgetWithText(TextFormField, 'Password'), 'short');
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'),
+        'short',
+      );
       await tester.tap(find.widgetWithText(FilledButton, 'Create account'));
       await tester.pumpAndSettle();
 

@@ -227,9 +227,17 @@ class _AuthScreenState extends State<AuthScreen> {
                                       spacing: 8,
                                       children: [
                                         Flexible(
-                                          child: Text(
-                                            action,
-                                            overflow: TextOverflow.ellipsis,
+                                          // The label fades over when the
+                                          // tab changes.
+                                          child: AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 200,
+                                            ),
+                                            child: Text(
+                                              action,
+                                              key: ValueKey(action),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
                                         ),
                                         const Icon(Icons.arrow_forward),
@@ -239,45 +247,63 @@ class _AuthScreenState extends State<AuthScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      // The age rule, as a stamped notice.
-                      Container(
-                        decoration: printBox(
-                          context,
-                          color: colors.tertiaryContainer,
-                          radius: 20,
-                          shadow: 0,
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          spacing: 10,
-                          children: [
-                            Transform.rotate(
-                              angle: -0.03,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                color: OctavaColors.yellow,
-                                child: Text(
-                                  t.authAgeTitle,
-                                  style: displayStyle(
-                                    size: 24,
-                                    color: OctavaColors.ink,
+                      // The age rule, as a stamped notice. Only shown when
+                      // creating an account; it slides away on Sign in.
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOutCubic,
+                        alignment: Alignment.topCenter,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: !_creating
+                              ? const SizedBox(width: double.infinity)
+                              : Padding(
+                                  key: const ValueKey('age'),
+                                  padding: const EdgeInsets.only(top: 24),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: Container(
+                                      decoration: printBox(
+                                        context,
+                                        color: colors.tertiaryContainer,
+                                        radius: 20,
+                                        shadow: 0,
+                                      ),
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        spacing: 10,
+                                        children: [
+                                          Transform.rotate(
+                                            angle: -0.03,
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 4,
+                                                  ),
+                                              color: OctavaColors.yellow,
+                                              child: Text(
+                                                t.authAgeTitle,
+                                                style: displayStyle(
+                                                  size: 24,
+                                                  color: OctavaColors.ink,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            t.authAgeBody,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              height: 1.5,
+                                              color: colors.onSurface,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            Text(
-                              t.authAgeBody,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                height: 1.5,
-                                color: colors.onSurface,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],
@@ -301,6 +327,8 @@ class _AuthTabs extends StatelessWidget {
   final bool creating;
   final ValueChanged<bool> onChanged;
 
+  static const _slide = Duration(milliseconds: 280);
+
   @override
   Widget build(BuildContext context) {
     final t = context.t;
@@ -312,31 +340,22 @@ class _AuthTabs extends StatelessWidget {
           selected: on,
           button: true,
           child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => onChanged(value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              height: 48,
-              alignment: Alignment.center,
-              decoration: on
-                  ? printBox(
-                      context,
-                      color: OctavaColors.pink,
-                      radius: 999,
-                      shadow: 2,
-                      borderColor: OctavaColors.ink,
-                    )
-                  : null,
+            child: Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(
-                    label,
+                  child: AnimatedDefaultTextStyle(
+                    duration: _slide,
+                    curve: Curves.easeOutCubic,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                       color: on ? OctavaColors.ink : colors.onSurface,
                     ),
+                    child: Text(label),
                   ),
                 ),
               ),
@@ -349,9 +368,41 @@ class _AuthTabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: printBox(context, radius: 999, shadow: 0),
-      child: Row(
-        spacing: 6,
-        children: [tab(t.authCreateAccount, true), tab(t.authSignIn, false)],
+      child: SizedBox(
+        height: 48,
+        child: Stack(
+          children: [
+            // One pink pill that slides under the chosen tab.
+            Positioned.fill(
+              child: AnimatedAlign(
+                duration: _slide,
+                curve: Curves.easeOutCubic,
+                alignment: creating
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: FractionallySizedBox(
+                  widthFactor: 0.5,
+                  heightFactor: 1,
+                  child: DecoratedBox(
+                    decoration: printBox(
+                      context,
+                      color: OctavaColors.pink,
+                      radius: 999,
+                      shadow: 2,
+                      borderColor: OctavaColors.ink,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                tab(t.authCreateAccount, true),
+                tab(t.authSignIn, false),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
