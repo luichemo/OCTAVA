@@ -32,29 +32,50 @@ class OctavaApp extends StatelessWidget {
     // Rebuilds the whole app when someone picks another language or theme.
     return ListenableBuilder(
       listenable: Listenable.merge([appLanguage, appTheme]),
-      builder: (context, _) => MaterialApp(
-        title: 'OCTAVA',
-        debugShowCheckedModeBanner: false,
-        theme: octavaTheme(Brightness.light),
-        darkTheme: octavaTheme(Brightness.dark),
-        themeMode: appTheme.value,
-        locale: appLanguage.value,
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        localeListResolutionCallback: (deviceLocales, _) =>
-            resolveLocale(deviceLocales),
-        // Keeps translations for code without a BuildContext in step.
-        builder: (context, child) {
-          L10n.current = AppLocalizations.of(context);
-          return child!;
-        },
-        home: home,
-      ),
+      builder: (context, _) {
+        // Set before the themes are built, since they use heading styles.
+        georgianType =
+            (appLanguage.value ??
+                    resolveLocale(
+                      WidgetsBinding.instance.platformDispatcher.locales,
+                    ))
+                .languageCode ==
+            'ka';
+        return MaterialApp(
+          title: 'OCTAVA',
+          debugShowCheckedModeBanner: false,
+          theme: octavaTheme(Brightness.light),
+          darkTheme: octavaTheme(Brightness.dark),
+          themeMode: appTheme.value,
+          locale: appLanguage.value,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          localeListResolutionCallback: (deviceLocales, _) =>
+              resolveLocale(deviceLocales),
+          // Keeps translations for code without a BuildContext in step.
+          builder: (context, child) {
+            L10n.current = AppLocalizations.of(context);
+            if (!georgianType) return child!;
+            // Georgian letters read larger than Latin ones at the same size,
+            // so all text is 10% smaller (on top of the person's own setting).
+            final media = MediaQuery.of(context);
+            return MediaQuery(
+              data: media.copyWith(
+                textScaler: TextScaler.linear(
+                  media.textScaler.scale(16) / 16 * 0.9,
+                ),
+              ),
+              child: child!,
+            );
+          },
+          home: home,
+        );
+      },
     );
   }
 }

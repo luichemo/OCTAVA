@@ -157,7 +157,11 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Text(
               widget.name,
-              style: displayStyle(size: 28, color: colors.onSurface),
+              style: displayStyle(
+                size: 28,
+                color: colors.onSurface,
+                latin: !hasGeorgian(widget.name),
+              ),
             ),
             Text(
               widget.instrument,

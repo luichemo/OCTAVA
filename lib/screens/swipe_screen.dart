@@ -504,6 +504,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                                 style: displayStyle(
                                   size: 40,
                                   color: OctavaColors.pink,
+                                  latin: true,
                                 ),
                               ),
                             ),

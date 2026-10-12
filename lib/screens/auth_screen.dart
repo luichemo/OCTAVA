@@ -119,6 +119,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     style: displayStyle(
                                       size: 72,
                                       color: colors.onSurface,
+                                      latin: true,
                                     ),
                                   ),
                                   Text(

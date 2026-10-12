@@ -28,18 +28,36 @@ class OctavaColors {
 /// Neither main font has Georgian letters; Noto Sans Georgian fills in.
 const georgianFallback = ['NotoSansGeorgian'];
 
+/// True while the app is shown in Georgian; OctavaApp sets it before
+/// building the themes and screens.
+bool georgianType = false;
+
+/// How much smaller headings are in Georgian. Bebas has no Georgian letters,
+/// and the Noto Sans Georgian fallback is far wider and heavier at the same
+/// size, so Georgian headings would otherwise look huge. (All text is also
+/// 10% smaller in Georgian; see OctavaApp.)
+const georgianHeadingScale = 0.8;
+
+/// Whether [text] has Georgian letters, for text that may be in either
+/// script (people's names): `displayStyle(latin: !hasGeorgian(name))`.
+bool hasGeorgian(String text) => RegExp(r'[Ⴀ-ჿ]').hasMatch(text);
+
 /// Bebas Neue for headings, stamps and the wordmark: tall condensed capitals.
 /// It's registered as weight 700 (pubspec.yaml), so the Georgian fallback is
-/// bold too, as the design asks, and Bebas itself isn't faux-bolded.
-TextStyle displayStyle({double size = 32, Color? color}) => TextStyle(
-  fontFamily: 'BebasNeue',
-  fontFamilyFallback: georgianFallback,
-  fontSize: size,
-  fontWeight: FontWeight.w700,
-  height: 1.0,
-  letterSpacing: size * 0.04,
-  color: color,
-);
+/// bold too, and Bebas itself isn't faux-bolded. [latin]: text that's always
+/// in Latin letters (the wordmark), which keeps its size in Georgian.
+TextStyle displayStyle({double size = 32, Color? color, bool latin = false}) {
+  final georgian = georgianType && !latin;
+  return TextStyle(
+    fontFamily: 'BebasNeue',
+    fontFamilyFallback: georgianFallback,
+    fontSize: georgian ? size * georgianHeadingScale : size,
+    fontWeight: georgian ? FontWeight.w600 : FontWeight.w700,
+    height: georgian ? 1.2 : 1.0,
+    letterSpacing: georgian ? 0 : size * 0.04,
+    color: color,
+  );
+}
 
 /// The colour of hard offset shadows: ink on paper, near-black in the dark.
 Color shadowInk(BuildContext context) =>

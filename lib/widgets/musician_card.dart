@@ -53,7 +53,9 @@ class MusicianCard extends StatelessWidget {
     final colors = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
     final compact = MediaQuery.sizeOf(context).height < 700;
-    final headingSize = compact ? 60.0 : 76.0;
+    // The instrument fills the card's width in Latin letters; Georgian
+    // words are much wider, so they start smaller still.
+    final headingSize = (compact ? 60.0 : 76.0) * (georgianType ? 0.6 : 1);
     final m = musician;
 
     return Semantics(
@@ -204,6 +206,7 @@ class MusicianCard extends StatelessWidget {
                           style: displayStyle(
                             size: 30,
                             color: colors.onSurface,
+                            latin: !hasGeorgian(m.name),
                           ),
                         ),
                       ),
