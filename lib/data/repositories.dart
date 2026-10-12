@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/musician.dart';
@@ -53,6 +54,10 @@ class SupabaseAuthRepository implements AuthRepository {
       final response = await _client.auth.signUp(
         email: email.trim(),
         password: password,
+        // On the web, the confirmation link brings people back to the page
+        // they signed up on (the GitHub Pages preview, or localhost while
+        // developing). It must be listed under Redirect URLs in Supabase.
+        emailRedirectTo: kIsWeb ? Uri.base.removeFragment().toString() : null,
       );
       // Supabase hides whether an email is taken: a "fake" user comes back
       // with no identities. Tell the person to sign in instead.

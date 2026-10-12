@@ -20,6 +20,10 @@ abstract interface class DeckSource {
   /// Records the choice. Returns the match id when it's a match, else null.
   Future<String?> swipe(Musician musician, Decision decision);
 
+  /// Takes back a swipe that didn't make a match, so the person can be
+  /// shown again.
+  Future<void> undo(Musician musician);
+
   /// Your main instrument and your matches (oldest first), which fill the
   /// band lineup (see `buildLineup`).
   Future<({String? myRole, List<BandMember> members})> loadBand();
@@ -57,6 +61,9 @@ class SampleDeck implements DeckSource {
   @override
   Future<({String? myRole, List<BandMember> members})> loadBand() async =>
       (myRole: 'guitar', members: const <BandMember>[]);
+
+  @override
+  Future<void> undo(Musician musician) async {}
 }
 
 /// Real people and swipes, through the database functions get_deck and
@@ -93,6 +100,15 @@ class SupabaseDeck implements DeckSource {
       ) as String?;
     } catch (_) {
       throw UserFacingException(L10n.current.errSaveSwipe);
+    }
+  }
+
+  @override
+  Future<void> undo(Musician musician) async {
+    try {
+      await _client.rpc('undo_swipe', params: {'target': musician.id});
+    } catch (_) {
+      throw UserFacingException(L10n.current.errUndo);
     }
   }
 

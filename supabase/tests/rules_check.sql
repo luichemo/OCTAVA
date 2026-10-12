@@ -159,6 +159,18 @@ begin
   insert into public.messages (match_id, body) values (m, 'Hi A, want to jam?');
   r := r || 'PASS B can message A in their match'::text;
 
+  select created_by = b into ok from public.matches where id = m;
+  r := r || case when ok then 'PASS a match remembers whose swipe made it' else 'FAIL matches.created_by not set' end;
+  insert into public.match_reads (match_id, last_read_at) values (m, now() + interval '1 day');
+  select last_read_at <= now() into ok from public.match_reads where match_id = m and user_id = b;
+  r := r || case when ok then 'PASS read marks use the server clock' else 'FAIL read mark set in the future' end;
+  begin
+    perform public.undo_swipe(a);
+    r := r || 'FAIL a swipe that made a match was undone'::text;
+  exception when others then
+    r := r || 'PASS a swipe that made a match can''t be undone'::text;
+  end;
+
   -- ---------------------------------------------------------- adult C
   perform set_config('request.jwt.claims', json_build_object('sub', c, 'role', 'authenticated')::text, true);
   select count(*) into n from public.get_deck(null) d where d.id = a;
@@ -175,11 +187,25 @@ begin
   exception when others then
     r := r || 'PASS C can''t post in someone else''s match'::text;
   end;
+  select count(*) into n from public.match_reads where match_id = m;
+  r := r || case when n = 0 then 'PASS C can''t see A and B''s read marks' else 'FAIL C sees their read marks' end;
+  begin
+    insert into public.match_reads (match_id) values (m);
+    r := r || 'FAIL C could mark A and B''s chat read'::text;
+  exception when others then
+    r := r || 'PASS C can''t mark A and B''s chat read'::text;
+  end;
+  perform public.record_swipe(b, 'pass');
+  ok := public.undo_swipe(b);
+  select count(*) into n from public.get_deck(null) d where d.id = b;
+  r := r || case when ok and n = 1 then 'PASS undo brings a passed person back' else 'FAIL undo didn''t bring B back' end;
 
   -- ---------------------------------------------------------- A blocks B
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
   select count(*) into n from public.messages where match_id = m;
   r := r || case when n = 1 then 'PASS A reads B''s message' else 'FAIL A reads ' || n || ' messages' end;
+  select count(*) into n from public.match_reads where match_id = m and user_id = b;
+  r := r || case when n = 1 then 'PASS A sees B''s read mark (for "Seen")' else 'FAIL A can''t see B''s read mark' end;
 
   insert into public.blocks (blocked_id) values (b);
   perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);

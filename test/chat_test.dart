@@ -12,20 +12,51 @@ import 'package:octava/models/chat.dart';
 import 'package:octava/screens/matches_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
 
-/// In-memory chat: sending adds to the live message stream, like Realtime.
+/// In-memory chat: sending adds to the live message stream, and every
+/// change is also announced on [changes], like Realtime.
 class FakeChatRepository implements ChatRepository {
-  FakeChatRepository({this.matches = const [], this.refuseSends = false});
+  FakeChatRepository({
+    List<MatchSummary> matches = const [],
+    this.refuseSends = false,
+  }) : matches = [...matches];
 
   final List<MatchSummary> matches;
   final bool refuseSends;
   final _messages = <String, List<ChatMessage>>{};
   final _streams = <String, StreamController<List<ChatMessage>>>{};
+  final _changes = StreamController<LiveChange>.broadcast();
+
+  /// When you / they last read each match.
+  final myReads = <String, DateTime>{};
+  final theirReads = <String, DateTime>{};
+  final unmatched = <String>[];
 
   @override
   String get myId => 'me';
 
   @override
-  Future<List<MatchSummary>> loadMatches() async => matches;
+  Future<List<MatchSummary>> loadMatches() async => [
+    for (final m in matches)
+      MatchSummary(
+        matchId: m.matchId,
+        otherUserId: m.otherUserId,
+        name: m.name,
+        instrument: m.instrument,
+        matchedAt: m.matchedAt,
+        lastMessage: _messages[m.matchId]?.lastOrNull?.body,
+        lastMessageAt: _messages[m.matchId]?.lastOrNull?.sentAt,
+        lastMessageIsMine: _messages[m.matchId]?.lastOrNull?.senderId == 'me',
+        unreadCount: (_messages[m.matchId] ?? [])
+            .where(
+              (msg) =>
+                  msg.senderId != 'me' &&
+                  (myReads[m.matchId] == null ||
+                      msg.sentAt.isAfter(myReads[m.matchId]!)),
+            )
+            .length,
+        theirLastReadAt: theirReads[m.matchId],
+      ),
+  ];
 
   @override
   Stream<List<ChatMessage>> messages(String matchId) {
@@ -47,6 +78,22 @@ class FakeChatRepository implements ChatRepository {
     receive(matchId, 'me', body);
   }
 
+  @override
+  Future<void> markRead(String matchId) async {
+    myReads[matchId] = DateTime.now();
+    _changes.add(const ReadMarked());
+  }
+
+  @override
+  Future<void> unmatch(String matchId) async {
+    unmatched.add(matchId);
+    matches.removeWhere((m) => m.matchId == matchId);
+    _changes.add(const MatchRemoved());
+  }
+
+  @override
+  Stream<LiveChange> changes() => _changes.stream;
+
   /// A message arriving from either side.
   void receive(String matchId, String senderId, String body) {
     final list = _messages.putIfAbsent(matchId, () => []);
@@ -59,6 +106,21 @@ class FakeChatRepository implements ChatRepository {
       ),
     );
     _streams[matchId]?.add(List.of(list));
+    _changes.add(
+      MessageArrived(matchId: matchId, senderId: senderId, body: body),
+    );
+  }
+
+  /// Someone else's swipe completes a match with you.
+  void matchWith(MatchSummary match, {String createdBy = 'them'}) {
+    matches.add(match);
+    _changes.add(MatchMade(matchId: match.matchId, createdBy: createdBy));
+  }
+
+  /// The other person reads the chat.
+  void theyRead(String matchId) {
+    theirReads[matchId] = DateTime.now();
+    _changes.add(const ReadMarked());
   }
 }
 

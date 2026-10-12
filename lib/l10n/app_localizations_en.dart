@@ -1152,4 +1152,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errSaveBand =>
       'Couldn\'t save your band\'s roles. Check your connection and try again.';
+
+  @override
+  String get bannerNewMatch => 'You both want to play together. Tap to say hi.';
+
+  @override
+  String get seen => 'Seen';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get chatMore => 'More';
+
+  @override
+  String get unmatch => 'Unmatch';
+
+  @override
+  String unmatchTitle(String name) {
+    return 'Unmatch $name?';
+  }
+
+  @override
+  String get unmatchBody =>
+      'This chat will disappear for both of you. You can\'t undo this.';
+
+  @override
+  String unmatchDone(String name) {
+    return 'You unmatched $name.';
+  }
+
+  @override
+  String get errUnmatch =>
+      'Couldn\'t unmatch. Check your connection and try again.';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get errUndo =>
+      'Couldn\'t bring the card back. Check your connection and try again.';
 }

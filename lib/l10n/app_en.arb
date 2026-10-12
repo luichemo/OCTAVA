@@ -618,5 +618,30 @@
       }
     }
   },
-  "errSaveBand": "Couldn't save your band's roles. Check your connection and try again."
+  "errSaveBand": "Couldn't save your band's roles. Check your connection and try again.",
+  "bannerNewMatch": "You both want to play together. Tap to say hi.",
+  "seen": "Seen",
+  "today": "Today",
+  "chatMore": "More",
+  "unmatch": "Unmatch",
+  "unmatchTitle": "Unmatch {name}?",
+  "@unmatchTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unmatchBody": "This chat will disappear for both of you. You can't undo this.",
+  "unmatchDone": "You unmatched {name}.",
+  "@unmatchDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errUnmatch": "Couldn't unmatch. Check your connection and try again.",
+  "undo": "Undo",
+  "errUndo": "Couldn't bring the card back. Check your connection and try again."
 }

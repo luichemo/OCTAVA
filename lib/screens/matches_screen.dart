@@ -2,18 +2,34 @@ import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/chat_repository.dart';
+import '../data/live_updates.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../models/chat.dart';
 import '../theme.dart';
+import '../widgets/person_avatar.dart';
 import 'chat_screen.dart';
 
-/// Everyone you've matched with, newest activity first. Tap one to chat.
+/// Everyone you've matched with, newest activity first, updated live.
+/// Tap one to chat.
 class MatchesScreen extends StatefulWidget {
-  const MatchesScreen({super.key, required this.repository, this.safety});
+  const MatchesScreen({
+    super.key,
+    required this.repository,
+    this.live,
+    this.safety,
+    this.avatars,
+  });
+
+  /// Shows people's AI avatars. Without it, their initial.
+  final AvatarRepository? avatars;
 
   final ChatRepository repository;
+
+  /// The session's live matches. Without it the screen makes its own.
+  final LiveUpdates? live;
 
   /// Passed on to chats for block and report.
   final SafetyRepository? safety;
@@ -23,14 +39,14 @@ class MatchesScreen extends StatefulWidget {
 }
 
 class _MatchesScreenState extends State<MatchesScreen> {
-  late Future<List<MatchSummary>> _matches = widget.repository.loadMatches();
+  // `widget.live ?? ...`: use the shared one, or own a private one.
+  late final LiveUpdates _live =
+      widget.live ?? (LiveUpdates(widget.repository)..start());
 
-  Future<void> _refresh() async {
-    final next = widget.repository.loadMatches();
-    setState(() {
-      _matches = next;
-    });
-    await next.catchError((_) => <MatchSummary>[]);
+  @override
+  void dispose() {
+    if (widget.live == null) _live.dispose();
+    super.dispose();
   }
 
   Future<void> _open(MatchSummary match) async {
@@ -38,6 +54,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       MaterialPageRoute<void>(
         builder: (_) => ChatScreen(
           repository: widget.repository,
+          live: _live,
           matchId: match.matchId,
           otherUserId: match.otherUserId,
           safety: widget.safety,
@@ -46,8 +63,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
         ),
       ),
     );
-    // New messages change the previews and the order.
-    if (mounted) _refresh();
+    // Blocking in the chat removes it from the list.
+    if (mounted) _live.refresh();
   }
 
   @override
@@ -64,19 +81,20 @@ class _MatchesScreenState extends State<MatchesScreen> {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
-          child: FutureBuilder<List<MatchSummary>>(
-            future: _matches,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
+          child: ListenableBuilder(
+            listenable: _live,
+            builder: (context, _) {
+              final matches = _live.matches;
+              final error = _live.error;
+              if (error != null && matches == null) {
                 return _Message(
-                  text: snapshot.error is UserFacingException
-                      ? (snapshot.error as UserFacingException).message
+                  text: error is UserFacingException
+                      ? error.message
                       : context.t.errLoadMatches,
                   action: context.t.tryAgain,
-                  onAction: _refresh,
+                  onAction: _live.refresh,
                 );
               }
-              final matches = snapshot.data;
               if (matches == null) {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -84,7 +102,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 return _Message(text: context.t.matchesEmpty);
               }
               return RefreshIndicator(
-                onRefresh: _refresh,
+                onRefresh: _live.refresh,
                 child: ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: matches.length,
@@ -92,6 +110,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                       Divider(height: 1, color: colors.outlineVariant),
                   itemBuilder: (context, i) => _MatchTile(
                     match: matches[i],
+                    avatars: widget.avatars,
                     onTap: () => _open(matches[i]),
                   ),
                 ),
@@ -105,14 +124,16 @@ class _MatchesScreenState extends State<MatchesScreen> {
 }
 
 class _MatchTile extends StatelessWidget {
-  const _MatchTile({required this.match, required this.onTap});
+  const _MatchTile({required this.match, required this.onTap, this.avatars});
 
   final MatchSummary match;
+  final AvatarRepository? avatars;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final unread = match.unreadCount > 0;
     final preview = match.lastMessage == null
         ? context.t.newMatchSayHi
         : (match.lastMessageIsMine
@@ -121,14 +142,10 @@ class _MatchTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      leading: CircleAvatar(
-        radius: 24,
-        backgroundColor: OctavaColors.pink,
-        foregroundColor: OctavaColors.ink,
-        child: Text(
-          match.name.characters.first.toUpperCase(),
-          style: displayStyle(size: 26),
-        ),
+      leading: PersonAvatar(
+        name: match.name,
+        avatarPath: match.avatarPath,
+        avatars: avatars,
       ),
       title: Row(
         children: [
@@ -155,19 +172,30 @@ class _MatchTile extends StatelessWidget {
           ),
           Text(
             formatMessageTime(match.lastActivity),
-            style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
+            style: TextStyle(
+              fontSize: 13,
+              color: unread ? colors.onSurface : colors.onSurfaceVariant,
+              fontWeight: unread ? FontWeight.w700 : FontWeight.w400,
+            ),
           ),
         ],
       ),
+      trailing: unread
+          ? Badge(
+              label: Text('${match.unreadCount}'),
+              backgroundColor: OctavaColors.pink,
+              textColor: OctavaColors.ink,
+            )
+          : null,
       subtitle: Text(
         preview,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          color: match.lastMessage == null
+          color: match.lastMessage == null || unread
               ? colors.onSurface
               : colors.onSurfaceVariant,
-          fontWeight: match.lastMessage == null
+          fontWeight: match.lastMessage == null || unread
               ? FontWeight.w600
               : FontWeight.w400,
         ),

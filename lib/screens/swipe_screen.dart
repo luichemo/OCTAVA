@@ -11,6 +11,7 @@ import '../data/avatar_repository.dart';
 import '../data/band_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
+import '../data/live_updates.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
@@ -40,7 +41,12 @@ class SwipeScreen extends StatefulWidget {
     this.location,
     this.filterStore,
     this.bandNeeds,
+    this.live,
   });
+
+  /// Live matches: the unread badge on Matches, and reloading the band row
+  /// when someone matches with you or unmatches.
+  final LiveUpdates? live;
 
   /// The roles your band needs. Defaults to keeping them only while the app
   /// runs.
@@ -110,9 +116,34 @@ class _SwipeScreenState extends State<SwipeScreen>
   late final AnimationController _anim = AnimationController(vsync: this);
   Animation<Offset>? _animOffset;
 
+  late int _matchSetVersion = widget.live?.matchSetVersion ?? 0;
+
+  void _onLive() {
+    final version = widget.live!.matchSetVersion;
+    if (version == _matchSetVersion) return;
+    _matchSetVersion = version;
+    _refreshBand();
+  }
+
+  /// Reloads only the band row, keeping the cards where they are.
+  Future<void> _refreshBand() async {
+    try {
+      final band = await widget.source.loadBand();
+      if (!mounted) return;
+      setState(() {
+        _myRole = band.myRole;
+        _members = band.members;
+        _rebuildBand();
+      });
+    } on UserFacingException {
+      // The row stays as it was; the next full load tries again.
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    widget.live?.addListener(_onLive);
     _anim.addListener(() {
       final a = _animOffset;
       if (a != null) setState(() => _drag = a.value);
@@ -202,6 +233,7 @@ class _SwipeScreenState extends State<SwipeScreen>
 
   @override
   void dispose() {
+    widget.live?.removeListener(_onLive);
     _anim.dispose();
     super.dispose();
   }
@@ -307,17 +339,31 @@ class _SwipeScreenState extends State<SwipeScreen>
     }
     final matchId = outcome is String ? outcome : null;
 
-    if (decision == Decision.pass) {
-      SemanticsService.sendAnnouncement(
-        View.of(context),
-        context.t.passedOn(musician.name),
-        TextDirection.ltr,
-      );
-    } else if (matchId != null) {
+    if (matchId != null) {
       await _showMatch(musician, matchId);
     } else {
-      _toast(context.t.askedToJam(musician.name));
+      _toast(
+        decision == Decision.pass
+            ? context.t.passedOn(musician.name)
+            : context.t.askedToJam(musician.name),
+        onUndo: () => _undo(musician),
+      );
     }
+  }
+
+  /// Puts a card back on top after its swipe is taken back.
+  Future<void> _undo(Musician musician) async {
+    try {
+      await widget.source.undo(musician);
+    } on UserFacingException catch (e) {
+      if (mounted) _toast(e.message);
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _queue = [musician, ..._queue.where((m) => m != musician)];
+      _drag = Offset.zero;
+    });
   }
 
   Future<void> _showMatch(Musician m, String matchId) async {
@@ -357,7 +403,9 @@ class _SwipeScreenState extends State<SwipeScreen>
     }
   }
 
-  void _toast(String message) {
+  /// A short message at the bottom. With [onUndo] it stays longer and has
+  /// an Undo button.
+  void _toast(String message, {VoidCallback? onUndo}) {
     final colors = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -375,7 +423,14 @@ class _SwipeScreenState extends State<SwipeScreen>
           backgroundColor: colors.onSurface,
           behavior: SnackBarBehavior.floating,
           shape: const StadiumBorder(),
-          duration: const Duration(milliseconds: 2400),
+          duration: Duration(milliseconds: onUndo == null ? 2400 : 4000),
+          action: onUndo == null
+              ? null
+              : SnackBarAction(
+                  label: context.t.undo,
+                  textColor: OctavaColors.pink,
+                  onPressed: onUndo,
+                ),
         ),
       );
   }
@@ -532,6 +587,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                                   if (mounted) _reload();
                                 },
                           onMatches: widget.onOpenMatches,
+                          live: widget.live,
                           onRecord: widget.onRecord == null
                               ? null
                               : () async {
@@ -741,8 +797,10 @@ class _LocationPrompt extends StatelessWidget {
 /// Bottom navigation: Profile, Matches and Sign out, with labels.
 /// Bottom navigation: Profile, a round ➕ (record a clip) and Matches.
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({this.onProfile, this.onMatches, this.onRecord});
+  const _BottomBar({this.onProfile, this.onMatches, this.onRecord, this.live});
 
+  /// For the unread count on Matches.
+  final LiveUpdates? live;
   final VoidCallback? onProfile;
   final VoidCallback? onMatches;
   final VoidCallback? onRecord;
@@ -781,10 +839,14 @@ class _BottomBar extends StatelessWidget {
               ),
             ),
           if (onMatches != null)
-            _BarButton(
-              icon: Icons.chat_bubble_outline_rounded,
-              label: context.t.navMatches,
-              onTap: onMatches!,
+            ListenableBuilder(
+              listenable: live ?? const AlwaysStoppedAnimation(0),
+              builder: (context, _) => _BarButton(
+                icon: Icons.chat_bubble_outline_rounded,
+                label: context.t.navMatches,
+                onTap: onMatches!,
+                badge: live?.unreadTotal ?? 0,
+              ),
             ),
         ],
       ),
@@ -797,11 +859,15 @@ class _BarButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.badge = 0,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+
+  /// A count shown on the icon when above 0.
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
@@ -815,7 +881,13 @@ class _BarButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: colors.onSurface),
+              Badge(
+                isLabelVisible: badge > 0,
+                label: Text(badge > 99 ? '99+' : '$badge'),
+                backgroundColor: OctavaColors.pink,
+                textColor: OctavaColors.ink,
+                child: Icon(icon, color: colors.onSurface),
+              ),
               const SizedBox(height: 2),
               Text(
                 label,

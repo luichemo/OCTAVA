@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/chat.dart';
@@ -17,6 +19,17 @@ abstract interface class ChatRepository {
   Stream<List<ChatMessage>> messages(String matchId);
 
   Future<void> send(String matchId, String body);
+
+  /// Marks a chat read up to now (for unread counts and their "Seen").
+  /// Failing quietly is fine: it's retried the next time.
+  Future<void> markRead(String matchId);
+
+  /// Deletes the match (and its chat) for both people.
+  Future<void> unmatch(String matchId);
+
+  /// Live changes to your matches, messages and read marks, until the
+  /// subscription is cancelled.
+  Stream<LiveChange> changes();
 }
 
 class SupabaseChatRepository implements ChatRepository {
@@ -39,7 +52,8 @@ class SupabaseChatRepository implements ChatRepository {
       final people = await _client
           .from('profiles')
           .select(
-            'id, display_name, profile_instruments(instrument_id, is_primary)',
+            'id, display_name, avatar_path, '
+            'profile_instruments(instrument_id, is_primary)',
           )
           .inFilter('id', matches.map(otherOf).toList());
       final byId = {for (final p in people) p['id'] as String: p};
@@ -56,6 +70,27 @@ class SupabaseChatRepository implements ChatRepository {
       for (final msg in recent) {
         latest.putIfAbsent(msg['match_id'] as String, () => msg);
       }
+
+      // Read marks: yours for unread counts, theirs for "Seen".
+      final reads = await _client
+          .from('match_reads')
+          .select('match_id, user_id, last_read_at')
+          .inFilter('match_id', [for (final m in matches) m['id']]);
+      final myRead = <String, DateTime>{};
+      final theirRead = <String, DateTime>{};
+      for (final r in reads) {
+        final at = DateTime.parse(r['last_read_at'] as String).toLocal();
+        (r['user_id'] == myId ? myRead : theirRead)[r['match_id'] as String] =
+            at;
+      }
+      int unreadIn(String matchId) => recent.where((msg) {
+        if (msg['match_id'] != matchId || msg['sender_id'] == myId) {
+          return false;
+        }
+        final read = myRead[matchId];
+        return read == null ||
+            DateTime.parse(msg['created_at'] as String).toLocal().isAfter(read);
+      }).length;
 
       final summaries = <MatchSummary>[];
       for (final m in matches) {
@@ -75,6 +110,9 @@ class SupabaseChatRepository implements ChatRepository {
                 ? null
                 : DateTime.parse(last['created_at'] as String).toLocal(),
             lastMessageIsMine: last?['sender_id'] == myId,
+            unreadCount: unreadIn(m['id'] as String),
+            theirLastReadAt: theirRead[m['id']],
+            avatarPath: person['avatar_path'] as String?,
           ),
         );
       }
@@ -110,6 +148,78 @@ class SupabaseChatRepository implements ChatRepository {
     } catch (_) {
       throw UserFacingException(L10n.current.errSendOffline);
     }
+  }
+
+  @override
+  Future<void> markRead(String matchId) async {
+    try {
+      // The server sets last_read_at to its own clock (trigger).
+      await _client.from('match_reads').upsert({
+        'match_id': matchId,
+        'user_id': myId,
+      });
+    } catch (_) {
+      // Not worth bothering anyone; the next open marks it again.
+    }
+  }
+
+  @override
+  Future<void> unmatch(String matchId) async {
+    try {
+      // RLS lets either person delete; messages and read marks cascade.
+      await _client.from('matches').delete().eq('id', matchId);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errUnmatch);
+    }
+  }
+
+  @override
+  Stream<LiveChange> changes() {
+    // One Realtime channel per listener. Row-level security decides which
+    // rows reach us, so only your own matches' changes arrive (except
+    // deletes, which Realtime sends to everyone with the id only).
+    late final RealtimeChannel channel;
+    final out = StreamController<LiveChange>(
+      onCancel: () => _client.removeChannel(channel),
+    );
+    void on(
+      String table,
+      PostgresChangeEvent event,
+      LiveChange? Function(Map<String, dynamic> row) toChange,
+    ) {
+      channel.onPostgresChanges(
+        event: event,
+        schema: 'public',
+        table: table,
+        callback: (payload) {
+          final change = toChange(payload.newRecord);
+          if (change != null && !out.isClosed) out.add(change);
+        },
+      );
+    }
+
+    channel = _client.channel('live-$myId');
+    on(
+      'messages',
+      PostgresChangeEvent.insert,
+      (row) => MessageArrived(
+        matchId: row['match_id'] as String,
+        senderId: row['sender_id'] as String,
+        body: row['body'] as String,
+      ),
+    );
+    on(
+      'matches',
+      PostgresChangeEvent.insert,
+      (row) => MatchMade(
+        matchId: row['id'] as String,
+        createdBy: row['created_by'] as String?,
+      ),
+    );
+    on('matches', PostgresChangeEvent.delete, (_) => const MatchRemoved());
+    on('match_reads', PostgresChangeEvent.all, (_) => const ReadMarked());
+    channel.subscribe();
+    return out.stream;
   }
 
   static String _mainInstrument(Map<String, dynamic> person) {

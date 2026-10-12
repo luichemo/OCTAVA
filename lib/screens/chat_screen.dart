@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 
 import '../data/chat_repository.dart';
+import '../data/live_updates.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../widgets/safety_sheet.dart';
@@ -19,9 +20,13 @@ class ChatScreen extends StatefulWidget {
     required this.name,
     required this.instrument,
     this.safety,
+    this.live,
   });
 
   final ChatRepository repository;
+
+  /// Marks the chat read while it's open and provides "Seen".
+  final LiveUpdates? live;
   final String matchId;
   final String otherUserId;
 
@@ -43,9 +48,58 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _sending = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.live?.openChat(widget.matchId);
+  }
+
+  @override
   void dispose() {
+    widget.live?.closeChat(widget.matchId);
     _input.dispose();
     super.dispose();
+  }
+
+  Future<void> _safety() async {
+    final blocked = await showSafetyOptions(
+      context,
+      safety: widget.safety!,
+      userId: widget.otherUserId,
+      name: widget.name,
+    );
+    // A blocked chat is closed; the Matches list no longer shows it.
+    if (blocked && mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _unmatch() async {
+    final t = context.t;
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.unmatchTitle(widget.name)),
+        content: Text(t.unmatchBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(t.unmatch),
+          ),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await widget.repository.unmatch(widget.matchId);
+    } on UserFacingException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+      return;
+    }
+    messenger.showSnackBar(SnackBar(content: Text(t.unmatchDone(widget.name))));
+    if (mounted) Navigator.of(context).pop();
   }
 
   Future<void> _send() async {
@@ -78,21 +132,25 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         backgroundColor: colors.surface,
         actions: [
-          if (widget.safety != null)
-            IconButton(
-              tooltip: context.t.blockOrReport,
-              icon: const Icon(Icons.more_vert_rounded),
-              onPressed: () async {
-                final blocked = await showSafetyOptions(
-                  context,
-                  safety: widget.safety!,
-                  userId: widget.otherUserId,
-                  name: widget.name,
-                );
-                // A blocked chat is closed; the Matches list no longer shows it.
-                if (blocked && context.mounted) Navigator.of(context).pop();
-              },
-            ),
+          PopupMenuButton<_MenuChoice>(
+            tooltip: context.t.chatMore,
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (choice) => switch (choice) {
+              _MenuChoice.unmatch => _unmatch(),
+              _MenuChoice.safety => _safety(),
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _MenuChoice.unmatch,
+                child: Text(context.t.unmatch),
+              ),
+              if (widget.safety != null)
+                PopupMenuItem(
+                  value: _MenuChoice.safety,
+                  child: Text(context.t.blockOrReport),
+                ),
+            ],
+          ),
         ],
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,9 +210,59 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: messages.length,
                         itemBuilder: (context, i) {
                           final message = messages[messages.length - 1 - i];
-                          return _Bubble(
-                            message: message,
-                            mine: message.senderId == widget.repository.myId,
+                          final mine =
+                              message.senderId == widget.repository.myId;
+                          // Messages are listed newest first, so the one
+                          // above on screen is at index i + 1.
+                          final older = i + 1 < messages.length
+                              ? messages[messages.length - 2 - i]
+                              : null;
+                          final newDay =
+                              older == null ||
+                              !_sameDay(older.sentAt, message.sentAt);
+                          final bubble = newDay
+                              ? Column(
+                                  children: [
+                                    _DayChip(day: message.sentAt),
+                                    _Bubble(message: message, mine: mine),
+                                  ],
+                                )
+                              : _Bubble(message: message, mine: mine);
+                          // "Seen" goes under your newest message only.
+                          if (i != 0 || !mine || widget.live == null) {
+                            return bubble;
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              bubble,
+                              ListenableBuilder(
+                                listenable: widget.live!,
+                                builder: (context, _) {
+                                  final read = widget.live!
+                                      .matchById(widget.matchId)
+                                      ?.theirLastReadAt;
+                                  final seen =
+                                      read != null &&
+                                      !read.isBefore(message.sentAt);
+                                  return seen
+                                      ? Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 4,
+                                            bottom: 2,
+                                          ),
+                                          child: Text(
+                                            context.t.seen,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: colors.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink();
+                                },
+                              ),
+                            ],
                           );
                         },
                       );
@@ -195,6 +303,43 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _MenuChoice { unmatch, safety }
+
+bool _sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+/// "Today", "Yesterday" or a date, between messages from different days.
+class _DayChip extends StatelessWidget {
+  const _DayChip({required this.day});
+
+  final DateTime day;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            formatDay(day),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: colors.onSurfaceVariant,
             ),
           ),
         ),
@@ -245,7 +390,7 @@ class _Bubble extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                formatMessageTime(message.sentAt),
+                formatClock(message.sentAt),
                 style: TextStyle(
                   fontSize: 11,
                   color: mine

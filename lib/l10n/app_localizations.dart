@@ -2089,6 +2089,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t save your band\'s roles. Check your connection and try again.'**
   String get errSaveBand;
+
+  /// No description provided for @bannerNewMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'You both want to play together. Tap to say hi.'**
+  String get bannerNewMatch;
+
+  /// No description provided for @seen.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen'**
+  String get seen;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @chatMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get chatMore;
+
+  /// No description provided for @unmatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmatch'**
+  String get unmatch;
+
+  /// No description provided for @unmatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmatch {name}?'**
+  String unmatchTitle(String name);
+
+  /// No description provided for @unmatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This chat will disappear for both of you. You can\'t undo this.'**
+  String get unmatchBody;
+
+  /// No description provided for @unmatchDone.
+  ///
+  /// In en, this message translates to:
+  /// **'You unmatched {name}.'**
+  String unmatchDone(String name);
+
+  /// No description provided for @errUnmatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t unmatch. Check your connection and try again.'**
+  String get errUnmatch;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @errUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t bring the card back. Check your connection and try again.'**
+  String get errUndo;
 }
 
 class _AppLocalizationsDelegate

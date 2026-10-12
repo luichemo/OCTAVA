@@ -74,7 +74,9 @@ void main() {
     final safety = FakeSafetyRepository();
     await openNikasChat(tester, safety);
 
-    await tester.tap(find.byTooltip('Block or report'));
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Block or report'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Block Nika'));
     await tester.pumpAndSettle();
@@ -91,7 +93,9 @@ void main() {
     final safety = FakeSafetyRepository();
     await openNikasChat(tester, safety);
 
-    await tester.tap(find.byTooltip('Block or report'));
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Block or report'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Block Nika'));
     await tester.pumpAndSettle();
@@ -111,7 +115,9 @@ void main() {
     final safety = FakeSafetyRepository();
     await openNikasChat(tester, safety);
 
-    await tester.tap(find.byTooltip('Block or report'));
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Block or report'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Report Nika'));
     await tester.pumpAndSettle();

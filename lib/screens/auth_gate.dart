@@ -9,11 +9,14 @@ import '../data/band_repository.dart';
 import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
+import '../data/live_updates.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../widgets/record_sheet.dart';
 import '../data/safety_repository.dart';
+import '../models/chat.dart';
 import '../models/musician.dart';
+import '../widgets/live_banner.dart';
 import 'auth_screen.dart';
 import 'chat_screen.dart';
 import 'edit_profile_screen.dart';
@@ -107,9 +110,15 @@ class _ProfileGateState extends State<ProfileGate> {
       ? null
       : JustAudioClipPlayer(widget.clips!.playbackUrl);
 
+  // Live matches for the whole session: badges, banners, the Matches list.
+  late final LiveUpdates? _live = widget.chat == null
+      ? null
+      : (LiveUpdates(widget.chat!)..start());
+
   @override
   void dispose() {
     _player?.dispose();
+    _live?.dispose();
     super.dispose();
   }
 
@@ -136,22 +145,47 @@ class _ProfileGateState extends State<ProfileGate> {
   void _openMatches() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            MatchesScreen(repository: widget.chat!, safety: widget.safety),
+        builder: (_) => MatchesScreen(
+          repository: widget.chat!,
+          live: _live,
+          safety: widget.safety,
+          avatars: widget.avatars,
+        ),
       ),
     );
   }
 
-  void _openChat(String matchId, Musician musician) {
+  void _openChat(String matchId, Musician musician) => _pushChat(
+    matchId: matchId,
+    otherUserId: musician.id!,
+    name: musician.name,
+    instrument: musician.instrument,
+  );
+
+  /// From a banner.
+  void _openChatFor(MatchSummary match) => _pushChat(
+    matchId: match.matchId,
+    otherUserId: match.otherUserId,
+    name: match.name,
+    instrument: match.instrument,
+  );
+
+  void _pushChat({
+    required String matchId,
+    required String otherUserId,
+    required String name,
+    required String instrument,
+  }) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ChatScreen(
           repository: widget.chat!,
+          live: _live,
           matchId: matchId,
-          otherUserId: musician.id!,
+          otherUserId: otherUserId,
           safety: widget.safety,
-          name: musician.name,
-          instrument: musician.instrument,
+          name: name,
+          instrument: instrument,
         ),
       ),
     );
@@ -175,20 +209,26 @@ class _ProfileGateState extends State<ProfileGate> {
           null => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),
-          ProfileStatus.ready => SwipeScreen(
-            source: widget.deck,
-            onRecord: widget.clips == null
-                ? null
-                : () => showRecordSheet(context, clips: widget.clips!),
-            onOpenMatches: widget.chat == null ? null : _openMatches,
-            onOpenChat: widget.chat == null ? null : _openChat,
-            safety: widget.safety,
-            player: _player,
-            onOpenProfile: _openProfile,
+          ProfileStatus.ready => LiveBannerListener(
+            live: _live,
             avatars: widget.avatars,
-            location: widget.location,
-            filterStore: widget.filterStore,
-            bandNeeds: widget.bandNeeds,
+            onOpen: _openChatFor,
+            child: SwipeScreen(
+              source: widget.deck,
+              onRecord: widget.clips == null
+                  ? null
+                  : () => showRecordSheet(context, clips: widget.clips!),
+              onOpenMatches: widget.chat == null ? null : _openMatches,
+              onOpenChat: widget.chat == null ? null : _openChat,
+              safety: widget.safety,
+              player: _player,
+              onOpenProfile: _openProfile,
+              avatars: widget.avatars,
+              location: widget.location,
+              filterStore: widget.filterStore,
+              bandNeeds: widget.bandNeeds,
+              live: _live,
+            ),
           ),
           final status => OnboardingScreen(
             repository: widget.repository,

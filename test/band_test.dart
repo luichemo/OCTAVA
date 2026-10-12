@@ -107,13 +107,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('a second drummer fills the second drums slot', (
-      tester,
-    ) async {
-      await pump(
-        tester,
-        SwipeScreen(bandNeeds: MemoryBandNeeds({'drums': 2})),
-      );
+    testWidgets('a second drummer fills the second drums slot', (tester) async {
+      await pump(tester, SwipeScreen(bandNeeds: MemoryBandNeeds({'drums': 2})));
       expect(find.text('Open'), findsNWidgets(2));
 
       await swipeJam(tester); // Nika, a drummer who likes you

@@ -1142,4 +1142,44 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get errSaveBand =>
       'ბენდის როლები ვერ შევინახე. შეამოწმე ინტერნეტი და სცადე თავიდან.';
+
+  @override
+  String get bannerNewMatch => 'ორივეს ერთად დაკვრა გინდათ. შეეხე და მიესალმე.';
+
+  @override
+  String get seen => 'ნანახია';
+
+  @override
+  String get today => 'დღეს';
+
+  @override
+  String get chatMore => 'მეტი';
+
+  @override
+  String get unmatch => 'დაკავშირების გაუქმება';
+
+  @override
+  String unmatchTitle(String name) {
+    return 'გააუქმო კავშირი $name-თან?';
+  }
+
+  @override
+  String get unmatchBody =>
+      'ეს ჩატი ორივესთვის გაქრება. ამის დაბრუნება შეუძლებელია.';
+
+  @override
+  String unmatchDone(String name) {
+    return '$name-თან კავშირი გაუქმდა.';
+  }
+
+  @override
+  String get errUnmatch =>
+      'კავშირი ვერ გაუქმდა. შეამოწმე ინტერნეტი და სცადე თავიდან.';
+
+  @override
+  String get undo => 'დაბრუნება';
+
+  @override
+  String get errUndo =>
+      'ბარათი ვერ დავაბრუნე. შეამოწმე ინტერნეტი და სცადე თავიდან.';
 }
