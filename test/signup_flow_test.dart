@@ -166,23 +166,20 @@ void main() {
     testWidgets('opens on Sign in', (tester) async {
       await pump(tester, AuthScreen(auth: FakeAuthRepository()));
       expect(find.widgetWithText(FilledButton, 'Sign in'), findsOneWidget);
-      expect(find.text('Create a new account'), findsOneWidget);
+      expect(find.text('Create account'), findsOneWidget); // the tab
     });
 
     testWidgets('checks the email and password before sending', (tester) async {
       final auth = FakeAuthRepository();
       await pump(tester, AuthScreen(auth: auth));
-      await tester.tap(find.text('Create a new account'));
+      await tester.tap(find.text('Create account')); // the tab
       await tester.pump();
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Email'),
         'not-an-email',
       );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Password'),
-        'short',
-      );
+      await tester.enterText(find.widgetWithText(TextFormField, 'Password'), 'short');
       await tester.tap(find.widgetWithText(FilledButton, 'Create account'));
       await tester.pumpAndSettle();
 
@@ -194,7 +191,7 @@ void main() {
     testWidgets('explains email confirmation after sign-up', (tester) async {
       final auth = FakeAuthRepository(needsConfirmation: true);
       await pump(tester, AuthScreen(auth: auth));
-      await tester.tap(find.text('Create a new account'));
+      await tester.tap(find.text('Create account')); // the tab
       await tester.pump();
 
       await tester.enterText(

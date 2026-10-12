@@ -73,17 +73,23 @@ flutter:
 
   # Bundled from Google Fonts (OFL licences in assets/fonts/).
   fonts:
-    - family: InstrumentSans
+    # Body text (design/stitch DESIGN.md: Inter).
+    - family: Inter
       fonts:
-        - asset: assets/fonts/InstrumentSans-Regular.ttf
-        - asset: assets/fonts/InstrumentSans-SemiBold.ttf
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/InstrumentSans-Bold.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
-    - family: BigShouldersDisplay
+    # Headings, stamps and the wordmark: condensed capitals.
+    # Registered as 700 so bold requests use it as is (no faux bold) and the
+    # Georgian fallback in headings is bold too; see displayStyle().
+    - family: BebasNeue
       fonts:
-        - asset: assets/fonts/BigShouldersDisplay-Black.ttf
-          weight: 900
+        - asset: assets/fonts/BebasNeue-Regular.ttf
+          weight: 700
     # Georgian letters; used as a fallback by every text style (see theme.dart).
     - family: NotoSansGeorgian
       fonts:

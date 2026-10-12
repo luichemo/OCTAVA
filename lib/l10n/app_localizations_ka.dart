@@ -62,12 +62,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get authSignIn => 'შესვლა';
 
   @override
-  String get authHaveAccount => 'უკვე მაქვს ანგარიში';
-
-  @override
-  String get authNewAccount => 'ახალი ანგარიშის შექმნა';
-
-  @override
   String get authCheckEmail =>
       'შეამოწმე ელფოსტა: გამოგიგზავნეთ ბმული ანგარიშის დასადასტურებლად. გახსენი ის და შემდეგ აქ შედი.';
 
@@ -1182,4 +1176,41 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get errUndo =>
       'ბარათი ვერ დავაბრუნე. შეამოწმე ინტერნეტი და სცადე თავიდან.';
+
+  @override
+  String get authHeadline => 'გადაფურცლე. დაუკარი. შექმენი ბენდი.';
+
+  @override
+  String get authAgeTitle => 'მხოლოდ 16+ მუსიკოსები';
+
+  @override
+  String get authAgeBody =>
+      'რეგისტრაციით ადასტურებ, რომ 16 წლის ან უფროსი ხარ.';
+
+  @override
+  String bandFilled(int filled, int total) {
+    return '$filled / $total შევსებულია';
+  }
+
+  @override
+  String get navRecord => 'ჩაწერა';
+
+  @override
+  String get sectionTheme => 'თემა';
+
+  @override
+  String get themeLight => 'ნათელი';
+
+  @override
+  String get themeDark => 'მუქი';
+
+  @override
+  String get themeInfo =>
+      '„მოწყობილობის“ ნიშნავს ტელეფონის ან ბრაუზერის პარამეტრს.';
+
+  @override
+  String get themeToDark => 'მუქ რეჟიმზე გადართვა';
+
+  @override
+  String get themeToLight => 'ნათელ რეჟიმზე გადართვა';
 }

@@ -68,12 +68,15 @@ void main() {
       AuthScreen(auth: FakeAuthRepository()),
       locale: const Locale('en'),
     );
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Sign in'), findsOneWidget);
 
     await tester.tap(find.text('ქართული'));
     await tester.pumpAndSettle();
 
-    expect(find.text('შესვლა'), findsOneWidget); // Sign in
+    expect(
+      find.widgetWithText(FilledButton, 'შესვლა'),
+      findsOneWidget,
+    ); // Sign in
     expect(find.text('English'), findsOneWidget);
     expect(appLanguage.value, const Locale('ka'));
   });

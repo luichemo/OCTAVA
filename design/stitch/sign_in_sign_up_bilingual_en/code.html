@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'surface-container-high': '#e5e6ff', 'on-error-container': '#93000a', 'error-container': '#ffdad6', 'surface-dim': '#d4d7ff', 'on-tertiary-container': '#00323b', 'on-primary': '#ffffff', 'surface-tint': '#b7046c', 'on-surface': '#000f5d', 'surface-bright': '#fbf8ff', 'tertiary-fixed-dim': '#75d4eb', 'surface': '#fbf8ff', 'outline-variant': '#dfbec8', 'on-secondary-fixed-variant': '#534600', 'primary-fixed-dim': '#ffb0cc', 'outline': '#8b7078', 'tertiary-container': '#3aa0b6', 'on-tertiary-fixed-variant': '#004e5c', 'on-tertiary-fixed': '#001f26', 'primary': '#b7046c', 'primary-fixed': '#ffd9e4', 'surface-variant': '#dee0ff', 'surface-container-lowest': '#ffffff', 'secondary': '#6e5e00', 'on-error': '#ffffff', 'secondary-fixed-dim': '#e2c633', 'error': '#ba1a1a', 'background': '#fbf8ff', 'on-secondary-container': '#726200', 'on-secondary': '#ffffff', 'on-surface-variant': '#584048', 'surface-container-low': '#f4f2ff', 'inverse-primary': '#ffb0cc', 'on-tertiary': '#ffffff', 'inverse-on-surface': '#f0efff', 'secondary-fixed': '#ffe256', 'on-primary-fixed': '#3e0021', 'primary-container': '#ff4fa3', 'secondary-container': '#fddf4b', 'tertiary': '#006879', 'on-secondary-fixed': '#211b00', 'on-background': '#000f5d', 'inverse-surface': '#132480', 'surface-container-highest': '#dee0ff', 'on-primary-container': '#5d0034', 'tertiary-fixed': '#aaedff', 'surface-container': '#edecff', 'on-primary-fixed-variant': '#8d0051' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'margin-md': '1.5rem', 'space-sm': '0.5rem', 'space-xs': '0.25rem', 'space-lg': '1.5rem', 'space-2xl': '3rem', 'gutter': '1rem', 'margin-lg': '2.5rem', 'margin': '1rem', 'space-md': '1rem', 'space-xl': '2rem', 'gutter-md': '1.5rem' }, fontFamily: { 'display-hero': ['Bebas Neue'], 'display-hero-mobile': ['Bebas Neue'], 'title-lg': ['Inter'], 'headline-md': ['Bebas Neue'], 'body-md': ['Inter'], 'body-sm': ['Inter'], 'headline-lg': ['Bebas Neue'], 'caption': ['Inter'], 'label-pill': ['Inter'], 'label-stamp': ['Bebas Neue'], 'headline-lg-mobile': ['Bebas Neue'], 'title-md': ['Inter'], 'body-lg': ['Inter'] }, fontSize: { 'display-hero': ['64px', { lineHeight: '60px', letterSpacing: '0.05em', fontWeight: '400' }], 'display-hero-mobile': ['44px', { lineHeight: '44px', letterSpacing: '0.04em', fontWeight: '400' }], 'title-lg': ['20px', { lineHeight: '28px', fontWeight: '700' }], 'headline-md': ['24px', { lineHeight: '28px', letterSpacing: '0.03em', fontWeight: '400' }], 'body-md': ['14px', { lineHeight: '22px', fontWeight: '400' }], 'body-sm': ['12px', { lineHeight: '18px', fontWeight: '400' }], 'headline-lg': ['36px', { lineHeight: '38px', letterSpacing: '0.04em', fontWeight: '400' }], 'caption': ['11px', { lineHeight: '14px', fontWeight: '600' }], 'label-pill': ['13px', { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '700' }], 'label-stamp': ['20px', { lineHeight: '20px', letterSpacing: '0.08em', fontWeight: '400' }], 'headline-lg-mobile': ['28px', { lineHeight: '32px', letterSpacing: '0.03em', fontWeight: '400' }], 'title-md': ['16px', { lineHeight: '24px', fontWeight: '700' }], 'body-lg': ['16px', { lineHeight: '26px', fontWeight: '500' }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100%;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-full antialiased"><main class="flex-1 flex flex-col relative w-full pt-safe pb-safe bg-surface px-gutter"><div class="flex flex-col w-full pb-8">
+<!-- Top Navigation & Language Pill Switcher -->
+<div class="flex items-center justify-between w-full pt-2 pb-4">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-caption text-caption text-on-surface uppercase tracking-wider">LIVE AUDITIONS</span>
+</div>
+<!-- Language Selector EN / ქართ -->
+<div class="inline-flex items-center p-1 rounded-full bg-surface-container-high shadow-sm" id="langSwitcher">
+<button class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-pill text-label-pill shadow-sm transition-all duration-150" id="langEnBtn" onclick="switchLang('en')" type="button">
+        EN
+      </button>
+<button class="px-3 py-1 rounded-full text-on-surface-variant font-label-pill text-label-pill hover:text-on-surface transition-all duration-150" id="langKaBtn" onclick="switchLang('ka')" type="button">
+        ქართ
+      </button>
+</div>
+</div>
+<!-- Hero Gig Poster Block -->
+<div class="relative w-full rounded-2xl bg-surface-container-lowest p-5 shadow-md overflow-hidden mb-5">
+<!-- Decorative Riso Halftone Pattern Dots -->
+<div class="absolute -right-6 -bottom-6 w-32 h-32 opacity-15 pointer-events-none">
+<svg fill="none" height="100%" viewbox="0 0 100 100" width="100%">
+<pattern height="10" id="risoHalftone" patternunits="userSpaceOnUse" width="10" x="0" y="0">
+<circle cx="2" cy="2" fill="#000f5d" r="2"></circle>
+<circle cx="7" cy="7" fill="#ff4fa3" r="1.5"></circle>
+</pattern>
+<rect fill="url(#risoHalftone)" height="100" width="100"></rect>
+</svg>
+</div>
+<!-- Risograph Offset Badge -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-secondary-container text-on-secondary-container font-label-stamp text-label-stamp mb-2 rotate-[-1.5deg]">
+<span class="material-symbols-outlined text-[18px]">graphic_eq</span>
+<span>JAM RADAR V2.4</span>
+</div>
+<!-- Title and Graphic Waveform Identity -->
+<div class="flex items-baseline justify-between gap-2">
+<h1 class="font-display-hero-mobile text-display-hero-mobile text-on-surface tracking-wider uppercase leading-none">
+        OCTAVA
+      </h1>
+<!-- Musical Stem Waveform Mini Vis -->
+<div class="flex items-end gap-1 h-8 pb-1">
+<span class="w-1.5 h-3 rounded-full bg-primary-container animate-pulse"></span>
+<span class="w-1.5 h-6 rounded-full bg-tertiary-container"></span>
+<span class="w-1.5 h-8 rounded-full bg-secondary-container"></span>
+<span class="w-1.5 h-4 rounded-full bg-on-surface"></span>
+<span class="w-1.5 h-7 rounded-full bg-primary-container"></span>
+</div>
+</div>
+<p class="font-headline-md text-headline-md text-primary mt-1 tracking-wide leading-tight uppercase" id="heroTagline">
+      Tinder for Forming Bands
+    </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5" id="heroSubtext">
+      Find guitarists, drummers, synth-wizards, and lead vocals near you.
+    </p>
+</div>
+<!-- Roomy Segmented Auth Tabs (Prepared for Georgian Expansion) -->
+<div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-surface-container mb-5 shadow-sm">
+<button class="py-3 px-2 rounded-xl bg-primary text-on-primary font-label-pill text-label-pill text-center shadow-md transition-all duration-150" id="tabSignup" onclick="setAuthTab('signup')" type="button">
+<span id="tabSignupText">Create account</span>
+</button>
+<button class="py-3 px-2 rounded-xl text-on-surface-variant font-label-pill text-label-pill text-center hover:text-on-surface transition-all duration-150" id="tabSignin" onclick="setAuthTab('signin')" type="button">
+<span id="tabSigninText">Sign in</span>
+</button>
+</div>
+<!-- Interactive Form Container -->
+<div class="rounded-2xl bg-surface-container-lowest p-5 shadow-md flex flex-col gap-4 mb-4">
+<!-- Email Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-pill text-label-pill text-on-surface uppercase tracking-wide flex items-center justify-between" for="authEmail" id="lblEmail">
+<span>Email address</span>
+<span class="text-caption font-caption text-primary">STRICT PRIVACY</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-on-surface-variant text-[20px] pointer-events-none">mail</span>
+<input class="w-full min-h-[48px] py-3.5 pl-11 pr-4 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder-on-surface-variant/50 focus:bg-surface-bright focus:outline-none transition-colors shadow-sm" id="authEmail" placeholder="jam@riffbox.fm" type="email"/>
+</div>
+</div>
+<!-- Password Input with Reveal Toggle -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-pill text-label-pill text-on-surface uppercase tracking-wide" for="authPassword" id="lblPassword">
+          Password
+        </label>
+<button class="hidden font-body-sm text-body-sm text-primary font-semibold hover:underline" id="btnForgot" onclick="alert('Password reset link sent!')" type="button">
+          Forgot password?
+        </button>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-on-surface-variant text-[20px] pointer-events-none">lock</span>
+<input class="w-full min-h-[48px] py-3.5 pl-11 pr-12 rounded-xl bg-surface-container-low text-on-surface font-body-md text-body-md placeholder-on-surface-variant/50 focus:bg-surface-bright focus:outline-none transition-colors shadow-sm" id="authPassword" placeholder="At least 8 characters" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 p-1.5 text-on-surface-variant hover:text-on-surface transition-colors" onclick="togglePasswordVisibility()" type="button">
+<span class="material-symbols-outlined text-[20px]" id="passwordEyeIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Genre Intent Selector (Sign-up state highlight) -->
+<div class="flex flex-col gap-1.5 pt-1" id="genrePillRack">
+<span class="font-caption text-caption text-on-surface-variant uppercase tracking-wider" id="lblVibe">Your Main Gear</span>
+<div class="flex flex-wrap gap-1.5">
+<button class="px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-body-sm text-body-sm font-semibold shadow-sm active:scale-95 transition-transform" onclick="toggleGenrePill(this)" type="button">
+          ⚡ Electric Guitar
+        </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm active:scale-95 transition-transform" onclick="toggleGenrePill(this)" type="button">
+          🥁 Drums &amp; Perc
+        </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm active:scale-95 transition-transform" onclick="toggleGenrePill(this)" type="button">
+          🎹 Synth/Keys
+        </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm active:scale-95 transition-transform" onclick="toggleGenrePill(this)" type="button">
+          🎙️ Vocals
+        </button>
+</div>
+</div>
+<!-- Primary CTA Button -->
+<button class="w-full min-h-[52px] mt-2 py-3.5 px-6 rounded-xl bg-primary-container text-on-primary-container font-headline-md text-headline-md tracking-wider uppercase text-center shadow-md active:translate-x-0.5 active:translate-y-0.5 active:shadow-sm transition-all duration-100 flex items-center justify-center gap-2" id="primaryCta" onclick="handleAuthSubmit()" type="button">
+<span id="primaryCtaText">CREATE ACCOUNT</span>
+<span class="material-symbols-outlined text-[22px]">arrow_forward</span>
+</button>
+</div>
+<!-- Split Divider -->
+<div class="relative flex items-center justify-center my-3">
+<div class="w-full h-px bg-surface-container-high"></div>
+<span class="absolute px-3 py-0.5 rounded-full bg-surface text-on-surface-variant font-caption text-caption uppercase tracking-wider" id="orDivider">
+      OR CONNECT WITH
+    </span>
+</div>
+<!-- Social Sign Up Stack -->
+<div class="flex flex-col gap-2.5">
+<!-- Spotify Fast Track -->
+<button class="w-full min-h-[48px] py-3 px-4 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm active:translate-y-0.5 transition-all flex items-center justify-between" onclick="socialConnect('Spotify')" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-tertiary-container flex items-center justify-center text-on-tertiary">
+<span class="material-symbols-outlined text-[20px]">queue_music</span>
+</div>
+<span class="font-title-md text-title-md" id="txtSpotify">Continue with Spotify</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption">IMPORT STEMS</span>
+</button>
+<!-- Google Button -->
+<button class="w-full min-h-[48px] py-3 px-4 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm active:translate-y-0.5 transition-all flex items-center justify-between" onclick="socialConnect('Google')" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</div>
+<span class="font-title-md text-title-md" id="txtGoogle">Continue with Google</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</button>
+<!-- Apple Button -->
+<button class="w-full min-h-[48px] py-3 px-4 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm active:translate-y-0.5 transition-all flex items-center justify-between" onclick="socialConnect('Apple')" type="button">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-inverse-on-surface">
+<span class="material-symbols-outlined text-[20px]">token</span>
+</div>
+<span class="font-title-md text-title-md" id="txtApple">Continue with Apple</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</button>
+</div>
+<!-- Riso Community Badges & Terms Note -->
+<div class="mt-6 rounded-2xl bg-surface-container-low p-4 flex flex-col gap-2 shadow-sm text-center">
+<div class="flex items-center justify-center gap-2">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-stamp text-label-stamp">
+        16+ MUSICIANS ONLY
+      </span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-caption text-caption">
+        NO GHOST PRODUCERS
+      </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed" id="legalText">
+      By plugging in, you verify you are 16+ and agree to OCTAVA's 
+      <a class="text-primary font-semibold hover:underline" href="#terms">Jam Code of Conduct</a> &amp; 
+      <a class="text-primary font-semibold hover:underline" href="#privacy">Privacy Charter</a>.
+    </p>
+</div>
+</div>
+<script>
+  let currentLanguage = 'en';
+  let currentAuthMode = 'signup';
+
+  const i18n = {
+    en: {
+      tagline: 'Tinder for Forming Bands',
+      subtext: 'Find guitarists, drummers, synth-wizards, and lead vocals near you.',
+      tabSignup: 'Create account',
+      tabSignin: 'Sign in',
+      lblEmail: 'Email address',
+      lblPassword: 'Password',
+      pwdPlaceholder: 'At least 8 characters',
+      ctaSignup: 'CREATE ACCOUNT',
+      ctaSignin: 'SIGN IN TO REHEARSE',
+      divider: 'OR CONNECT WITH',
+      spotify: 'Continue with Spotify',
+      google: 'Continue with Google',
+      apple: 'Continue with Apple',
+      legal: "By plugging in, you verify you are 16+ and agree to OCTAVA's Jam Code of Conduct & Privacy Charter."
+    },
+    ka: {
+      tagline: 'ტინდერი მუსიკალური ბენდებისთვის',
+      subtext: 'იპოვე გიტარისტები, დრამერები, სინთ-ოსტატები და ვოკალისტები შენს ქალაქში.',
+      tabSignup: 'ანგარიშის შექმნა',
+      tabSignin: 'შესვლა',
+      lblEmail: 'ელფოსტის მისამართი',
+      lblPassword: 'პაროლი',
+      pwdPlaceholder: 'მინიმუმ 8 სიმბოლო',
+      ctaSignup: 'ანგარიშის შექმნა',
+      ctaSignin: 'შესვლა რეპეტიციაზე',
+      divider: 'ან გააგრძელეთ',
+      spotify: 'Spotify-ით გაგრძელება',
+      google: 'Google-ით გაგრძელება',
+      apple: 'Apple-ით გაგრძელება',
+      legal: "დარეგისტრირებით თქვენ ადასტურებთ, რომ ხართ 16+ წლის და ეთანხმებით OCTAVA-ს სარეპეტიციო წესებსა და კონფიდენციალურობას."
+    }
+  };
+
+  function switchLang(lang) {
+    currentLanguage = lang;
+    const enBtn = document.getElementById('langEnBtn');
+    const kaBtn = document.getElementById('langKaBtn');
+    
+    if (lang === 'en') {
+      enBtn.className = 'px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-pill text-label-pill shadow-sm transition-all duration-150';
+      kaBtn.className = 'px-3 py-1 rounded-full text-on-surface-variant font-label-pill text-label-pill hover:text-on-surface transition-all duration-150';
+    } else {
+      kaBtn.className = 'px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-pill text-label-pill shadow-sm transition-all duration-150';
+      enBtn.className = 'px-3 py-1 rounded-full text-on-surface-variant font-label-pill text-label-pill hover:text-on-surface transition-all duration-150';
+    }
+
+    applyTranslations();
+  }
+
+  function applyTranslations() {
+    const data = i18n[currentLanguage];
+    document.getElementById('heroTagline').innerText = data.tagline;
+    document.getElementById('heroSubtext').innerText = data.subtext;
+    document.getElementById('tabSignupText').innerText = data.tabSignup;
+    document.getElementById('tabSigninText').innerText = data.tabSignin;
+    document.getElementById('lblEmail').children[0].innerText = data.lblEmail;
+    document.getElementById('lblPassword').innerText = data.lblPassword;
+    document.getElementById('authPassword').setAttribute('placeholder', data.pwdPlaceholder);
+    document.getElementById('orDivider').innerText = data.divider;
+    document.getElementById('txtSpotify').innerText = data.spotify;
+    document.getElementById('txtGoogle').innerText = data.google;
+    document.getElementById('txtApple').innerText = data.apple;
+    document.getElementById('legalText').innerHTML = data.legal;
+
+    const ctaText = document.getElementById('primaryCtaText');
+    ctaText.innerText = currentAuthMode === 'signup' ? data.ctaSignup : data.ctaSignin;
+  }
+
+  function setAuthTab(mode) {
+    currentAuthMode = mode;
+    const tabSignup = document.getElementById('tabSignup');
+    const tabSignin = document.getElementById('tabSignin');
+    const genreRack = document.getElementById('genrePillRack');
+    const btnForgot = document.getElementById('btnForgot');
+    const ctaText = document.getElementById('primaryCtaText');
+
+    if (mode === 'signup') {
+      tabSignup.className = 'py-3 px-2 rounded-xl bg-primary text-on-primary font-label-pill text-label-pill text-center shadow-md transition-all duration-150';
+      tabSignin.className = 'py-3 px-2 rounded-xl text-on-surface-variant font-label-pill text-label-pill text-center hover:text-on-surface transition-all duration-150';
+      genreRack.classList.remove('hidden');
+      btnForgot.classList.add('hidden');
+      ctaText.innerText = i18n[currentLanguage].ctaSignup;
+    } else {
+      tabSignin.className = 'py-3 px-2 rounded-xl bg-primary text-on-primary font-label-pill text-label-pill text-center shadow-md transition-all duration-150';
+      tabSignup.className = 'py-3 px-2 rounded-xl text-on-surface-variant font-label-pill text-label-pill text-center hover:text-on-surface transition-all duration-150';
+      genreRack.classList.add('hidden');
+      btnForgot.classList.remove('hidden');
+      ctaText.innerText = i18n[currentLanguage].ctaSignin;
+    }
+  }
+
+  function togglePasswordVisibility() {
+    const input = document.getElementById('authPassword');
+    const icon = document.getElementById('passwordEyeIcon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.innerText = 'visibility_off';
+    } else {
+      input.type = 'password';
+      icon.innerText = 'visibility';
+    }
+  }
+
+  function toggleGenrePill(btn) {
+    const isSelected = btn.classList.contains('bg-secondary-container');
+    if (isSelected) {
+      btn.className = 'px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm active:scale-95 transition-transform';
+    } else {
+      btn.className = 'px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-body-sm text-body-sm font-semibold shadow-sm active:scale-95 transition-transform';
+    }
+  }
+
+  function handleAuthSubmit() {
+    const email = document.getElementById('authEmail').value.trim();
+    if (!email) {
+      alert(currentLanguage === 'en' ? 'Please enter your email to proceed to the greenroom!' : 'გთხოვთ შეიყვანოთ ელფოსტა!');
+      return;
+    }
+    const action = currentAuthMode === 'signup' ? 'Account created' : 'Signed in';
+    alert(`${action}! Welcome to the rehearsal space: ${email}`);
+  }
+
+  function socialConnect(provider) {
+    alert(`Connecting with ${provider}... Loading musical profile sync.`);
+  }
+</script></main></body></html>

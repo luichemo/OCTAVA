@@ -34,6 +34,7 @@ class BandLineup extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
     final scrolls = band.length > _fitSlots;
+    final filled = band.where((s) => s.member != null).length;
     final slots = [
       // `(i, (:role, member: who))` unpacks the index and the record's
       // fields, like `[i, { role, member: who }]` destructuring in JS.
@@ -43,82 +44,91 @@ class BandLineup extends StatelessWidget {
           key: ValueKey('$i-$role-$who'),
           tween: Tween(begin: i == justFilled && !reduceMotion ? 1 : 0, end: 0),
           duration: const Duration(milliseconds: 700),
-          builder: (context, flash, _) => Container(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: BoxDecoration(
-              color: who != null
-                  ? Color.lerp(
-                      colors.surfaceContainer,
-                      OctavaColors.pink,
-                      flash,
+          builder: (context, flash, _) {
+            // You: a white slot. Members: pink, flashing yellow as they
+            // arrive. Open: an empty outline.
+            final you = who == youMarker;
+            final member = who != null && !you;
+            final fill = member
+                ? Color.lerp(OctavaColors.pink, OctavaColors.yellow, flash)!
+                : you
+                ? colors.surfaceContainer
+                : Colors.transparent;
+            final text = member ? OctavaColors.ink : colors.onSurface;
+            return Container(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: who == null
+                  ? BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colors.outlineVariant,
+                        width: 2,
+                      ),
                     )
-                  : null,
-              border: Border.all(
-                color: who != null ? colors.outline : colors.outlineVariant,
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                // Long names (e.g. Georgian "დასარტყამები") shrink to
-                // fit the slot instead of wrapping.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      instrumentLabel(role),
-                      maxLines: 1,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                  : printBox(
+                      context,
+                      color: fill,
+                      radius: 12,
+                      shadow: 2,
+                      borderColor: member ? OctavaColors.ink : null,
+                    ),
+              child: Column(
+                children: [
+                  // Long names (e.g. Georgian "დასარტყამები") shrink to
+                  // fit the slot instead of wrapping.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        instrumentLabel(role),
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: who == null ? colors.onSurfaceVariant : text,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                // "Open" shrinks to fit (it's long in Georgian);
-                // member names end with "…" instead.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: who == null
-                      ? FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            context.t.slotOpen,
+                  // "Open" shrinks to fit (it's long in Georgian);
+                  // member names end with "…" instead.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: who == null
+                        ? FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              context.t.slotOpen,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            you ? context.t.slotYou : who,
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
-                              color: colors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                              color: you ? OctavaColors.pink : text,
                             ),
                           ),
-                        )
-                      : Text(
-                          who == youMarker ? context.t.slotYou : who,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                ),
-              ],
-            ),
-          ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
     ];
-    final title = Text(
-      context.t.yourBand,
-      style: TextStyle(
-        color: colors.onSurfaceVariant,
-        fontWeight: FontWeight.w600,
-        fontSize: 14,
-      ),
-    );
     final row = scrolls
         ? SingleChildScrollView(
             scrollDirection: Axis.horizontal,
+            // Room for the slots' hard shadows.
+            padding: const EdgeInsets.only(bottom: 2, right: 2),
             child: Row(
               spacing: 6,
               children: [
@@ -131,35 +141,47 @@ class BandLineup extends StatelessWidget {
             children: [for (final slot in slots) Expanded(child: slot)],
           );
     final edit = onEdit;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (edit == null)
-          title
-        else
-          // The title doubles as the button, like the filter summary.
+    return Container(
+      decoration: printBox(context, radius: 20),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           InkWell(
             onTap: edit,
             borderRadius: BorderRadius.circular(8),
-            child: Tooltip(
-              message: context.t.bandEdit,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 4,
-                children: [
-                  title,
-                  Icon(
-                    Icons.edit_outlined,
-                    size: 16,
-                    color: colors.onSurfaceVariant,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.t.yourBand,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: displayStyle(size: 22, color: colors.onSurface),
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  context.t.bandFilled(filled, band.length),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: OctavaColors.pink,
+                  ),
+                ),
+                if (edit != null)
+                  IconButton(
+                    tooltip: context.t.bandEdit,
+                    onPressed: edit,
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                  ),
+              ],
             ),
           ),
-        const SizedBox(height: 6),
-        if (edit == null) row else GestureDetector(onTap: edit, child: row),
-      ],
+          const SizedBox(height: 6),
+          if (edit == null) row else GestureDetector(onTap: edit, child: row),
+        ],
+      ),
     );
   }
 }

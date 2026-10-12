@@ -3,12 +3,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
+import 'data/theme_setting.dart';
 import 'l10n/l10n.dart';
 import 'screens/auth_gate.dart';
 import 'theme.dart';
 
 // `async` + `await`: work like in TypeScript. Supabase and the saved language
-// must be ready before the first screen draws, so main waits for them.
+// and theme must be ready before the first screen draws, so main waits.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
@@ -16,6 +17,7 @@ Future<void> main() async {
     publishableKey: SupabaseConfig.publishableKey,
   );
   await appLanguage.load();
+  await appTheme.load();
   runApp(const OctavaApp());
 }
 
@@ -27,15 +29,16 @@ class OctavaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rebuilds the whole app when someone picks another language.
-    return ValueListenableBuilder<Locale?>(
-      valueListenable: appLanguage,
-      builder: (context, chosen, _) => MaterialApp(
+    // Rebuilds the whole app when someone picks another language or theme.
+    return ListenableBuilder(
+      listenable: Listenable.merge([appLanguage, appTheme]),
+      builder: (context, _) => MaterialApp(
         title: 'OCTAVA',
         debugShowCheckedModeBanner: false,
         theme: octavaTheme(Brightness.light),
         darkTheme: octavaTheme(Brightness.dark),
-        locale: chosen,
+        themeMode: appTheme.value,
+        locale: appLanguage.value,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [
           AppLocalizations.delegate,

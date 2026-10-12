@@ -15,6 +15,7 @@ import '../data/live_updates.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
+import '../data/theme_setting.dart';
 import '../models/band.dart';
 import '../models/deck_filters.dart';
 import '../models/musician.dart';
@@ -463,7 +464,6 @@ class _SwipeScreenState extends State<SwipeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final canSwipe = !_loading && _loadError == null && _queue.isNotEmpty;
 
     // Arrow keys mirror the buttons (useful in the browser preview).
@@ -490,32 +490,45 @@ class _SwipeScreenState extends State<SwipeScreen>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
+                        // Space the wordmark doesn't use goes in the middle,
+                        // so the filter pill stays at the right edge.
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'OCTAVA',
-                            style: displayStyle(color: colors.onSurface)
-                                .copyWith(letterSpacing: 0.6),
+                          // The wordmark gives way first on narrow screens.
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'OCTAVA',
+                                style: displayStyle(
+                                  size: 40,
+                                  color: OctavaColors.pink,
+                                ),
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
+                            flex: 2,
                             child: Align(
                               alignment: Alignment.centerRight,
-                              // The summary is also the way into the filters.
-                              child: TextButton.icon(
-                                onPressed: _loading ? null : _openFilters,
-                                icon: const Icon(Icons.tune_rounded, size: 18),
-                                label: Text(
-                                  _filters.describe(hasLocation: _hasLocation),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: colors.onSurfaceVariant,
-                                  textStyle: const TextStyle(fontSize: 14),
-                                  visualDensity: VisualDensity.compact,
-                                ),
+                              // The summary is also the way into the filters:
+                              // a yellow printed pill.
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 8,
+                                children: [
+                                  const _ThemeButton(),
+                                  Flexible(
+                                    child: _FilterPill(
+                                      label: _filters.describe(
+                                        hasLocation: _hasLocation,
+                                      ),
+                                      onTap: _loading ? null : _openFilters,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -825,17 +838,42 @@ class _BottomBar extends StatelessWidget {
             ),
           if (onRecord != null)
             Expanded(
-              child: Center(
-                child: IconButton.filled(
-                  tooltip: context.t.navAdd,
-                  onPressed: onRecord,
-                  style: IconButton.styleFrom(
-                    backgroundColor: OctavaColors.pink,
-                    foregroundColor: OctavaColors.ink,
-                    minimumSize: const Size(56, 56),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Pink on a yellow hard shadow, like the design's main key.
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: hardShadow(OctavaColors.yellow),
+                    ),
+                    child: IconButton.filled(
+                      tooltip: context.t.navAdd,
+                      onPressed: onRecord,
+                      style: IconButton.styleFrom(
+                        backgroundColor: OctavaColors.pink,
+                        foregroundColor: OctavaColors.ink,
+                        minimumSize: const Size(56, 56),
+                        side: const BorderSide(
+                          color: OctavaColors.ink,
+                          width: 2,
+                        ),
+                      ),
+                      icon: const Icon(Icons.add_rounded, size: 32),
+                    ),
                   ),
-                  icon: const Icon(Icons.add_rounded, size: 32),
-                ),
+                  const SizedBox(height: 4),
+                  ExcludeSemantics(
+                    child: Text(
+                      context.t.navRecord,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           if (onMatches != null)
@@ -849,6 +887,87 @@ class _BottomBar extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Sun or moon: one tap switches between light and dark. ("Device", which
+/// follows the phone, is in the profile's Theme section.)
+class _ThemeButton extends StatelessWidget {
+  const _ThemeButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: printBox(context, radius: 999, shadow: 2),
+      child: IconButton(
+        tooltip: dark ? t.themeToLight : t.themeToDark,
+        visualDensity: VisualDensity.compact,
+        onPressed: () =>
+            appTheme.choose(dark ? ThemeMode.light : ThemeMode.dark),
+        icon: Icon(
+          dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
+
+/// The filter summary as a yellow pill with a hard shadow.
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: printBox(
+              context,
+              color: OctavaColors.yellow,
+              radius: 999,
+              shadow: 2,
+              borderColor: OctavaColors.ink,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                const Icon(
+                  Icons.tune_rounded,
+                  size: 18,
+                  color: OctavaColors.ink,
+                ),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: OctavaColors.ink,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

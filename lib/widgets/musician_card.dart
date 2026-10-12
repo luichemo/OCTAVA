@@ -60,11 +60,7 @@ class MusicianCard extends StatelessWidget {
       label: context.t.cardSemantics(m.name, m.age, m.instrument.toLowerCase()),
       child: Container(
         clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: colors.surfaceContainer,
-          border: Border.all(color: colors.outline, width: 2),
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: printBox(context, radius: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -87,6 +83,57 @@ class MusicianCard extends StatelessWidget {
                         child: AvatarImage(
                           avatars: avatars!,
                           path: m.avatarPath!,
+                        ),
+                      ),
+                    ),
+                  if (fitsOpenSlot)
+                    Positioned(
+                      top: 14,
+                      left: 14,
+                      right: 64,
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Transform.rotate(
+                          angle: -2 * pi / 180,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: printBox(
+                              context,
+                              color: OctavaColors.pink,
+                              radius: 999,
+                              shadow: 2,
+                              borderColor: OctavaColors.ink,
+                              shadowColor: OctavaColors.ink,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 4,
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 16,
+                                  color: OctavaColors.ink,
+                                ),
+                                Flexible(
+                                  child: Text(
+                                    context.t.fitsSlot(
+                                      m.instrument.toLowerCase(),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: OctavaColors.ink,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -148,27 +195,16 @@ class MusicianCard extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
                     children: [
-                      Text(
-                        context.t.nameAge(m.name, m.age),
-                        style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          m.whereText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: colors.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.end,
+                          context.t.nameAge(m.name, m.age),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: displayStyle(
+                            size: 30,
+                            color: colors.onSurface,
+                          ),
                         ),
                       ),
                       if (onSafety != null)
@@ -181,35 +217,79 @@ class MusicianCard extends StatelessWidget {
                         ),
                     ],
                   ),
-                  if (fitsOpenSlot)
+                  // Where they are, as a small outlined pill.
+                  if (m.whereText.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 2,
                       ),
-                      decoration: BoxDecoration(
-                        color: colors.tertiaryContainer,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        context.t.fitsSlot(m.instrument.toLowerCase()),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      decoration: printBox(context, radius: 999, shadow: 0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 4,
+                        children: [
+                          Icon(
+                            Icons.near_me_outlined,
+                            size: 14,
+                            color: colors.onSurfaceVariant,
+                          ),
+                          Flexible(
+                            child: Text(
+                              m.whereText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   if (m.clipSeconds != null) _Clip(musician: m, player: player),
                   if (m.genres.isNotEmpty)
-                    Text(
-                      context.t.plays(
+                    // Genre pills in the three spot inks, in turn.
+                    Semantics(
+                      label: context.t.plays(
                         listJoin([for (final g in m.genres) genreLabel(g)]),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 15),
+                      child: ExcludeSemantics(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            for (final (i, g) in m.genres.take(4).indexed)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 3,
+                                ),
+                                decoration: printBox(
+                                  context,
+                                  color: const [
+                                    OctavaColors.yellow,
+                                    OctavaColors.aqua,
+                                    OctavaColors.pinkTint,
+                                  ][i % 3],
+                                  radius: 999,
+                                  shadow: 2,
+                                  borderColor: OctavaColors.ink,
+                                ),
+                                child: Text(
+                                  genreLabel(g),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: OctavaColors.ink,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   if (!compact && m.links.isNotEmpty)
                     Wrap(
@@ -362,51 +442,67 @@ class _Clip extends StatelessWidget {
     final seconds = musician.clipSeconds!;
     final bars = musician.waveform;
     final lit = (progress * bars.length).floor();
-    return Row(
-      spacing: 10,
-      children: [
-        IconButton.outlined(
-          onPressed: onPressed,
-          tooltip: onPressed == null
-              ? context.t.noClip
-              : (playing
-                    ? context.t.stopClipOf(musician.name)
-                    : context.t.playClipOf(musician.name)),
-          icon: Icon(playing ? Icons.stop_rounded : Icons.play_arrow_rounded),
-        ),
-        Expanded(
-          child: SizedBox(
-            height: 32,
-            child: Row(
-              spacing: 2,
-              children: [
-                for (final (i, h) in bars.indexed)
-                  Expanded(
-                    child: FractionallySizedBox(
-                      heightFactor: h,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: i < lit
-                              ? OctavaColors.pink
-                              : colors.outlineVariant,
-                          borderRadius: BorderRadius.circular(2),
+    // A small "audio stem" player on its own printed strip.
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
+      decoration: printBox(
+        context,
+        color: colors.surface,
+        radius: 18,
+        shadow: 2,
+      ),
+      child: Row(
+        spacing: 10,
+        children: [
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: OctavaColors.pink,
+              foregroundColor: OctavaColors.ink,
+              disabledBackgroundColor: colors.outlineVariant,
+              side: const BorderSide(color: OctavaColors.ink, width: 2),
+            ),
+            onPressed: onPressed,
+            tooltip: onPressed == null
+                ? context.t.noClip
+                : (playing
+                      ? context.t.stopClipOf(musician.name)
+                      : context.t.playClipOf(musician.name)),
+            icon: Icon(playing ? Icons.stop_rounded : Icons.play_arrow_rounded),
+          ),
+          Expanded(
+            child: SizedBox(
+              height: 32,
+              child: Row(
+                spacing: 2,
+                children: [
+                  for (final (i, h) in bars.indexed)
+                    Expanded(
+                      child: FractionallySizedBox(
+                        heightFactor: h,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: i < lit
+                                ? OctavaColors.pink
+                                : colors.outlineVariant,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        Text(
-          '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
-          style: TextStyle(
-            fontSize: 13,
-            color: colors.onSurfaceVariant,
-            fontFeatures: const [FontFeature.tabularFigures()],
+          Text(
+            '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
+            style: TextStyle(
+              fontSize: 13,
+              color: colors.onSurfaceVariant,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

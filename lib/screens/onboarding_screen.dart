@@ -22,6 +22,7 @@ import 'card_preview_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../widgets/language_picker.dart';
+import '../widgets/theme_picker.dart';
 
 /// The profile form. First-time setup asks for the date of birth (once, can't
 /// be changed); given [initial], it edits an existing profile instead and adds
@@ -294,7 +295,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               key: _formKey,
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                children: [
+                children: _sectionCards([
                   Text(
                     _editing
                         ? context.t.profileTitle
@@ -581,10 +582,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   if (_editing) ...[
                     _Section(context.t.sectionLanguage),
                     const LanguageSection(),
+                    _Section(context.t.sectionTheme),
+                    const ThemeSection(),
                   ],
+                  const _EndOfSections(),
                   if (_error != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.only(top: 16),
                       child: Text(
                         _error!,
                         style: TextStyle(
@@ -593,8 +597,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ),
                     ),
-                  const SizedBox(height: 20),
-                  FilledButton(
+                  const SizedBox(height: 28),
+                  PrintButton(
                     onPressed: _saving ? null : _submit,
                     child: _saving
                         ? const SizedBox.square(
@@ -607,7 +611,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 : context.t.createProfile,
                           ),
                   ),
-                ],
+                ]),
               ),
             ),
           ),
@@ -621,18 +625,82 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 String formatDate(DateTime d) =>
     DateFormat.yMMMMd(L10n.current.localeName).format(d);
 
+/// A section heading. [_sectionCards] puts it, and everything after it up
+/// to the next heading, on one printed card.
 class _Section extends StatelessWidget {
   const _Section(this.title);
   final String title;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 28, bottom: 12),
-    child: Text(
-      title,
-      style: displayStyle(
-        size: 28,
-        color: Theme.of(context).colorScheme.onSurface,
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(
+      spacing: 10,
+      children: [
+        Container(width: 6, height: 24, color: OctavaColors.pink),
+        Expanded(
+          child: Text(
+            title,
+            style: displayStyle(
+              size: 30,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Marks where the last section's card ends (the save button comes after).
+class _EndOfSections extends StatelessWidget {
+  const _EndOfSections();
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+}
+
+/// Groups the form into cards: each [_Section] and the widgets after it,
+/// until the next one or [_EndOfSections]. Widgets before the first
+/// heading (the title and warnings) stay as they are.
+List<Widget> _sectionCards(List<Widget> children) {
+  final out = <Widget>[];
+  List<Widget>? card;
+  void finish() {
+    if (card case final c?) out.add(_SectionCard(children: c));
+    card = null;
+  }
+
+  for (final w in children) {
+    if (w is _Section) {
+      finish();
+      card = [w];
+    } else if (w is _EndOfSections) {
+      finish();
+    } else if (card case final c?) {
+      c.add(w);
+    } else {
+      out.add(w);
+    }
+  }
+  finish();
+  return out;
+}
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 20),
+    child: Container(
+      decoration: printBox(context, radius: 24),
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     ),
   );
@@ -646,13 +714,14 @@ class _NoClipsWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    // Yellow in both modes, so the text stays dark ink.
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.tertiaryContainer,
-        border: Border.all(color: OctavaColors.pink, width: 2),
-        borderRadius: BorderRadius.circular(16),
+      decoration: printBox(
+        context,
+        color: OctavaColors.yellow,
+        radius: 20,
+        borderColor: OctavaColors.ink,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -661,19 +730,22 @@ class _NoClipsWarning extends StatelessWidget {
           Row(
             spacing: 8,
             children: [
-              const Icon(Icons.visibility_off_outlined),
+              const Icon(
+                Icons.visibility_off_outlined,
+                color: OctavaColors.ink,
+              ),
               Expanded(
                 child: Text(
                   context.t.noClipsTitle,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: displayStyle(size: 26, color: OctavaColors.ink),
                 ),
               ),
             ],
           ),
-          Text(context.t.noClipsBody),
+          Text(
+            context.t.noClipsBody,
+            style: const TextStyle(color: OctavaColors.ink, height: 1.5),
+          ),
           FilledButton.icon(
             onPressed: onRecord,
             icon: const Icon(Icons.mic_rounded),

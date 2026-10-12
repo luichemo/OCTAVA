@@ -62,12 +62,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authSignIn => 'Sign in';
 
   @override
-  String get authHaveAccount => 'I already have an account';
-
-  @override
-  String get authNewAccount => 'Create a new account';
-
-  @override
   String get authCheckEmail =>
       'Check your email: we sent you a link to confirm your account. Open it, then sign in here.';
 
@@ -1192,4 +1186,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errUndo =>
       'Couldn\'t bring the card back. Check your connection and try again.';
+
+  @override
+  String get authHeadline => 'Swipe. Jam. Form a band.';
+
+  @override
+  String get authAgeTitle => '16+ musicians only';
+
+  @override
+  String get authAgeBody => 'By joining, you confirm you\'re 16 or older.';
+
+  @override
+  String bandFilled(int filled, int total) {
+    return '$filled of $total filled';
+  }
+
+  @override
+  String get navRecord => 'Record';
+
+  @override
+  String get sectionTheme => 'Theme';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeInfo => '\"Device\" follows your phone or browser setting.';
+
+  @override
+  String get themeToDark => 'Switch to dark mode';
+
+  @override
+  String get themeToLight => 'Switch to light mode';
 }

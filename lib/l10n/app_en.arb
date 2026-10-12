@@ -17,8 +17,6 @@
   "authPasswordShort": "Use at least 8 characters",
   "authCreateAccount": "Create account",
   "authSignIn": "Sign in",
-  "authHaveAccount": "I already have an account",
-  "authNewAccount": "Create a new account",
   "authCheckEmail": "Check your email: we sent you a link to confirm your account. Open it, then sign in here.",
   "errEmailTaken": "There is already an account with this email. Sign in instead.",
   "errBadLogin": "That email and password don't match an account.",
@@ -643,5 +641,26 @@
   },
   "errUnmatch": "Couldn't unmatch. Check your connection and try again.",
   "undo": "Undo",
-  "errUndo": "Couldn't bring the card back. Check your connection and try again."
+  "errUndo": "Couldn't bring the card back. Check your connection and try again.",
+  "authHeadline": "Swipe. Jam. Form a band.",
+  "authAgeTitle": "16+ musicians only",
+  "authAgeBody": "By joining, you confirm you're 16 or older.",
+  "bandFilled": "{filled} of {total} filled",
+  "@bandFilled": {
+    "placeholders": {
+      "filled": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "navRecord": "Record",
+  "sectionTheme": "Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeInfo": "\"Device\" follows your phone or browser setting.",
+  "themeToDark": "Switch to dark mode",
+  "themeToLight": "Switch to light mode"
 }

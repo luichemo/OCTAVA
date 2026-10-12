@@ -200,18 +200,6 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get authSignIn;
 
-  /// No description provided for @authHaveAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'I already have an account'**
-  String get authHaveAccount;
-
-  /// No description provided for @authNewAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a new account'**
-  String get authNewAccount;
-
   /// No description provided for @authCheckEmail.
   ///
   /// In en, this message translates to:
@@ -2155,6 +2143,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t bring the card back. Check your connection and try again.'**
   String get errUndo;
+
+  /// No description provided for @authHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe. Jam. Form a band.'**
+  String get authHeadline;
+
+  /// No description provided for @authAgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'16+ musicians only'**
+  String get authAgeTitle;
+
+  /// No description provided for @authAgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'By joining, you confirm you\'re 16 or older.'**
+  String get authAgeBody;
+
+  /// No description provided for @bandFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'{filled} of {total} filled'**
+  String bandFilled(int filled, int total);
+
+  /// No description provided for @navRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get navRecord;
+
+  /// No description provided for @sectionTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get sectionTheme;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Device\" follows your phone or browser setting.'**
+  String get themeInfo;
+
+  /// No description provided for @themeToDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark mode'**
+  String get themeToDark;
+
+  /// No description provided for @themeToLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to light mode'**
+  String get themeToLight;
 }
 
 class _AppLocalizationsDelegate

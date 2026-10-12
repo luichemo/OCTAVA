@@ -153,6 +153,8 @@ void main() {
     expect(find.widgetWithText(Chip, 'Guitar'), findsOneWidget);
     expect(find.widgetWithText(Chip, 'Vocals'), findsNothing);
 
+    await tester.ensureVisible(find.text('Change roles'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Change roles'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('more-guitar')));
