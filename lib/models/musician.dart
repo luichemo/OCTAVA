@@ -13,6 +13,7 @@ class Musician {
     required this.name,
     required this.age,
     this.instrumentId,
+    this.otherInstruments = const [],
     this.area,
     this.km,
     this.genres = const [],
@@ -38,6 +39,11 @@ class Musician {
       name: row['display_name'] as String,
       age: row['age'] as int,
       instrumentId: primary?['instrument'] as String?,
+      otherInstruments: sortBySkill([
+        for (final i in instruments)
+          if (i != primary)
+            (id: i['instrument'] as String, skill: i['skill'] as String),
+      ]),
       area: row['area'] as String?,
       km: (row['distance_km'] as num?)?.toDouble(),
       genres: (row['genres'] as List? ?? const []).cast<String>(),
@@ -63,6 +69,10 @@ class Musician {
 
   /// Main instrument's label in the app's language, e.g. "Drums".
   String get instrument => instrumentLabel(instrumentId);
+
+  /// The other instruments they play, best first: "Also: Guitar · Pro".
+  /// (A record type: `(id: 'guitar', skill: 'pro')`, like a small tuple.)
+  final List<({String id, String skill})> otherInstruments;
   final String? area;
 
   /// Distance from you; null when either of you hasn't shared a location.
@@ -118,6 +128,20 @@ class Musician {
 
   /// 0, 1 or 2: which portrait colour this card uses.
   int get toneIndex => _seed % 3;
+}
+
+/// Highest skill first; equal skills keep their order.
+List<({String id, String skill})> sortBySkill(
+  List<({String id, String skill})> instruments,
+) {
+  final rank = skillLabels.keys.toList(); // lowest to highest
+  // List.sort isn't guaranteed stable, so sort index pairs.
+  final indexed = instruments.indexed.toList()
+    ..sort((a, b) {
+      final bySkill = rank.indexOf(b.$2.skill) - rank.indexOf(a.$2.skill);
+      return bySkill != 0 ? bySkill : a.$1 - b.$1;
+    });
+  return [for (final (_, i) in indexed) i];
 }
 
 /// "a", "a and b", "a, b and c".

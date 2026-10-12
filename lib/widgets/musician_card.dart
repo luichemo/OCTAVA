@@ -220,6 +220,22 @@ class MusicianCard extends StatelessWidget {
                         ),
                     ],
                   ),
+                  if (m.otherInstruments.isNotEmpty)
+                    Text(
+                      context.t.cardAlsoPlays(
+                        [
+                          for (final i in m.otherInstruments)
+                            '${instrumentLabel(i.id)} · ${skillLabels[i.skill] ?? i.skill}',
+                        ].join(', '),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
                   // Where they are, as a small outlined pill.
                   if (m.whereText.isNotEmpty)
                     Container(

@@ -219,6 +219,11 @@ class SupabaseProfileRepository implements ProfileRepository {
         name: draft.displayName,
         age: now.year - born.year - (hadBirthday ? 0 : 1),
         instrumentId: draft.instruments.keys.firstOrNull,
+        otherInstruments: sortBySkill([
+          for (final MapEntry(key: id, value: skill)
+              in draft.instruments.entries.skip(1))
+            (id: id, skill: skill),
+        ]),
         area: draft.area.isEmpty ? null : draft.area,
         genres: draft.genres,
         lookingFor: draft.lookingFor.isEmpty ? null : draft.lookingFor,

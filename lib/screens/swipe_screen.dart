@@ -486,7 +486,7 @@ class _SwipeScreenState extends State<SwipeScreen>
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -585,7 +585,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                       if (widget.onOpenProfile != null ||
                           widget.onOpenMatches != null ||
                           widget.onRecord != null) ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         _BottomBar(
                           onProfile: widget.onOpenProfile == null
                               ? null
@@ -822,7 +822,7 @@ class _BottomBar extends StatelessWidget {
           top: BorderSide(color: colors.outlineVariant, width: 1.5),
         ),
       ),
-      padding: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.only(top: 4),
       child: Row(
         children: [
           if (onProfile != null)
@@ -833,42 +833,28 @@ class _BottomBar extends StatelessWidget {
             ),
           if (onRecord != null)
             Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Pink on a yellow hard shadow, like the design's main key.
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: hardShadow(OctavaColors.yellow),
-                    ),
-                    child: IconButton.filled(
-                      tooltip: context.t.navAdd,
-                      onPressed: onRecord,
-                      style: IconButton.styleFrom(
-                        backgroundColor: OctavaColors.pink,
-                        foregroundColor: OctavaColors.ink,
-                        minimumSize: const Size(56, 56),
-                        side: const BorderSide(
-                          color: OctavaColors.ink,
-                          width: 2,
-                        ),
-                      ),
-                      icon: const Icon(Icons.add_rounded, size: 32),
-                    ),
+              child: Center(
+                // Pink on a yellow hard shadow, like the design's main key.
+                // No label under it, to keep the bar short; the tooltip and
+                // screen readers say "Add".
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: hardShadow(OctavaColors.yellow),
                   ),
-                  const SizedBox(height: 4),
-                  ExcludeSemantics(
-                    child: Text(
-                      context.t.navRecord,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: colors.onSurface,
-                      ),
+                  child: IconButton.filled(
+                    tooltip: context.t.navAdd,
+                    onPressed: onRecord,
+                    style: IconButton.styleFrom(
+                      backgroundColor: OctavaColors.pink,
+                      foregroundColor: OctavaColors.ink,
+                      minimumSize: const Size(46, 46),
+                      padding: EdgeInsets.zero,
+                      side: const BorderSide(color: OctavaColors.ink, width: 2),
                     ),
+                    icon: const Icon(Icons.add_rounded, size: 28),
                   ),
-                ],
+                ),
               ),
             ),
           if (onMatches != null)
@@ -991,7 +977,7 @@ class _BarButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

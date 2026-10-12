@@ -1193,9 +1193,6 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get navRecord => 'ჩაწერა';
-
-  @override
   String get sectionTheme => 'თემა';
 
   @override
@@ -1213,4 +1210,15 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get themeToLight => 'ნათელ რეჟიმზე გადართვა';
+
+  @override
+  String cardAlsoPlays(String instruments) {
+    return 'ასევე: $instruments';
+  }
+
+  @override
+  String get instrumentMakeMain => 'გახადე მთავარ ინსტრუმენტად';
+
+  @override
+  String get instrumentIsMain => 'შენი მთავარი ინსტრუმენტი';
 }

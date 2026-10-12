@@ -83,6 +83,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final Map<String, String> _instruments =
       {}; // id → skill, in the order picked
   final List<String> _genres = [];
+
+  /// Moves [id] to the front of [_instruments], making it the main one.
+  void _makeMain(String id) {
+    // Dart maps keep insertion order, so re-insert with [id] first.
+    final skill = _instruments.remove(id)!;
+    final rest = Map.of(_instruments);
+    _instruments
+      ..clear()
+      ..[id] = skill
+      ..addAll(rest);
+  }
+
   final Set<String> _goals = {};
   String? _frequency;
   final Set<String> _gear = {};
@@ -427,6 +439,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),
+                            ),
+                          ),
+                          // The star picks the main instrument (the first
+                          // one): it's on the card and fills band roles.
+                          IconButton(
+                            tooltip: i == 0
+                                ? context.t.instrumentIsMain
+                                : context.t.instrumentMakeMain,
+                            isSelected: i == 0,
+                            onPressed: i == 0
+                                ? null
+                                : () => setState(() => _makeMain(id)),
+                            icon: const Icon(Icons.star_outline_rounded),
+                            selectedIcon: const Icon(
+                              Icons.star_rounded,
+                              color: OctavaColors.pink,
                             ),
                           ),
                           DropdownButton<String>(

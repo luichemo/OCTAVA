@@ -656,11 +656,21 @@
       }
     }
   },
-  "navRecord": "Record",
   "sectionTheme": "Theme",
   "themeLight": "Light",
   "themeDark": "Dark",
   "themeInfo": "\"Device\" follows your phone or browser setting.",
   "themeToDark": "Switch to dark mode",
-  "themeToLight": "Switch to light mode"
+  "themeToLight": "Switch to light mode",
+  "cardAlsoPlays": "Also: {instruments}",
+  "@cardAlsoPlays": {
+    "description": "Under the name on a card: the person's other instruments with skill, e.g. 'Guitar · Pro, Keys · Advanced'.",
+    "placeholders": {
+      "instruments": {
+        "type": "String"
+      }
+    }
+  },
+  "instrumentMakeMain": "Make this your main instrument",
+  "instrumentIsMain": "Your main instrument"
 }

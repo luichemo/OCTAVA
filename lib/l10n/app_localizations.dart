@@ -2168,12 +2168,6 @@ abstract class AppLocalizations {
   /// **'{filled} of {total} filled'**
   String bandFilled(int filled, int total);
 
-  /// No description provided for @navRecord.
-  ///
-  /// In en, this message translates to:
-  /// **'Record'**
-  String get navRecord;
-
   /// No description provided for @sectionTheme.
   ///
   /// In en, this message translates to:
@@ -2209,6 +2203,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switch to light mode'**
   String get themeToLight;
+
+  /// Under the name on a card: the person's other instruments with skill, e.g. 'Guitar · Pro, Keys · Advanced'.
+  ///
+  /// In en, this message translates to:
+  /// **'Also: {instruments}'**
+  String cardAlsoPlays(String instruments);
+
+  /// No description provided for @instrumentMakeMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this your main instrument'**
+  String get instrumentMakeMain;
+
+  /// No description provided for @instrumentIsMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Your main instrument'**
+  String get instrumentIsMain;
 }
 
 class _AppLocalizationsDelegate

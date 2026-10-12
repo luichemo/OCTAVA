@@ -1202,9 +1202,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get navRecord => 'Record';
-
-  @override
   String get sectionTheme => 'Theme';
 
   @override
@@ -1221,4 +1218,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeToLight => 'Switch to light mode';
+
+  @override
+  String cardAlsoPlays(String instruments) {
+    return 'Also: $instruments';
+  }
+
+  @override
+  String get instrumentMakeMain => 'Make this your main instrument';
+
+  @override
+  String get instrumentIsMain => 'Your main instrument';
 }

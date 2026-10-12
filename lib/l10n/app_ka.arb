@@ -345,11 +345,13 @@
   "authAgeTitle": "მხოლოდ 16+ მუსიკოსები",
   "authAgeBody": "რეგისტრაციით ადასტურებ, რომ 16 წლის ან უფროსი ხარ.",
   "bandFilled": "{filled} / {total} შევსებულია",
-  "navRecord": "ჩაწერა",
   "sectionTheme": "თემა",
   "themeLight": "ნათელი",
   "themeDark": "მუქი",
   "themeInfo": "„მოწყობილობის“ ნიშნავს ტელეფონის ან ბრაუზერის პარამეტრს.",
   "themeToDark": "მუქ რეჟიმზე გადართვა",
-  "themeToLight": "ნათელ რეჟიმზე გადართვა"
+  "themeToLight": "ნათელ რეჟიმზე გადართვა",
+  "cardAlsoPlays": "ასევე: {instruments}",
+  "instrumentMakeMain": "გახადე მთავარ ინსტრუმენტად",
+  "instrumentIsMain": "შენი მთავარი ინსტრუმენტი"
 }
