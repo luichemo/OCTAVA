@@ -20,7 +20,7 @@ void main() {
   testWidgets('shows the band lineup and the first musician', (tester) async {
     await pumpApp(tester);
 
-    expect(find.text('OCTAVA'), findsOneWidget);
+    expect(find.bySemanticsLabel('OCTAVA'), findsOneWidget); // the logo
     expect(find.text('Your band'), findsOneWidget);
     expect(find.text('Open'), findsNWidgets(4));
     expect(find.text('Nika, 24'), findsOneWidget);

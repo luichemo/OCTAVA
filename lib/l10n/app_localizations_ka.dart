@@ -1178,7 +1178,7 @@ class AppLocalizationsKa extends AppLocalizations {
       'ბარათი ვერ დავაბრუნე. შეამოწმე ინტერნეტი და სცადე თავიდან.';
 
   @override
-  String get authHeadline => 'გადაფურცლე. დაუკარი. შექმენი ბენდი.';
+  String get authHeadline => 'მოუსმინე. დაუკარი. შექმენი ბენდი.';
 
   @override
   String get authAgeTitle => 'მხოლოდ 16+ მუსიკოსები';

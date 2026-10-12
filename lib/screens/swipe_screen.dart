@@ -23,6 +23,7 @@ import '../theme.dart';
 import '../widgets/band_lineup.dart';
 import '../widgets/band_roles_sheet.dart';
 import '../widgets/musician_card.dart';
+import '../widgets/octava_logo.dart';
 import '../widgets/safety_sheet.dart';
 import 'filters_screen.dart';
 
@@ -499,14 +500,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
-                              child: Text(
-                                'OCTAVA',
-                                style: displayStyle(
-                                  size: 40,
-                                  color: OctavaColors.pink,
-                                  latin: true,
-                                ),
-                              ),
+                              child: const OctavaLogo(height: 44),
                             ),
                           ),
                           const SizedBox(width: 12),

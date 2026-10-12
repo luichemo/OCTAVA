@@ -71,6 +71,9 @@ flutter:
   # Generates AppLocalizations from lib/l10n/*.arb (see l10n.yaml).
   generate: true
 
+  assets:
+    - assets/images/logo.png
+
   # Bundled from Google Fonts (OFL licences in assets/fonts/).
   fonts:
     # Body text (design/stitch DESIGN.md: Inter).

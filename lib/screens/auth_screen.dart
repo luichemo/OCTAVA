@@ -5,6 +5,7 @@ import '../l10n/l10n.dart';
 import '../data/repositories.dart';
 import '../theme.dart';
 import '../widgets/language_picker.dart';
+import '../widgets/octava_logo.dart';
 
 /// Create an account or sign in with email and password. When this succeeds,
 /// Supabase's auth state changes and AuthGate moves on by itself.
@@ -114,14 +115,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'OCTAVA',
-                                    style: displayStyle(
-                                      size: 72,
-                                      color: colors.onSurface,
-                                      latin: true,
-                                    ),
-                                  ),
+                                  const OctavaLogo(height: 96),
+                                  const SizedBox(height: 8),
                                   Text(
                                     t.authHeadline,
                                     style: displayStyle(
