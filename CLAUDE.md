@@ -8,7 +8,7 @@ OCTAVA is a Tinder-style app for forming bands. Musicians swipe on each other, a
 
 Decisions the owner has made (build to these; don't ask about them again):
 - **Audience:** all kinds of musicians: beginners and hobbyists, working musicians, existing bands looking for members, and session or one-off players.
-- **Platforms:** iOS and Android, mobile first. No public web app is planned. The `web/` platform exists only as a development preview (see Commands).
+- **Platforms:** iOS and Android, mobile first. The web version is only a preview for testers, published to GitHub Pages at https://luichemo.github.io/OCTAVA/ by `.github/workflows/pages.yml` on every push to `flutter-setup` or `main` (it runs analyze and the tests first). It uses the real Supabase project, so testers create real accounts.
 - **Reach:** worldwide from launch. The UI is in English and Georgian (done; see Code layout → Translations).
 - **Ages:** 16+. People aged 16–17 can join bands with adults but cannot have one-on-one private chats with adults. Enforce this on the server, not only in the UI.
 - **Matching:** a match happens when two people both swipe right. A new member joins a band when a majority of its current members vote yes.
