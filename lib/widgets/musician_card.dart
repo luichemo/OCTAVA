@@ -398,18 +398,26 @@ class _Stamp extends StatelessWidget {
 /// The audio clip row. Playback arrives with real profiles and uploaded
 /// clips, so the button is disabled for now.
 /// The clip row: play button, waveform (filling in as it plays) and length.
-class _Clip extends StatelessWidget {
+class _Clip extends StatefulWidget {
   const _Clip({required this.musician, this.player});
 
   final Musician musician;
   final ClipPlayer? player;
 
   @override
+  State<_Clip> createState() => _ClipState();
+}
+
+class _ClipState extends State<_Clip> {
+  /// Where a finger is dragging on the waveform (0–1), or null.
+  double? _scrub;
+
+  @override
   Widget build(BuildContext context) {
-    final player = this.player;
-    final path = musician.clipPath;
+    final player = widget.player;
+    final path = widget.musician.clipPath;
     if (player == null || path == null) {
-      return _row(context, playing: false, progress: 0);
+      return _row(context, playing: false, progress: 0, canSeek: false);
     }
 
     // Rebuilds when any clip starts or stops, then follows the position.
@@ -418,22 +426,17 @@ class _Clip extends StatelessWidget {
       builder: (context, playingPath, _) {
         final playing = playingPath == path;
         if (!playing) {
-          return _row(
-            context,
-            playing: false,
-            progress: 0,
-            onPressed: () => _toggle(context),
-          );
+          return _row(context, playing: false, progress: _scrub ?? 0);
         }
         return StreamBuilder<Duration>(
           stream: player.position,
           builder: (context, snapshot) {
             final played = (snapshot.data?.inMilliseconds ?? 0) / 1000;
+            final seconds = widget.musician.clipSeconds!;
             return _row(
               context,
               playing: true,
-              progress: (played / musician.clipSeconds!).clamp(0, 1),
-              onPressed: () => _toggle(context),
+              progress: _scrub ?? (played / seconds).clamp(0, 1),
             );
           },
         );
@@ -441,11 +444,25 @@ class _Clip extends StatelessWidget {
     );
   }
 
-  Future<void> _toggle(BuildContext context) async {
+  Future<void> _toggle() =>
+      _guard(() => widget.player!.toggle(widget.musician.clipPath!));
+
+  /// Jumps to [fraction] (0–1) of the clip, starting it if needed.
+  Future<void> _seekTo(double fraction) {
+    final ms = (fraction * widget.musician.clipSeconds! * 1000).round();
+    return _guard(
+      () => widget.player!.seek(
+        widget.musician.clipPath!,
+        Duration(milliseconds: ms),
+      ),
+    );
+  }
+
+  Future<void> _guard(Future<void> Function() action) async {
     final messenger = ScaffoldMessenger.of(context);
     final t = context.t;
     try {
-      await player!.toggle(musician.clipPath!);
+      await action();
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(t.errClipPlay)));
     }
@@ -455,12 +472,79 @@ class _Clip extends StatelessWidget {
     BuildContext context, {
     required bool playing,
     required double progress,
-    VoidCallback? onPressed,
+    bool canSeek = true,
   }) {
     final colors = Theme.of(context).colorScheme;
-    final seconds = musician.clipSeconds!;
-    final bars = musician.waveform;
+    final t = context.t;
+    final m = widget.musician;
+    final seconds = m.clipSeconds!;
+    final bars = m.waveform;
     final lit = (progress * bars.length).floor();
+    // While playing or dragging, the time shows where you are; else the
+    // clip's length.
+    final shown = playing || _scrub != null
+        ? (progress * seconds).floor()
+        : seconds;
+    final strip = SizedBox(
+      height: 32,
+      child: Row(
+        spacing: 2,
+        children: [
+          for (final (i, h) in bars.indexed)
+            Expanded(
+              child: FractionallySizedBox(
+                heightFactor: h,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: i < lit ? OctavaColors.pink : colors.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+    Widget waveform = strip;
+    if (canSeek) {
+      // Tap or drag on the waveform to jump there. A sideways drag here
+      // moves through the song instead of swiping the card (it claims the
+      // gesture before the card's pan does).
+      waveform = LayoutBuilder(
+        builder: (context, box) {
+          double at(Offset p) => (p.dx / box.maxWidth).clamp(0.0, 1.0);
+          void drag(Offset p) => setState(() {
+            _scrub = at(p);
+          });
+          return Semantics(
+            slider: true,
+            label: t.clipPosition,
+            value: '${(progress * 100).round()}%',
+            increasedValue: '${((progress + 0.1).clamp(0, 1) * 100).round()}%',
+            decreasedValue: '${((progress - 0.1).clamp(0, 1) * 100).round()}%',
+            onIncrease: () => _seekTo((progress + 0.1).clamp(0, 1)),
+            onDecrease: () => _seekTo((progress - 0.1).clamp(0, 1)),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: (d) => _seekTo(at(d.localPosition)),
+              onHorizontalDragStart: (d) => drag(d.localPosition),
+              onHorizontalDragUpdate: (d) => drag(d.localPosition),
+              onHorizontalDragEnd: (_) {
+                final to = _scrub;
+                if (to != null) _seekTo(to);
+                setState(() {
+                  _scrub = null;
+                });
+              },
+              onHorizontalDragCancel: () => setState(() {
+                _scrub = null;
+              }),
+              child: strip,
+            ),
+          );
+        },
+      );
+    }
     // A small "audio stem" player on its own printed strip.
     return Container(
       padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
@@ -480,40 +564,15 @@ class _Clip extends StatelessWidget {
               disabledBackgroundColor: colors.outlineVariant,
               side: const BorderSide(color: OctavaColors.ink, width: 2),
             ),
-            onPressed: onPressed,
-            tooltip: onPressed == null
-                ? context.t.noClip
-                : (playing
-                      ? context.t.stopClipOf(musician.name)
-                      : context.t.playClipOf(musician.name)),
+            onPressed: canSeek ? _toggle : null,
+            tooltip: !canSeek
+                ? t.noClip
+                : (playing ? t.stopClipOf(m.name) : t.playClipOf(m.name)),
             icon: Icon(playing ? Icons.stop_rounded : Icons.play_arrow_rounded),
           ),
-          Expanded(
-            child: SizedBox(
-              height: 32,
-              child: Row(
-                spacing: 2,
-                children: [
-                  for (final (i, h) in bars.indexed)
-                    Expanded(
-                      child: FractionallySizedBox(
-                        heightFactor: h,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: i < lit
-                                ? OctavaColors.pink
-                                : colors.outlineVariant,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+          Expanded(child: waveform),
           Text(
-            '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
+            '${shown ~/ 60}:${(shown % 60).toString().padLeft(2, '0')}',
             style: TextStyle(
               fontSize: 13,
               color: colors.onSurfaceVariant,

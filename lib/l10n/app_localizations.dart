@@ -2221,6 +2221,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your main instrument'**
   String get instrumentIsMain;
+
+  /// Sign-up failed because the project's email sending limit was reached (affects everyone).
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-ups are busy right now. Please try again in an hour.'**
+  String get errEmailBusy;
+
+  /// No description provided for @clipPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position in the clip'**
+  String get clipPosition;
 }
 
 class _AppLocalizationsDelegate

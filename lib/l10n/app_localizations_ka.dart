@@ -1221,4 +1221,11 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get instrumentIsMain => 'შენი მთავარი ინსტრუმენტი';
+
+  @override
+  String get errEmailBusy =>
+      'ახლა რეგისტრაცია გადატვირთულია. სცადე თავიდან ერთ საათში.';
+
+  @override
+  String get clipPosition => 'პოზიცია ჩანაწერში';
 }

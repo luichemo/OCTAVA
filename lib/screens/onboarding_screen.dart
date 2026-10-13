@@ -84,6 +84,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       {}; // id → skill, in the order picked
   final List<String> _genres = [];
 
+  /// Sections opened in edit mode, by id. All start closed; while setting
+  /// up a profile every section is open and can't be closed.
+  final Set<String> _openSections = {};
+
   /// Moves [id] to the front of [_instruments], making it the main one.
   void _makeMain(String id) {
     // Dart maps keep insertion order, so re-insert with [id] first.
@@ -231,6 +235,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final valid =
         formOk && _instruments.isNotEmpty && _linkInput.text.trim().isEmpty;
     setState(() {
+      // Open the sections with problems, so they can be seen. (Only these
+      // three can have one when editing; the birth date is sign-up only.)
+      if (_name.text.trim().isEmpty) _openSections.add('about');
+      if (_instruments.isEmpty) _openSections.add('play');
+      if (_linkError != null) _openSections.add('links');
       _instrumentError = _instruments.isEmpty
           ? context.t.pickInstrumentError
           : null;
@@ -307,339 +316,347 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               key: _formKey,
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                children: _sectionCards([
-                  Text(
-                    _editing
-                        ? context.t.profileTitle
-                        : context.t.profileSetUpTitle,
-                    style: displayStyle(size: 44, color: colors.onSurface),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.t.profileSubtitle,
-                    style: TextStyle(color: colors.onSurfaceVariant),
-                  ),
-                  if (_editing) ...[
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => CardPreviewScreen(
-                              repository: widget.repository,
-                              player: widget.player,
-                              avatars: widget.avatars,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(Icons.visibility_outlined),
-                        label: Text(context.t.seeYourCard),
-                      ),
+                children: _sectionCards(
+                  open: _editing ? _openSections : null,
+                  onToggle: (id) => setState(() {
+                    if (!_openSections.remove(id)) _openSections.add(id);
+                  }),
+                  [
+                    Text(
+                      _editing
+                          ? context.t.profileTitle
+                          : context.t.profileSetUpTitle,
+                      style: displayStyle(size: 44, color: colors.onSurface),
                     ),
-                  ],
-                  if (_editing && widget.clips != null && _clipCount == 0) ...[
-                    const SizedBox(height: 16),
-                    _NoClipsWarning(onRecord: _recordFromWarning),
-                  ],
-                  if (_editing && widget.avatars != null) ...[
-                    _Section(context.t.sectionAvatar),
-                    AvatarSection(avatars: widget.avatars!),
-                  ],
-                  _Section(context.t.sectionAbout),
-                  TextFormField(
-                    controller: _name,
-                    maxLength: 40,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      labelText: context.t.fieldName,
-                      counterText: '',
+                    const SizedBox(height: 8),
+                    Text(
+                      context.t.profileSubtitle,
+                      style: TextStyle(color: colors.onSurfaceVariant),
                     ),
-                    validator: (v) => (v ?? '').trim().isEmpty
-                        ? context.t.fieldNameError
-                        : null,
-                  ),
-                  if (_needsBirthDate) ...[
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _birthDateText,
-                      readOnly: true,
-                      onTap: _pickBirthDate,
-                      decoration: InputDecoration(
-                        labelText: context.t.fieldBirthDate,
-                        helperText: context.t.fieldBirthDateHelper,
-                        suffixIcon: Icon(Icons.calendar_today_rounded),
-                      ),
-                      validator: (_) => _birthDate == null
-                          ? context.t.fieldBirthDateError
-                          : null,
-                    ),
-                  ],
-                  const SizedBox(height: 14),
-                  TextFormField(
-                    controller: _area,
-                    maxLength: 60,
-                    decoration: InputDecoration(
-                      labelText: context.t.fieldArea,
-                      hintText: context.t.fieldAreaHint,
-                      counterText: '',
-                    ),
-                  ),
-                  if (_editing && widget.bandNeeds != null) ...[
-                    _Section(context.t.sectionBand),
-                    BandNeedsSection(
-                      repository: widget.bandNeeds!,
-                      // The first instrument is the main one.
-                      myRole: _instruments.keys.firstOrNull,
-                    ),
-                  ],
-                  if (_editing && widget.location != null) ...[
-                    _Section(context.t.sectionLocation),
-                    LocationSection(location: widget.location!),
-                  ],
-                  _Section(context.t.sectionPlay),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final MapEntry(key: id, value: label)
-                          in instrumentLabels.entries)
-                        FilterChip(
-                          label: Text(label),
-                          selected: _instruments.containsKey(id),
-                          onSelected: (on) => setState(() {
-                            on
-                                ? _instruments[id] = 'intermediate'
-                                : _instruments.remove(id);
-                            if (on) _instrumentError = null;
-                          }),
-                        ),
-                    ],
-                  ),
-                  if (_instrumentError != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        _instrumentError!,
-                        style: TextStyle(color: colors.error, fontSize: 13),
-                      ),
-                    ),
-                  for (final (i, id) in _instruments.keys.indexed)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              i == 0
-                                  ? context.t.instrumentMain(
-                                      instrumentLabels[id]!,
-                                    )
-                                  : instrumentLabels[id]!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                    if (_editing) ...[
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => CardPreviewScreen(
+                                repository: widget.repository,
+                                player: widget.player,
+                                avatars: widget.avatars,
                               ),
                             ),
                           ),
-                          // The star picks the main instrument (the first
-                          // one): it's on the card and fills band roles.
-                          IconButton(
-                            tooltip: i == 0
-                                ? context.t.instrumentIsMain
-                                : context.t.instrumentMakeMain,
-                            isSelected: i == 0,
-                            onPressed: i == 0
-                                ? null
-                                : () => setState(() => _makeMain(id)),
-                            icon: const Icon(Icons.star_outline_rounded),
-                            selectedIcon: const Icon(
-                              Icons.star_rounded,
-                              color: OctavaColors.pink,
-                            ),
-                          ),
-                          DropdownButton<String>(
-                            value: _instruments[id],
-                            onChanged: (skill) =>
-                                setState(() => _instruments[id] = skill!),
-                            items: [
-                              for (final MapEntry(key: value, value: label)
-                                  in skillLabels.entries)
-                                DropdownMenuItem(
-                                  value: value,
-                                  child: Text(label),
-                                ),
-                            ],
-                          ),
-                        ],
+                          icon: const Icon(Icons.visibility_outlined),
+                          label: Text(context.t.seeYourCard),
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 18),
-                  Text(
-                    context.t.fieldGenres,
-                    style: TextStyle(color: colors.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 8),
-                  GenrePicker(
-                    selected: _genres,
-                    max: 10,
-                    onChanged: (picked) => setState(() {
-                      _genres
-                        ..clear()
-                        ..addAll(picked);
-                    }),
-                  ),
-                  _Section(context.t.sectionWant),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final MapEntry(key: id, value: label)
-                          in goalLabels.entries)
-                        FilterChip(
-                          label: Text(label),
-                          selected: _goals.contains(id),
-                          onSelected: (on) => setState(
-                            () => on ? _goals.add(id) : _goals.remove(id),
-                          ),
-                        ),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.t.rehearseQuestion,
-                    style: TextStyle(color: colors.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final MapEntry(key: id, value: label)
-                          in frequencyLabels.entries)
-                        ChoiceChip(
-                          label: Text(label),
-                          selected: _frequency == id,
-                          onSelected: (on) =>
-                              setState(() => _frequency = on ? id : null),
-                        ),
+                    if (_editing &&
+                        widget.clips != null &&
+                        _clipCount == 0) ...[
+                      const SizedBox(height: 16),
+                      _NoClipsWarning(onRecord: _recordFromWarning),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.t.gearQuestion,
-                    style: TextStyle(color: colors.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final MapEntry(key: id, value: label)
-                          in gearLabels.entries)
-                        FilterChip(
-                          label: Text(label),
-                          selected: _gear.contains(id),
-                          onSelected: (on) => setState(
-                            () => on ? _gear.add(id) : _gear.remove(id),
-                          ),
-                        ),
+                    if (_editing && widget.avatars != null) ...[
+                      _Section('avatar', context.t.sectionAvatar),
+                      AvatarSection(avatars: widget.avatars!),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _lookingFor,
-                    maxLength: 300,
-                    minLines: 2,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: context.t.fieldLookingFor,
-                      hintText: context.t.fieldLookingForHint,
-                      alignLabelWithHint: true,
-                    ),
-                  ),
-                  if (_editing) ...[
-                    _Section(context.t.sectionLinks),
-                    TextField(
-                      controller: _linkInput,
-                      keyboardType: TextInputType.url,
-                      onSubmitted: (_) => _addLink(),
+                    _Section('about', context.t.sectionAbout),
+                    TextFormField(
+                      controller: _name,
+                      maxLength: 40,
+                      textCapitalization: TextCapitalization.words,
                       decoration: InputDecoration(
-                        labelText: context.t.linksLabel,
-                        hintText: context.t.linksHint,
-                        errorText: _linkError,
-                        suffixIcon: IconButton(
-                          tooltip: context.t.addLink,
-                          onPressed: _addLink,
-                          icon: const Icon(Icons.add_rounded),
+                        labelText: context.t.fieldName,
+                        counterText: '',
+                      ),
+                      validator: (v) => (v ?? '').trim().isEmpty
+                          ? context.t.fieldNameError
+                          : null,
+                    ),
+                    if (_needsBirthDate) ...[
+                      const SizedBox(height: 14),
+                      TextFormField(
+                        controller: _birthDateText,
+                        readOnly: true,
+                        onTap: _pickBirthDate,
+                        decoration: InputDecoration(
+                          labelText: context.t.fieldBirthDate,
+                          helperText: context.t.fieldBirthDateHelper,
+                          suffixIcon: Icon(Icons.calendar_today_rounded),
                         ),
+                        validator: (_) => _birthDate == null
+                            ? context.t.fieldBirthDateError
+                            : null,
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: _area,
+                      maxLength: 60,
+                      decoration: InputDecoration(
+                        labelText: context.t.fieldArea,
+                        hintText: context.t.fieldAreaHint,
+                        counterText: '',
                       ),
                     ),
-                    for (final link in _links)
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.link_rounded),
-                        title: Text(link.label),
-                        subtitle: Text(
-                          link.url,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: IconButton(
-                          tooltip: context.t.removeLink,
-                          onPressed: () => setState(() {
-                            _links.remove(link);
-                          }),
-                          icon: const Icon(Icons.close_rounded),
+                    if (_editing && widget.bandNeeds != null) ...[
+                      _Section('band', context.t.sectionBand),
+                      BandNeedsSection(
+                        repository: widget.bandNeeds!,
+                        // The first instrument is the main one.
+                        myRole: _instruments.keys.firstOrNull,
+                      ),
+                    ],
+                    if (_editing && widget.location != null) ...[
+                      _Section('location', context.t.sectionLocation),
+                      LocationSection(location: widget.location!),
+                    ],
+                    _Section('play', context.t.sectionPlay),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final MapEntry(key: id, value: label)
+                            in instrumentLabels.entries)
+                          FilterChip(
+                            label: Text(label),
+                            selected: _instruments.containsKey(id),
+                            onSelected: (on) => setState(() {
+                              on
+                                  ? _instruments[id] = 'intermediate'
+                                  : _instruments.remove(id);
+                              if (on) _instrumentError = null;
+                            }),
+                          ),
+                      ],
+                    ),
+                    if (_instrumentError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          _instrumentError!,
+                          style: TextStyle(color: colors.error, fontSize: 13),
                         ),
                       ),
-                  ],
-                  if (_editing &&
-                      widget.clips != null &&
-                      widget.player != null) ...[
-                    _Section(context.t.sectionClips),
-                    ClipsSection(
-                      // A new key reloads the list after recording from the warning.
-                      key: ValueKey(_clipsVersion),
-                      clips: widget.clips!,
-                      player: widget.player!,
-                      onCountChanged: (n) => setState(() {
-                        _clipCount = n;
+                    for (final (i, id) in _instruments.keys.indexed)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                i == 0
+                                    ? context.t.instrumentMain(
+                                        instrumentLabels[id]!,
+                                      )
+                                    : instrumentLabels[id]!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            // The star picks the main instrument (the first
+                            // one): it's on the card and fills band roles.
+                            IconButton(
+                              tooltip: i == 0
+                                  ? context.t.instrumentIsMain
+                                  : context.t.instrumentMakeMain,
+                              isSelected: i == 0,
+                              onPressed: i == 0
+                                  ? null
+                                  : () => setState(() => _makeMain(id)),
+                              icon: const Icon(Icons.star_outline_rounded),
+                              selectedIcon: const Icon(
+                                Icons.star_rounded,
+                                color: OctavaColors.pink,
+                              ),
+                            ),
+                            DropdownButton<String>(
+                              value: _instruments[id],
+                              onChanged: (skill) =>
+                                  setState(() => _instruments[id] = skill!),
+                              items: [
+                                for (final MapEntry(key: value, value: label)
+                                    in skillLabels.entries)
+                                  DropdownMenuItem(
+                                    value: value,
+                                    child: Text(label),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 18),
+                    Text(
+                      context.t.fieldGenres,
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 8),
+                    GenrePicker(
+                      selected: _genres,
+                      max: 10,
+                      onChanged: (picked) => setState(() {
+                        _genres
+                          ..clear()
+                          ..addAll(picked);
                       }),
                     ),
-                  ],
-                  if (_editing) ...[
-                    _Section(context.t.sectionLanguage),
-                    const LanguageSection(),
-                    _Section(context.t.sectionTheme),
-                    const ThemeSection(),
-                  ],
-                  const _EndOfSections(),
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text(
-                        _error!,
-                        style: TextStyle(
-                          color: colors.error,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    _Section('want', context.t.sectionWant),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final MapEntry(key: id, value: label)
+                            in goalLabels.entries)
+                          FilterChip(
+                            label: Text(label),
+                            selected: _goals.contains(id),
+                            onSelected: (on) => setState(
+                              () => on ? _goals.add(id) : _goals.remove(id),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      context.t.rehearseQuestion,
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final MapEntry(key: id, value: label)
+                            in frequencyLabels.entries)
+                          ChoiceChip(
+                            label: Text(label),
+                            selected: _frequency == id,
+                            onSelected: (on) =>
+                                setState(() => _frequency = on ? id : null),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      context.t.gearQuestion,
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final MapEntry(key: id, value: label)
+                            in gearLabels.entries)
+                          FilterChip(
+                            label: Text(label),
+                            selected: _gear.contains(id),
+                            onSelected: (on) => setState(
+                              () => on ? _gear.add(id) : _gear.remove(id),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _lookingFor,
+                      maxLength: 300,
+                      minLines: 2,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        labelText: context.t.fieldLookingFor,
+                        hintText: context.t.fieldLookingForHint,
+                        alignLabelWithHint: true,
                       ),
                     ),
-                  const SizedBox(height: 28),
-                  PrintButton(
-                    onPressed: _saving ? null : _submit,
-                    child: _saving
-                        ? const SizedBox.square(
-                            dimension: 22,
-                            child: CircularProgressIndicator(strokeWidth: 3),
-                          )
-                        : Text(
-                            _editing
-                                ? context.t.saveChanges
-                                : context.t.createProfile,
+                    if (_editing) ...[
+                      _Section('links', context.t.sectionLinks),
+                      TextField(
+                        controller: _linkInput,
+                        keyboardType: TextInputType.url,
+                        onSubmitted: (_) => _addLink(),
+                        decoration: InputDecoration(
+                          labelText: context.t.linksLabel,
+                          hintText: context.t.linksHint,
+                          errorText: _linkError,
+                          suffixIcon: IconButton(
+                            tooltip: context.t.addLink,
+                            onPressed: _addLink,
+                            icon: const Icon(Icons.add_rounded),
                           ),
-                  ),
-                ]),
+                        ),
+                      ),
+                      for (final link in _links)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.link_rounded),
+                          title: Text(link.label),
+                          subtitle: Text(
+                            link.url,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: IconButton(
+                            tooltip: context.t.removeLink,
+                            onPressed: () => setState(() {
+                              _links.remove(link);
+                            }),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                        ),
+                    ],
+                    if (_editing &&
+                        widget.clips != null &&
+                        widget.player != null) ...[
+                      _Section('clips', context.t.sectionClips),
+                      ClipsSection(
+                        // A new key reloads the list after recording from the warning.
+                        key: ValueKey(_clipsVersion),
+                        clips: widget.clips!,
+                        player: widget.player!,
+                        onCountChanged: (n) => setState(() {
+                          _clipCount = n;
+                        }),
+                      ),
+                    ],
+                    if (_editing) ...[
+                      _Section('language', context.t.sectionLanguage),
+                      const LanguageSection(),
+                      _Section('theme', context.t.sectionTheme),
+                      const ThemeSection(),
+                    ],
+                    const _EndOfSections(),
+                    if (_error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: colors.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 28),
+                    PrintButton(
+                      onPressed: _saving ? null : _submit,
+                      child: _saving
+                          ? const SizedBox.square(
+                              dimension: 22,
+                              child: CircularProgressIndicator(strokeWidth: 3),
+                            )
+                          : Text(
+                              _editing
+                                  ? context.t.saveChanges
+                                  : context.t.createProfile,
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -654,29 +671,28 @@ String formatDate(DateTime d) =>
     DateFormat.yMMMMd(L10n.current.localeName).format(d);
 
 /// A section heading. [_sectionCards] puts it, and everything after it up
-/// to the next heading, on one printed card.
+/// to the next heading, on one printed card. [id] stays the same in every
+/// language, so a section stays open when the language changes.
 class _Section extends StatelessWidget {
-  const _Section(this.title);
+  const _Section(this.id, this.title);
+  final String id;
   final String title;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 14),
-    child: Row(
-      spacing: 10,
-      children: [
-        Container(width: 6, height: 24, color: OctavaColors.pink),
-        Expanded(
-          child: Text(
-            title,
-            style: displayStyle(
-              size: 30,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+  Widget build(BuildContext context) => Row(
+    spacing: 10,
+    children: [
+      Container(width: 6, height: 24, color: OctavaColors.pink),
+      Expanded(
+        child: Text(
+          title,
+          style: displayStyle(
+            size: 30,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 
@@ -690,23 +706,41 @@ class _EndOfSections extends StatelessWidget {
 
 /// Groups the form into cards: each [_Section] and the widgets after it,
 /// until the next one or [_EndOfSections]. Widgets before the first
-/// heading (the title and warnings) stay as they are.
-List<Widget> _sectionCards(List<Widget> children) {
+/// heading (the title and warnings) stay as they are. With [open] (edit
+/// mode) each card folds: only the ids in [open] show their contents.
+List<Widget> _sectionCards(
+  List<Widget> children, {
+  Set<String>? open,
+  required ValueChanged<String> onToggle,
+}) {
   final out = <Widget>[];
-  List<Widget>? card;
+  _Section? heading;
+  List<Widget>? body;
   void finish() {
-    if (card case final c?) out.add(_SectionCard(children: c));
-    card = null;
+    if (heading case final h?) {
+      out.add(
+        _SectionCard(
+          key: ValueKey(h.id),
+          heading: h,
+          open: open?.contains(h.id),
+          onToggle: () => onToggle(h.id),
+          children: body!,
+        ),
+      );
+    }
+    heading = null;
+    body = null;
   }
 
   for (final w in children) {
     if (w is _Section) {
       finish();
-      card = [w];
+      heading = w;
+      body = [];
     } else if (w is _EndOfSections) {
       finish();
-    } else if (card case final c?) {
-      c.add(w);
+    } else if (body case final b?) {
+      b.add(w);
     } else {
       out.add(w);
     }
@@ -715,23 +749,106 @@ List<Widget> _sectionCards(List<Widget> children) {
   return out;
 }
 
+/// One printed card. [open] null: always open, with no arrow (sign-up).
+/// Otherwise tapping the heading folds or unfolds it. Folded contents stay
+/// built (only squeezed to zero height), so their fields still validate.
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.children});
+  const _SectionCard({
+    super.key,
+    required this.heading,
+    required this.open,
+    required this.onToggle,
+    required this.children,
+  });
 
+  final _Section heading;
+  final bool? open;
+  final VoidCallback onToggle;
   final List<Widget> children;
 
+  static const _duration = Duration(milliseconds: 250);
+
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 20),
-    child: Container(
-      decoration: printBox(context, radius: 24),
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+  Widget build(BuildContext context) {
+    final foldable = open != null;
+    final shown = open ?? true;
+    final body = Padding(
+      padding: const EdgeInsets.only(top: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
       ),
-    ),
-  );
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Container(
+        decoration: printBox(context, radius: 24),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!foldable)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+                child: heading,
+              )
+            else
+              Semantics(
+                button: true,
+                expanded: shown,
+                child: InkWell(
+                  onTap: onToggle,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 14, 12, 14),
+                    child: Row(
+                      children: [
+                        Expanded(child: heading),
+                        AnimatedRotation(
+                          turns: shown ? 0.5 : 0,
+                          duration: _duration,
+                          curve: Curves.easeOutCubic,
+                          child: Icon(
+                            Icons.expand_more_rounded,
+                            size: 28,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            if (!foldable)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+                child: body,
+              )
+            else
+              // Folded: zero height and hidden from taps and screen readers,
+              // but still built.
+              ClipRect(
+                child: AnimatedAlign(
+                  duration: _duration,
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
+                  heightFactor: shown ? 1 : 0,
+                  child: IgnorePointer(
+                    ignoring: !shown,
+                    child: ExcludeSemantics(
+                      excluding: !shown,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 20),
+                        child: body,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// Shown while the person has no audio clips: they don't appear in decks.

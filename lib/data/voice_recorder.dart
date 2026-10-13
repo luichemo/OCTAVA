@@ -42,8 +42,12 @@ abstract interface class VoiceRecorder {
   Future<void> dispose();
 }
 
-/// [VoiceRecorder] using the record package. The web records WAV (its
-/// length is always readable); phones record compact M4A (AAC).
+/// [VoiceRecorder] using the record package. Everything is compressed, to
+/// save storage and download bandwidth: phones record M4A (AAC). The web
+/// records AAC too where the browser can (Chrome, Edge, Safari), else Opus
+/// in WebM (Firefox), and only falls back to large WAV if neither works.
+/// The length is measured by the clock while recording, so it doesn't
+/// matter that browser recordings often carry no readable length.
 class DeviceVoiceRecorder implements VoiceRecorder {
   DeviceVoiceRecorder() {
     _player.playerStateStream.listen((state) {
@@ -58,24 +62,30 @@ class DeviceVoiceRecorder implements VoiceRecorder {
   @override
   final ValueNotifier<bool> playingBack = ValueNotifier(false);
 
-  String get _extension => kIsWeb ? 'wav' : 'm4a';
+  String _extension = 'm4a';
 
   @override
   Future<bool> hasPermission() => _recorder.hasPermission();
 
   @override
   Future<void> start() async {
-    final config = kIsWeb
+    final (encoder, extension) = kIsWeb
+        ? await _webFormat()
+        : (AudioEncoder.aacLc, 'm4a');
+    _extension = extension;
+    final config = encoder == AudioEncoder.wav
         ? const RecordConfig(
             encoder: AudioEncoder.wav,
             sampleRate: 22050,
             numChannels: 1,
           )
-        : const RecordConfig(
-            encoder: AudioEncoder.aacLc,
+        : RecordConfig(
+            encoder: encoder,
             sampleRate: 44100,
             numChannels: 1,
-            bitRate: 96000,
+            // Mono AAC at 64 kbps sounds close to a 128 kbps stereo MP3:
+            // about 0.5 MB a minute, against 2.6 MB for the old web WAV.
+            bitRate: 64000,
           );
     // The web keeps recordings in memory; phones need a file path.
     final path = kIsWeb
@@ -83,6 +93,18 @@ class DeviceVoiceRecorder implements VoiceRecorder {
         : '${(await getTemporaryDirectory()).path}/octava_${DateTime.now().millisecondsSinceEpoch}.$_extension';
     await _recorder.start(config, path: path);
     _startedAt = DateTime.now();
+  }
+
+  /// The most compact format this browser can record, with its extension.
+  /// AAC first: it also plays in the iPhone app, which can't play WebM.
+  Future<(AudioEncoder, String)> _webFormat() async {
+    if (await _recorder.isEncoderSupported(AudioEncoder.aacLc)) {
+      return (AudioEncoder.aacLc, 'm4a');
+    }
+    if (await _recorder.isEncoderSupported(AudioEncoder.opus)) {
+      return (AudioEncoder.opus, 'webm');
+    }
+    return (AudioEncoder.wav, 'wav');
   }
 
   @override

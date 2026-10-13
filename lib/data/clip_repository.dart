@@ -241,6 +241,9 @@ abstract interface class ClipPlayer {
   /// Plays [path], or stops it if it's already playing.
   Future<void> toggle(String path);
 
+  /// Jumps to [to] in [path], starting it there if it isn't playing.
+  Future<void> seek(String path, Duration to);
+
   Future<void> stop();
 
   Future<void> dispose();
@@ -266,10 +269,20 @@ class JustAudioClipPlayer implements ClipPlayer {
   @override
   Future<void> toggle(String path) async {
     if (playing.value == path) return stop();
+    await _start(path);
+  }
+
+  @override
+  Future<void> seek(String path, Duration to) async {
+    if (playing.value == path) return _player.seek(to);
+    await _start(path, from: to);
+  }
+
+  Future<void> _start(String path, {Duration? from}) async {
     await _player.stop();
     playing.value = path;
     try {
-      await _player.setUrl(await _urlFor(path));
+      await _player.setUrl(await _urlFor(path), initialPosition: from);
       // play() only completes when playback ends, so don't wait for it.
       if (playing.value == path) unawaited(_player.play());
     } catch (_) {

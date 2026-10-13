@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/musician.dart';
@@ -66,7 +66,7 @@ class SupabaseAuthRepository implements AuthRepository {
       }
       return response.session == null;
     } on AuthException catch (e) {
-      throw UserFacingException(_authMessage(e));
+      throw UserFacingException(authMessage(e));
     } on UserFacingException {
       rethrow;
     } catch (_) {
@@ -82,19 +82,22 @@ class SupabaseAuthRepository implements AuthRepository {
         password: password,
       );
     } on AuthException catch (e) {
-      throw UserFacingException(_authMessage(e));
+      throw UserFacingException(authMessage(e));
     } catch (_) {
       throw UserFacingException(_offline);
     }
   }
 
-  static String _authMessage(AuthException e) => switch (e.code) {
+  @visibleForTesting
+  static String authMessage(AuthException e) => switch (e.code) {
     'invalid_credentials' => L10n.current.errBadLogin,
     'email_not_confirmed' => L10n.current.errEmailNotConfirmed,
     'user_already_exists' || 'email_exists' => L10n.current.errEmailTaken,
     'weak_password' => L10n.current.errWeakPassword,
     'email_address_invalid' => L10n.current.errEmailInvalid,
-    'over_email_send_rate_limit' ||
+    // Supabase's built-in mailer sends only a few emails an hour for the
+    // whole project, so this is about everyone, not this person.
+    'over_email_send_rate_limit' => L10n.current.errEmailBusy,
     'over_request_rate_limit' => L10n.current.errTooManyAttempts,
     _ => e.message,
   };

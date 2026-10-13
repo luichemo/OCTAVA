@@ -1,29 +1,38 @@
 -- Adds the 8 sample musicians from the prototype as real (adult) profiles,
 -- for trying swiping and matching during development.
--- * They can't sign in: no password, emails end in @test.octava.invalid.
+-- * No password, so they can't sign in (test_riffs.py needs a temporary one);
+--   emails end in @test.octava.invalid.
 -- * Nika, Luka, Tamar and Dato have already chosen "Jam" on every real adult
 --   profile that exists when this runs, so a Jam back makes a match.
+-- * Genres are ids from the genres table (a trigger rejects anything else).
+-- * Nobody appears in the feed without an audio clip: run
+--   supabase/seed/test_riffs.py afterwards to give each one a short riff.
 -- * Remove them with supabase/seed/remove_test_musicians.sql.
 -- Run in the Supabase SQL editor (or via the MCP execute_sql tool). Safe to re-run.
 
 with people (n, name, age, instrument, skill, area, lat, lng, genres, looking_for, freq, goals, likes_you) as (
   values
-    (1, 'Nika',   24, 'drums',  'intermediate', 'Vera',        41.705, 44.780, '{post-punk,math rock}',   'A band that rehearses twice a week and actually plays shows.', 'several_a_week', '{gigging}',          true),
+    (1, 'Nika',   24, 'drums',  'intermediate', 'Vera',        41.705, 44.780, '{post-punk,math-rock}',   'A band that rehearses twice a week and actually plays shows.', 'several_a_week', '{gigging}',          true),
     (2, 'Mariam', 27, 'bass',   'advanced',     'Sololaki',    41.689, 44.802, '{funk,neo-soul}',         'Groove-first people. I have a car and a key to a rehearsal room.', 'weekly',     '{fun,gigging}',      false),
-    (3, 'Luka',   22, 'vocals', 'intermediate', 'Saburtalo',   41.727, 44.751, '{alt rock,grunge}',       'I write lyrics in Georgian and English. I need a band to make them loud.', 'weekly', '{gigging,recording}', true),
+    (3, 'Luka',   22, 'vocals', 'intermediate', 'Saburtalo',   41.727, 44.751, '{alt-rock,grunge}',       'I write lyrics in Georgian and English. I need a band to make them loud.', 'weekly', '{gigging,recording}', true),
     (4, 'Tamar',  30, 'keys',   'pro',          'Vake',        41.709, 44.760, '{jazz,synth-pop}',        'Classically trained, recovering. I want to play over a drum machine.', 'monthly',  '{recording}',        true),
     (5, 'Giorgi', 26, 'drums',  'advanced',     'Didube',      41.739, 44.778, '{metal,hardcore}',        'Double kick, my own kit, no excuses.', 'several_a_week',                       '{gigging,paid}',     false),
-    (6, 'Ana',    25, 'vocals', 'beginner',     'Mtatsminda',  41.694, 44.789, '{indie folk,dream pop}',  'Harmonies are my favourite part of any song.', 'occasionally',                  '{fun}',              false),
+    (6, 'Ana',    25, 'vocals', 'beginner',     'Mtatsminda',  41.694, 44.789, '{indie-folk,dream-pop}',  'Harmonies are my favourite part of any song.', 'occasionally',                  '{fun}',              false),
     (7, 'Dato',   29, 'bass',   'intermediate', 'Nadzaladevi', 41.748, 44.793, '{post-rock,shoegaze}',    'Long songs, lots of pedals, quiet and then very loud.', 'weekly',               '{fun,recording}',    true),
-    (8, 'Salome', 23, 'keys',   'intermediate', 'Avlabari',    41.692, 44.812, '{city pop,disco}',        'I want our first gig to be on a rooftop in June.', 'weekly',                    '{gigging}',          false)
+    (8, 'Salome', 23, 'keys',   'intermediate', 'Avlabari',    41.692, 44.812, '{city-pop,disco}',        'I want our first gig to be on a rooftop in June.', 'weekly',                    '{gigging}',          false)
 ),
 ids as (
   select p.*, ('00000000-0000-4000-8000-0000000000a' || p.n)::uuid as id from people p
 ),
 new_users as (
-  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, created_at, updated_at)
+  -- The token columns must be '' (not NULL) or signing in fails with
+  -- "Database error querying schema" (test_riffs.py signs in briefly).
+  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+                          confirmation_token, recovery_token, email_change, email_change_token_new,
+                          email_change_token_current, phone_change, phone_change_token,
+                          reauthentication_token, created_at, updated_at)
   select '00000000-0000-0000-0000-000000000000', id, 'authenticated', 'authenticated',
-         lower(name) || '@test.octava.invalid', '', now(), now()
+         lower(name) || '@test.octava.invalid', '', now(), '', '', '', '', '', '', '', '', now(), now()
   from ids
   on conflict (id) do nothing
   returning id

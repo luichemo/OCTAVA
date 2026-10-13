@@ -353,5 +353,7 @@
   "themeToLight": "ნათელ რეჟიმზე გადართვა",
   "cardAlsoPlays": "ასევე: {instruments}",
   "instrumentMakeMain": "გახადე მთავარ ინსტრუმენტად",
-  "instrumentIsMain": "შენი მთავარი ინსტრუმენტი"
+  "instrumentIsMain": "შენი მთავარი ინსტრუმენტი",
+  "errEmailBusy": "ახლა რეგისტრაცია გადატვირთულია. სცადე თავიდან ერთ საათში.",
+  "clipPosition": "პოზიცია ჩანაწერში"
 }

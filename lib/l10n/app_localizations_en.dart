@@ -1229,4 +1229,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get instrumentIsMain => 'Your main instrument';
+
+  @override
+  String get errEmailBusy =>
+      'Sign-ups are busy right now. Please try again in an hour.';
+
+  @override
+  String get clipPosition => 'Position in the clip';
 }

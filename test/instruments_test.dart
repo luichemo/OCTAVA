@@ -8,6 +8,7 @@ import 'package:octava/screens/edit_profile_screen.dart';
 import 'package:octava/theme.dart';
 import 'package:octava/widgets/musician_card.dart';
 
+import 'profile_helpers.dart';
 import 'signup_flow_test.dart' show FakeProfileRepository;
 
 void main() {
@@ -72,6 +73,7 @@ void main() {
         instruments: {'bass': 'pro', 'guitar': 'pro'},
       );
     await pump(tester, EditProfileScreen(repository: repo));
+    await openSection(tester, 'What you play');
     final scroll = find.byType(Scrollable).first;
 
     final makeMain = find.byTooltip('Make this your main instrument');

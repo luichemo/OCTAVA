@@ -672,5 +672,10 @@
     }
   },
   "instrumentMakeMain": "Make this your main instrument",
-  "instrumentIsMain": "Your main instrument"
+  "instrumentIsMain": "Your main instrument",
+  "errEmailBusy": "Sign-ups are busy right now. Please try again in an hour.",
+  "@errEmailBusy": {
+    "description": "Sign-up failed because the project's email sending limit was reached (affects everyone)."
+  },
+  "clipPosition": "Position in the clip"
 }

@@ -150,6 +150,19 @@ void main() {
       expect(deck.undone, ['Nika']);
       expect(find.text('Nika, 24'), findsOneWidget);
     });
+
+    testWidgets('the Undo offer goes away after 3 seconds', (tester) async {
+      await pumpSwipe(tester, FakeChatRepository(), deck: RecordingDeck());
+      await swipePass(tester);
+      await tester.pumpAndSettle();
+      expect(find.text('Undo'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(find.text('Undo'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+      expect(find.text('Undo'), findsNothing);
+    });
   });
 
   group('matches and chat', () {

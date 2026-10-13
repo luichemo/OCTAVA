@@ -405,8 +405,8 @@ class _SwipeScreenState extends State<SwipeScreen>
     }
   }
 
-  /// A short message at the bottom. With [onUndo] it stays longer and has
-  /// an Undo button.
+  /// A short message at the bottom. With [onUndo] it has an Undo button
+  /// and stays for 3 s.
   void _toast(String message, {VoidCallback? onUndo}) {
     final colors = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context)
@@ -425,7 +425,10 @@ class _SwipeScreenState extends State<SwipeScreen>
           backgroundColor: colors.onSurface,
           behavior: SnackBarBehavior.floating,
           shape: const StadiumBorder(),
-          duration: Duration(milliseconds: onUndo == null ? 2400 : 4000),
+          duration: Duration(milliseconds: onUndo == null ? 2400 : 3000),
+          // Flutter keeps a snack bar with a button up until it's tapped;
+          // the Undo offer should go away by itself after 3 s.
+          persist: false,
           action: onUndo == null
               ? null
               : SnackBarAction(
@@ -840,7 +843,7 @@ class _BottomBar extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    boxShadow: hardShadow(OctavaColors.yellow),
+                    boxShadow: hardShadow(OctavaColors.yellow, offset: 2),
                   ),
                   child: IconButton.filled(
                     tooltip: context.t.navAdd,

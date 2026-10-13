@@ -10,6 +10,7 @@ import 'package:octava/models/profile_draft.dart';
 import 'package:octava/screens/edit_profile_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
 
+import 'profile_helpers.dart';
 import 'signup_flow_test.dart' show FakeProfileRepository;
 
 void main() {
@@ -138,6 +139,7 @@ void main() {
       );
     final needs = MemoryBandNeeds();
     await pump(tester, EditProfileScreen(repository: repo, bandNeeds: needs));
+    await openSection(tester, 'Your band needs');
 
     final scroll = find.byType(Scrollable).first;
     await tester.scrollUntilVisible(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
+
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/musician.dart';
@@ -73,6 +75,15 @@ class FakeAuthRepository implements AuthRepository {
 }
 
 void main() {
+  test('the email sending limit gets its own message', () {
+    expect(
+      SupabaseAuthRepository.authMessage(
+        const AuthException('', code: 'over_email_send_rate_limit'),
+      ),
+      'Sign-ups are busy right now. Please try again in an hour.',
+    );
+  });
+
   Future<void> pump(WidgetTester tester, Widget home) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;

@@ -7,6 +7,7 @@ import 'package:octava/models/profile_draft.dart';
 import 'package:octava/screens/edit_profile_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
 
+import 'profile_helpers.dart';
 import 'signup_flow_test.dart' show FakeProfileRepository;
 
 void main() {
@@ -31,6 +32,7 @@ void main() {
     BuildContext screen() => tester.element(find.byType(EditProfileScreen));
     expect(Theme.of(screen()).brightness, Brightness.light);
 
+    await openSection(tester, 'Theme');
     final dark = find.widgetWithText(SegmentedButton<ThemeMode>, 'Dark');
     await tester.scrollUntilVisible(
       dark,
@@ -52,6 +54,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(appTheme.value, ThemeMode.system);
     expect(Theme.of(screen()).brightness, Brightness.light);
+  });
+
+  testWidgets('profile sections start folded and open on tap', (tester) async {
+    tester.view.physicalSize = const Size(420, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true)
+      ..saved = const ProfileDraft(
+        displayName: 'Luka',
+        instruments: {'vocals': 'pro'},
+      );
+    await tester.pumpWidget(
+      OctavaApp(home: EditProfileScreen(repository: repo)),
+    );
+    await tester.pumpAndSettle();
+
+    final picker = find.byType(SegmentedButton<ThemeMode>);
+    await openSection(tester, 'Language'); // scrolls Theme into view too
+    await tester.ensureVisible(find.text('Theme'));
+    await tester.pumpAndSettle();
+    expect(picker.hitTestable(), findsNothing);
+
+    await tester.tap(find.text('Theme'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(picker);
+    await tester.pumpAndSettle();
+    expect(picker.hitTestable(), findsOneWidget);
+
+    await tester.tap(find.text('Theme'));
+    await tester.pumpAndSettle();
+    expect(picker.hitTestable(), findsNothing);
   });
 
   testWidgets('the sun/moon button in the feed switches light and dark', (

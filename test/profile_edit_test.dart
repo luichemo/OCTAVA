@@ -18,6 +18,7 @@ import 'package:octava/screens/swipe_screen.dart';
 import 'package:octava/data/deck.dart';
 import 'package:octava/widgets/clips_section.dart';
 
+import 'profile_helpers.dart';
 import 'signup_flow_test.dart' show FakeProfileRepository;
 
 class FakeClipRepository implements ClipRepository {
@@ -71,6 +72,15 @@ class FakeClipPlayer implements ClipPlayer {
   Future<void> toggle(String path) async {
     toggled.add(path);
     playing.value = playing.value == path ? null : path;
+  }
+
+  /// Every seek, as "path@seconds".
+  final seeks = <String>[];
+
+  @override
+  Future<void> seek(String path, Duration to) async {
+    seeks.add('$path@${to.inSeconds}');
+    playing.value = path;
   }
 
   @override
@@ -226,6 +236,7 @@ void main() {
         instruments: {'vocals': 'pro'},
       );
     await pump(tester, EditProfileScreen(repository: repo));
+    await openSection(tester, 'Links');
 
     final scroll = find.byType(Scrollable).first;
     final linkField = find.widgetWithText(
@@ -341,6 +352,29 @@ void main() {
       await swipePass(tester);
       await tester.pumpAndSettle();
       expect(player.playing.value, isNull);
+    });
+
+    testWidgets('tapping the waveform jumps to that moment', (tester) async {
+      final player = FakeClipPlayer();
+      await pump(
+        tester,
+        SwipeScreen(source: const _ClipDeck(), player: player),
+      );
+
+      // Halfway along a 30 s clip: it starts playing from 0:15.
+      final wave = tester.getRect(
+        find
+            .byWidgetPredicate(
+              (w) =>
+                  w is Semantics &&
+                  w.properties.label == 'Position in the clip',
+            )
+            .last,
+      );
+      await tester.tapAt(wave.center);
+      await tester.pump();
+      expect(player.seeks, ['ana/1.mp3@15']);
+      expect(find.byTooltip("Stop Ana's clip"), findsOneWidget);
     });
   });
 }
