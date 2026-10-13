@@ -2420,12 +2420,6 @@ abstract class AppLocalizations {
   /// **'You\'ll stop seeing its members and votes. If you\'re the last member, the band is deleted.'**
   String get bandLeaveBody;
 
-  /// No description provided for @bandChatSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Band chat is coming soon.'**
-  String get bandChatSoon;
-
   /// No description provided for @errBandLoad.
   ///
   /// In en, this message translates to:
@@ -2539,6 +2533,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only the person who proposed them can cancel.'**
   String get errBandCancelNotYours;
+
+  /// No description provided for @bandChatOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open band chat'**
+  String get bandChatOpen;
+
+  /// No description provided for @bandChatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet. Say hi to the band!'**
+  String get bandChatEmpty;
+
+  /// No description provided for @bandChatClosedAlone.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a member to start the band chat.'**
+  String get bandChatClosedAlone;
+
+  /// No description provided for @bandChatClosedAges.
+  ///
+  /// In en, this message translates to:
+  /// **'The chat is paused: a band with teens and adults needs at least 3 members. It opens again when someone else joins.'**
+  String get bandChatClosedAges;
+
+  /// No description provided for @bandSeenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Seen by 1} other{Seen by {count}}}'**
+  String bandSeenBy(int count);
+
+  /// No description provided for @bandSeenByAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen by everyone'**
+  String get bandSeenByAll;
+
+  /// No description provided for @bandMembersButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get bandMembersButton;
+
+  /// No description provided for @bandMessagePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {message}'**
+  String bandMessagePreview(String name, String message);
+
+  /// No description provided for @errBandSendClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The band chat is closed right now.'**
+  String get errBandSendClosed;
+
+  /// In the pop-up about a bandmate: their role, e.g. 'Drums in Riot'.
+  ///
+  /// In en, this message translates to:
+  /// **'{instrument} in {band}'**
+  String bandMemberRole(String instrument, String band);
 }
 
 class _AppLocalizationsDelegate

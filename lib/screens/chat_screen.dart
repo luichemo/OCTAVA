@@ -223,15 +223,15 @@ class _ChatScreenState extends State<ChatScreen> {
                               : null;
                           final newDay =
                               older == null ||
-                              !_sameDay(older.sentAt, message.sentAt);
+                              !sameDay(older.sentAt, message.sentAt);
                           final bubble = newDay
                               ? Column(
                                   children: [
-                                    _DayChip(day: message.sentAt),
-                                    _Bubble(message: message, mine: mine),
+                                    DayChip(day: message.sentAt),
+                                    ChatBubble(message: message, mine: mine),
                                   ],
                                 )
-                              : _Bubble(message: message, mine: mine);
+                              : ChatBubble(message: message, mine: mine);
                           // "Seen" goes under your newest message only.
                           if (i != 0 || !mine || widget.live == null) {
                             return bubble;
@@ -317,12 +317,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
 enum _MenuChoice { unmatch, safety }
 
-bool _sameDay(DateTime a, DateTime b) =>
+bool sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
 /// "Today", "Yesterday" or a date, between messages from different days.
-class _DayChip extends StatelessWidget {
-  const _DayChip({required this.day});
+class DayChip extends StatelessWidget {
+  const DayChip({super.key, required this.day});
 
   final DateTime day;
 
@@ -352,11 +352,18 @@ class _DayChip extends StatelessWidget {
   }
 }
 
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message, required this.mine});
+/// One message. [sender]: their name above the text, for group chats.
+class ChatBubble extends StatelessWidget {
+  const ChatBubble({
+    super.key,
+    required this.message,
+    required this.mine,
+    this.sender,
+  });
 
   final ChatMessage message;
   final bool mine;
+  final String? sender;
 
   @override
   Widget build(BuildContext context) {
@@ -382,27 +389,42 @@ class _Bubble extends StatelessWidget {
               bottomRight: Radius.circular(mine ? 4 : 18),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                message.body,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: mine ? OctavaColors.ink : colors.onSurface,
+          // IntrinsicWidth: as wide as the longest line (name, text or
+          // time), so the bubble hugs short messages instead of stretching.
+          child: IntrinsicWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (sender != null)
+                  Text(
+                    sender!,
+                    // Pink text would be too faint on the pale bubble.
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                Text(
+                  message.body,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: mine ? OctavaColors.ink : colors.onSurface,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                formatClock(message.sentAt),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: mine
-                      ? OctavaColors.ink.withValues(alpha: 0.7)
-                      : colors.onSurfaceVariant,
+                const SizedBox(height: 2),
+                Text(
+                  formatClock(message.sentAt),
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: mine
+                        ? OctavaColors.ink.withValues(alpha: 0.7)
+                        : colors.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

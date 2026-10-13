@@ -822,7 +822,7 @@ class _BottomBar extends StatelessWidget {
     this.bands,
   });
 
-  /// For invites and votes waiting, also counted on Matches.
+  /// For band invites, votes and unread band messages, also on Matches.
   final LiveBands? bands;
 
   /// For the unread count on Matches.
@@ -882,7 +882,7 @@ class _BottomBar extends StatelessWidget {
                 icon: Icons.chat_bubble_outline_rounded,
                 label: context.t.navMatches,
                 onTap: onMatches!,
-                badge: (live?.unreadTotal ?? 0) + (bands?.actionCount ?? 0),
+                badge: (live?.unreadTotal ?? 0) + (bands?.badgeCount ?? 0),
               ),
             ),
         ],

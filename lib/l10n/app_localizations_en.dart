@@ -1366,9 +1366,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You\'ll stop seeing its members and votes. If you\'re the last member, the band is deleted.';
 
   @override
-  String get bandChatSoon => 'Band chat is coming soon.';
-
-  @override
   String get errBandLoad => 'Couldn\'t load your bands. Check your connection.';
 
   @override
@@ -1433,4 +1430,47 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errBandCancelNotYours =>
       'Only the person who proposed them can cancel.';
+
+  @override
+  String get bandChatOpen => 'Open band chat';
+
+  @override
+  String get bandChatEmpty => 'No messages yet. Say hi to the band!';
+
+  @override
+  String get bandChatClosedAlone => 'Add a member to start the band chat.';
+
+  @override
+  String get bandChatClosedAges =>
+      'The chat is paused: a band with teens and adults needs at least 3 members. It opens again when someone else joins.';
+
+  @override
+  String bandSeenBy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Seen by $count',
+      one: 'Seen by 1',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bandSeenByAll => 'Seen by everyone';
+
+  @override
+  String get bandMembersButton => 'Members';
+
+  @override
+  String bandMessagePreview(String name, String message) {
+    return '$name: $message';
+  }
+
+  @override
+  String get errBandSendClosed => 'The band chat is closed right now.';
+
+  @override
+  String bandMemberRole(String instrument, String band) {
+    return '$instrument in $band';
+  }
 }

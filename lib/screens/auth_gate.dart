@@ -20,6 +20,7 @@ import '../models/chat.dart';
 import '../models/musician.dart';
 import '../widgets/live_banner.dart';
 import 'auth_screen.dart';
+import 'band_chat_screen.dart';
 import 'chat_screen.dart';
 import 'edit_profile_screen.dart';
 import 'matches_screen.dart';
@@ -176,6 +177,20 @@ class _ProfileGateState extends State<ProfileGate> {
     instrument: musician.instrument,
   );
 
+  /// From a band message banner.
+  void _openBandChat(String bandId) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BandChatScreen(
+          bands: _bands!,
+          bandId: bandId,
+          matches: _live,
+          avatars: widget.avatars,
+        ),
+      ),
+    );
+  }
+
   /// From a banner.
   void _openChatFor(MatchSummary match) => _pushChat(
     matchId: match.matchId,
@@ -227,6 +242,8 @@ class _ProfileGateState extends State<ProfileGate> {
             live: _live,
             avatars: widget.avatars,
             onOpen: _openChatFor,
+            bands: _bands,
+            onOpenBand: _openBandChat,
             child: SwipeScreen(
               source: widget.deck,
               onRecord: widget.clips == null

@@ -387,7 +387,6 @@
   "bandLeave": "ბენდიდან წასვლა",
   "bandLeaveTitle": "ტოვებ ბენდს {band}?",
   "bandLeaveBody": "ვეღარ ნახავ მის წევრებს და კენჭისყრებს. თუ ბოლო წევრი ხარ, ბენდი წაიშლება.",
-  "bandChatSoon": "ბენდის ჩატი მალე დაემატება.",
   "errBandLoad": "ბენდები ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.",
   "errBandAction": "ვერ მოხერხდა. შეამოწმე ინტერნეტი და სცადე თავიდან.",
   "errBandNotMatched": "შეგიძლია შესთავაზო მხოლოდ ის, ვისთანაც დამეჩდი.",
@@ -406,5 +405,15 @@
   "bandCancelBody": "მას ამის შესახებ არ ეცოდინება. შეგიძლია მოგვიანებით ისევ შესთავაზო.",
   "bandCancelKeep": "დატოვება",
   "bandCancelled": "მოთხოვნა გაუქმდა: {name}.",
-  "errBandCancelNotYours": "გაუქმება მხოლოდ იმას შეუძლია, ვინც შესთავაზა."
+  "errBandCancelNotYours": "გაუქმება მხოლოდ იმას შეუძლია, ვინც შესთავაზა.",
+  "bandChatOpen": "ბენდის ჩატის გახსნა",
+  "bandChatEmpty": "შეტყობინებები ჯერ არაა. მიესალმე ბენდს!",
+  "bandChatClosedAlone": "ბენდის ჩატის დასაწყებად დაამატე წევრი.",
+  "bandChatClosedAges": "ჩატი შეჩერებულია: ბენდს, სადაც მოზარდები და ზრდასრულები არიან, მინიმუმ 3 წევრი სჭირდება. ჩატი ხელახლა გაიხსნება, როცა ვინმე შემოუერთდება.",
+  "bandSeenBy": "{count, plural, =1{ნახა 1-მა} other{ნახა {count}-მა}}",
+  "bandSeenByAll": "ყველამ ნახა",
+  "bandMembersButton": "წევრები",
+  "bandMessagePreview": "{name}: {message}",
+  "errBandSendClosed": "ბენდის ჩატი ახლა დახურულია.",
+  "bandMemberRole": "{instrument} · {band}"
 }

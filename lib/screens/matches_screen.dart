@@ -13,7 +13,7 @@ import '../models/chat.dart';
 import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 import '../widgets/person_avatar.dart';
-import 'band_screen.dart';
+import 'band_chat_screen.dart';
 import 'chat_screen.dart';
 
 /// Your bands and band invites (with [bands]), then everyone you've matched
@@ -77,7 +77,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   Future<void> _openBand(String bandId) => Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => BandScreen(
+      builder: (_) => BandChatScreen(
         bands: widget.bands!,
         bandId: bandId,
         matches: _live,
@@ -459,6 +459,16 @@ class _BandTile extends StatelessWidget {
     final t = context.t;
     final colors = Theme.of(context).colorScheme;
     final waiting = votesWaiting > 0;
+    final unread = band.unreadCount;
+    final last = band.lastMessage;
+    final bold = waiting || unread > 0;
+    // Votes come first; then the latest message; then who's in it.
+    final subtitle = waiting
+        ? t.bandVotesWaiting(votesWaiting)
+        : last != null
+        ? t.bandMessagePreview(last.senderName, last.body)
+        : t.bandMemberCount(band.members.length);
+    final count = votesWaiting + unread;
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
@@ -468,30 +478,43 @@ class _BandTile extends StatelessWidget {
         foregroundColor: OctavaColors.ink,
         child: Icon(Icons.groups_rounded),
       ),
-      title: Text(
-        band.name,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w700),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              band.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+          if (last != null)
+            Text(
+              formatMessageTime(last.sentAt),
+              style: TextStyle(
+                fontSize: 13,
+                color: bold ? colors.onSurface : colors.onSurfaceVariant,
+                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+              ),
+            ),
+        ],
       ),
       subtitle: Text(
-        waiting
-            ? t.bandVotesWaiting(votesWaiting)
-            : t.bandMemberCount(band.members.length),
+        subtitle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          color: waiting ? colors.onSurface : colors.onSurfaceVariant,
-          fontWeight: waiting ? FontWeight.w600 : FontWeight.w400,
+          color: bold ? colors.onSurface : colors.onSurfaceVariant,
+          fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
         ),
       ),
-      trailing: waiting
+      trailing: count > 0
           ? Badge(
-              label: Text('$votesWaiting'),
+              label: Text('$count'),
               backgroundColor: OctavaColors.pink,
               textColor: OctavaColors.ink,
             )
-          : const Icon(Icons.chevron_right),
+          : null,
     );
   }
 }

@@ -11,8 +11,10 @@ import 'package:octava/l10n/l10n.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/band_group.dart';
 import 'package:octava/models/chat.dart';
+import 'package:octava/screens/band_chat_screen.dart';
 import 'package:octava/screens/band_screen.dart';
 import 'package:octava/screens/matches_screen.dart';
+import 'package:octava/widgets/live_banner.dart';
 
 import 'chat_test.dart' show FakeChatRepository;
 
@@ -32,7 +34,7 @@ class FakeBandsRepository implements BandsRepository {
   final people = {
     for (final p in [me, nika, tamar, dato]) p.id: p,
   };
-  final _changes = StreamController<void>.broadcast();
+  final _changes = StreamController<BandChange>.broadcast();
 
   /// The next action fails with this message.
   String? failNext;
@@ -42,8 +44,36 @@ class FakeBandsRepository implements BandsRepository {
   String get myId => me.id;
 
   @override
-  Future<BandsState> load() async =>
-      (bands: List.of(bands), invites: List.of(invites));
+  Future<BandsState> load() async => (
+    bands: [
+      for (final b in bands)
+        MyBand(
+          id: b.id,
+          name: b.name,
+          members: b.members,
+          proposals: b.proposals,
+          chatOpen: b.members.length > 1 && !closedChats.contains(b.id),
+          unreadCount: (_messages[b.id] ?? const <ChatMessage>[])
+              .where(
+                (m) =>
+                    m.senderId != me.id &&
+                    (myReads[b.id] == null || m.sentAt.isAfter(myReads[b.id]!)),
+              )
+              .length,
+          lastMessage: switch (_messages[b.id]?.lastOrNull) {
+            final m? => BandMessagePreview(
+              senderId: m.senderId,
+              senderName: people[m.senderId]?.name ?? '?',
+              body: m.body,
+              sentAt: m.sentAt,
+            ),
+            null => null,
+          },
+          readMarks: Map.of(otherReads[b.id] ?? const {}),
+        ),
+    ],
+    invites: List.of(invites),
+  );
 
   void _check() {
     final fail = failNext;
@@ -53,7 +83,7 @@ class FakeBandsRepository implements BandsRepository {
 
   void _replace(MyBand band) {
     bands[bands.indexWhere((b) => b.id == band.id)] = band;
-    _changes.add(null);
+    _changes.add(const BandsChanged());
   }
 
   @override
@@ -61,7 +91,7 @@ class FakeBandsRepository implements BandsRepository {
     _check();
     final id = 'band${bands.length + 1}';
     bands.add(MyBand(id: id, name: name, members: const [me]));
-    _changes.add(null);
+    _changes.add(const BandsChanged());
     return id;
   }
 
@@ -135,7 +165,7 @@ class FakeBandsRepository implements BandsRepository {
         ),
       );
     }
-    _changes.add(null);
+    _changes.add(const BandsChanged());
   }
 
   final cancelled = <String>[];
@@ -164,11 +194,73 @@ class FakeBandsRepository implements BandsRepository {
   Future<void> leave(String bandId) async {
     _check();
     bands.removeWhere((b) => b.id == bandId);
-    _changes.add(null);
+    _changes.add(const BandsChanged());
   }
 
   @override
-  Stream<void> changes() => _changes.stream;
+  Stream<BandChange> changes() => _changes.stream;
+
+  // ------------------------------------------------------------ chat
+  final _messages = <String, List<ChatMessage>>{};
+  final _streams = <String, StreamController<List<ChatMessage>>>{};
+  final myReads = <String, DateTime>{};
+  final otherReads = <String, Map<String, DateTime>>{};
+  final sent = <String>[];
+
+  /// Bands whose chat is closed.
+  final closedChats = <String>{};
+
+  @override
+  Stream<List<ChatMessage>> messages(String bandId) {
+    final controller = _streams.putIfAbsent(
+      bandId,
+      () => StreamController<List<ChatMessage>>.broadcast(),
+    );
+    scheduleMicrotask(() => controller.add(List.of(_messages[bandId] ?? [])));
+    return controller.stream;
+  }
+
+  void _post(String bandId, String senderId, String body) {
+    final list = _messages.putIfAbsent(bandId, () => []);
+    list.add(
+      ChatMessage(
+        id: 'msg${list.length}',
+        senderId: senderId,
+        body: body,
+        sentAt: DateTime.now(),
+      ),
+    );
+    _streams[bandId]?.add(List.of(list));
+    _changes.add(
+      BandMessageArrived(bandId: bandId, senderId: senderId, body: body),
+    );
+  }
+
+  @override
+  Future<void> send(String bandId, String body) async {
+    _check();
+    if (closedChats.contains(bandId)) {
+      throw UserFacingException(L10n.current.errBandSendClosed);
+    }
+    sent.add(body);
+    _post(bandId, me.id, body);
+  }
+
+  /// A bandmate posts.
+  void receive(String bandId, String senderId, String body) =>
+      _post(bandId, senderId, body);
+
+  /// A bandmate reads the chat now.
+  void readBy(String bandId, String userId) {
+    otherReads.putIfAbsent(bandId, () => {})[userId] = DateTime.now().add(
+      const Duration(seconds: 1),
+    );
+    _changes.add(const BandsChanged());
+  }
+
+  @override
+  Future<void> markRead(String bandId) async =>
+      myReads[bandId] = DateTime.now().add(const Duration(seconds: 1));
 }
 
 void main() {
@@ -285,8 +377,14 @@ void main() {
     await tester.tap(find.text('Create'));
     await tester.pumpAndSettle();
     expect(repo.bands.single.name, 'Night Shift');
-    expect(find.byType(BandScreen), findsOneWidget);
+    // The new band's chat opens; alone, it asks you to add a member.
+    expect(find.byType(BandChatScreen), findsOneWidget);
     expect(find.text('Night Shift'), findsOneWidget);
+    expect(find.text('Add a member to start the band chat.'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Members'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BandScreen), findsOneWidget);
     expect(find.text('You'), findsOneWidget);
   });
 
@@ -544,6 +642,150 @@ void main() {
     });
   });
 
+  group('band chat', () {
+    const riot = MyBand(id: 'b1', name: 'Riot', members: [me, nika, tamar]);
+
+    Future<(FakeBandsRepository, LiveBands)> pumpChat(
+      WidgetTester tester, {
+      MyBand band = riot,
+      Set<String> closed = const {},
+    }) async {
+      final repo = FakeBandsRepository(bands: [band])
+        ..closedChats.addAll(closed);
+      final live = LiveBands(repo)..start();
+      addTearDown(live.dispose);
+      await live.refresh();
+      await pump(tester, BandChatScreen(bands: live, bandId: band.id));
+      return (repo, live);
+    }
+
+    testWidgets('send and receive, with who wrote what', (tester) async {
+      final (repo, _) = await pumpChat(tester);
+      expect(find.text('No messages yet. Say hi to the band!'), findsOneWidget);
+      expect(find.text('Luka, Nika and Tamar'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Rehearsal Friday?');
+      await tester.tap(find.byTooltip('Send'));
+      await tester.pumpAndSettle();
+      expect(repo.sent, ['Rehearsal Friday?']);
+      expect(find.text('Rehearsal Friday?'), findsOneWidget);
+
+      repo.receive('b1', 'nika', 'I\'m in');
+      repo.receive('b1', 'nika', 'bringing my snare');
+      await tester.pumpAndSettle();
+      // No names: one avatar for Nika's run; tapping it shows who she is.
+      expect(find.text('Nika'), findsNothing);
+      final avatar = find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.label == 'Nika',
+      );
+      expect(avatar, findsOneWidget);
+      await tester.tap(avatar);
+      await tester.pumpAndSettle();
+      expect(find.text('Nika'), findsOneWidget);
+      expect(find.text('Drums in Riot'), findsOneWidget);
+      expect(find.text('bringing my snare'), findsOneWidget);
+    });
+
+    testWidgets('your newest message says who has seen it', (tester) async {
+      final (repo, _) = await pumpChat(tester);
+      await tester.enterText(find.byType(TextField), 'Setlist ready');
+      await tester.tap(find.byTooltip('Send'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Seen'), findsNothing);
+
+      repo.readBy('b1', 'nika');
+      await tester.pumpAndSettle();
+      expect(find.text('Seen by 1'), findsOneWidget);
+      repo.readBy('b1', 'tamar');
+      await tester.pumpAndSettle();
+      expect(find.text('Seen by everyone'), findsOneWidget);
+    });
+
+    testWidgets('a band of one asks for a member instead of a message box', (
+      tester,
+    ) async {
+      await pumpChat(
+        tester,
+        band: const MyBand(id: 'b1', name: 'Solo', members: [me]),
+      );
+      expect(find.text('Add a member to start the band chat.'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('a paused mixed band explains why', (tester) async {
+      await pumpChat(
+        tester,
+        band: const MyBand(id: 'b1', name: 'Duo', members: [me, nika]),
+        closed: {'b1'},
+      );
+      expect(find.textContaining('needs at least 3 members'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('the band row shows the latest message and unread count', (
+      tester,
+    ) async {
+      final (repo, live) = await pumpMatches(tester, bands: [riot]);
+      repo.receive('b1', 'tamar', 'new song idea');
+      await tester.pumpAndSettle();
+      expect(find.text('Tamar: new song idea'), findsOneWidget);
+      expect(live.unreadTotal, 1);
+      expect(live.badgeCount, 1);
+
+      await tester.tap(find.text('Riot'));
+      await tester.pumpAndSettle();
+      expect(find.byType(BandChatScreen), findsOneWidget);
+      expect(live.unreadTotal, 0);
+    });
+
+    testWidgets('a band message elsewhere shows a banner that opens the chat', (
+      tester,
+    ) async {
+      final repo = FakeBandsRepository(bands: [riot]);
+      final live = LiveBands(repo)..start();
+      addTearDown(live.dispose);
+      await live.refresh();
+      final opened = <String>[];
+      await pump(
+        tester,
+        LiveBannerListener(
+          live: null,
+          bands: live,
+          onOpen: (_) {},
+          onOpenBand: opened.add,
+          child: const Scaffold(body: Text('feed')),
+        ),
+      );
+      repo.receive('b1', 'nika', 'gig on Saturday!');
+      await tester.pumpAndSettle();
+      expect(find.text('Riot'), findsOneWidget);
+      expect(find.text('Nika: gig on Saturday!'), findsOneWidget);
+
+      await tester.tap(find.text('Nika: gig on Saturday!'));
+      await tester.pumpAndSettle();
+      expect(opened, ['b1']);
+    });
+
+    testWidgets('your own messages don\'t make a banner', (tester) async {
+      final repo = FakeBandsRepository(bands: [riot]);
+      final live = LiveBands(repo)..start();
+      addTearDown(live.dispose);
+      await live.refresh();
+      await pump(
+        tester,
+        LiveBannerListener(
+          live: null,
+          bands: live,
+          onOpen: (_) {},
+          child: const Scaffold(body: Text('feed')),
+        ),
+      );
+      await repo.send('b1', 'from me');
+      await tester.pumpAndSettle();
+      expect(find.text('Luka: from me'), findsNothing);
+    });
+  });
+
   group('in Georgian', () {
     setUp(() => appLanguage.value = const Locale('ka'));
     tearDown(() => appLanguage.value = null);
@@ -580,6 +822,12 @@ void main() {
       expect(find.text('მიღება'), findsOneWidget);
 
       await tester.tap(find.text('Riot'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('შეტყობინებები ჯერ არაა. მიესალმე ბენდს!'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byTooltip('წევრები'));
       await tester.pumpAndSettle();
       expect(find.text('წევრები'), findsOneWidget);
       expect(find.text('თანხმობა'), findsOneWidget);

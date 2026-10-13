@@ -43,6 +43,21 @@ class BandProposal {
   final Set<String> approvedBy;
 }
 
+/// The newest message in a band chat, for the Matches list.
+class BandMessagePreview {
+  const BandMessagePreview({
+    required this.senderId,
+    required this.senderName,
+    required this.body,
+    required this.sentAt,
+  });
+
+  final String senderId;
+  final String senderName;
+  final String body;
+  final DateTime sentAt;
+}
+
 /// A band you're in.
 class MyBand {
   const MyBand({
@@ -50,7 +65,36 @@ class MyBand {
     required this.name,
     required this.members,
     this.proposals = const [],
+    this.chatOpen = true,
+    this.unreadCount = 0,
+    this.lastMessage,
+    this.readMarks = const {},
   });
+
+  /// Whether members can post: 2+ members, 3+ when teens and adults mix.
+  final bool chatOpen;
+
+  /// Other members' messages you haven't read.
+  final int unreadCount;
+  final BandMessagePreview? lastMessage;
+
+  /// When each other member last read the chat, for "Seen by".
+  final Map<String, DateTime> readMarks;
+
+  /// The same band with a different unread count.
+  MyBand copyWith({int? unreadCount}) => MyBand(
+    id: id,
+    name: name,
+    members: members,
+    proposals: proposals,
+    chatOpen: chatOpen,
+    unreadCount: unreadCount ?? this.unreadCount,
+    lastMessage: lastMessage,
+    readMarks: readMarks,
+  );
+
+  BandPerson? memberById(String id) =>
+      members.where((m) => m.id == id).firstOrNull;
 
   final String id;
   final String name;
@@ -85,3 +129,25 @@ class BandInvite {
 
 /// Everything band-related for the signed-in person.
 typedef BandsState = ({List<MyBand> bands, List<BandInvite> invites});
+
+/// Something that changed in your bands, pushed live by the server.
+sealed class BandChange {
+  const BandChange();
+}
+
+/// A new message in one of your band chats (from anyone, you included).
+class BandMessageArrived extends BandChange {
+  const BandMessageArrived({
+    required this.bandId,
+    required this.senderId,
+    required this.body,
+  });
+  final String bandId;
+  final String senderId;
+  final String body;
+}
+
+/// Bands, members, proposals, votes or read marks changed.
+class BandsChanged extends BandChange {
+  const BandsChanged();
+}

@@ -785,7 +785,6 @@
     }
   },
   "bandLeaveBody": "You'll stop seeing its members and votes. If you're the last member, the band is deleted.",
-  "bandChatSoon": "Band chat is coming soon.",
   "errBandLoad": "Couldn't load your bands. Check your connection.",
   "errBandAction": "That didn't work. Check your connection and try again.",
   "errBandNotMatched": "You can only propose people you've matched with.",
@@ -818,5 +817,43 @@
       }
     }
   },
-  "errBandCancelNotYours": "Only the person who proposed them can cancel."
+  "errBandCancelNotYours": "Only the person who proposed them can cancel.",
+  "bandChatOpen": "Open band chat",
+  "bandChatEmpty": "No messages yet. Say hi to the band!",
+  "bandChatClosedAlone": "Add a member to start the band chat.",
+  "bandChatClosedAges": "The chat is paused: a band with teens and adults needs at least 3 members. It opens again when someone else joins.",
+  "bandSeenBy": "{count, plural, =1{Seen by 1} other{Seen by {count}}}",
+  "@bandSeenBy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bandSeenByAll": "Seen by everyone",
+  "bandMembersButton": "Members",
+  "bandMessagePreview": "{name}: {message}",
+  "@bandMessagePreview": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "errBandSendClosed": "The band chat is closed right now.",
+  "bandMemberRole": "{instrument} in {band}",
+  "@bandMemberRole": {
+    "description": "In the pop-up about a bandmate: their role, e.g. 'Drums in Riot'.",
+    "placeholders": {
+      "instrument": {
+        "type": "String"
+      },
+      "band": {
+        "type": "String"
+      }
+    }
+  }
 }

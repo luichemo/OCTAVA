@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
+import '../models/chat.dart';
 import 'repositories.dart';
 
 /// Bands you're in, invites to join one, and the votes on new members.
@@ -30,8 +31,16 @@ abstract interface class BandsRepository {
 
   Future<void> leave(String bandId);
 
-  /// Fires whenever a band, member, proposal or vote you can see changes.
-  Stream<void> changes();
+  /// A band's messages, oldest first, updated live.
+  Stream<List<ChatMessage>> messages(String bandId);
+
+  Future<void> send(String bandId, String body);
+
+  /// Marks a band chat read up to now. Failing quietly is fine.
+  Future<void> markRead(String bandId);
+
+  /// Live changes to your bands and their chats.
+  Stream<BandChange> changes();
 }
 
 class SupabaseBandsRepository implements BandsRepository {
@@ -66,6 +75,34 @@ class SupabaseBandsRepository implements BandsRepository {
                 .from('band_votes')
                 .select('proposal_id, voter_id, approve')
                 .inFilter('proposal_id', [for (final p in proposals) p['id']]);
+
+      // Chat state for the bands you're in.
+      final chatRows = await _client.rpc('my_band_chats') as List;
+      final chatOpen = {
+        for (final c in chatRows)
+          c['band_id'] as String: c['chat_open'] as bool? ?? false,
+      };
+      final myBandIds = chatOpen.keys.toList();
+      final recent = myBandIds.isEmpty
+          ? const <Map<String, dynamic>>[]
+          : await _client
+                .from('band_messages')
+                .select('band_id, sender_id, body, created_at')
+                .inFilter('band_id', myBandIds)
+                .order('created_at', ascending: false)
+                .limit(500);
+      final reads = myBandIds.isEmpty
+          ? const <Map<String, dynamic>>[]
+          : await _client
+                .from('band_reads')
+                .select('band_id, user_id, last_read_at')
+                .inFilter('band_id', myBandIds);
+      DateTime at(Object? v) => DateTime.parse(v as String).toLocal();
+      final myRead = {
+        for (final r in reads)
+          if (r['user_id'] == myId)
+            r['band_id'] as String: at(r['last_read_at']),
+      };
 
       final peopleIds = {
         for (final m in members) m['profile_id'] as String,
@@ -108,11 +145,37 @@ class SupabaseBandsRepository implements BandsRepository {
           (m) => m['band_id'] == id && m['profile_id'] == myId,
         );
         if (inBand) {
+          final latest = recent.where((m) => m['band_id'] == id).firstOrNull;
+          final bandMembers = membersOf(id);
           myBands.add(
             MyBand(
               id: id,
               name: b['name'] as String,
-              members: membersOf(id),
+              members: bandMembers,
+              chatOpen: chatOpen[id] ?? false,
+              unreadCount: recent.where((m) {
+                if (m['band_id'] != id || m['sender_id'] == myId) return false;
+                final read = myRead[id];
+                return read == null || at(m['created_at']).isAfter(read);
+              }).length,
+              lastMessage: latest == null
+                  ? null
+                  : BandMessagePreview(
+                      senderId: latest['sender_id'] as String,
+                      senderName:
+                          bandMembers
+                              .where((p) => p.id == latest['sender_id'])
+                              .firstOrNull
+                              ?.name ??
+                          L10n.current.musicianFallback,
+                      body: latest['body'] as String,
+                      sentAt: at(latest['created_at']),
+                    ),
+              readMarks: {
+                for (final r in reads)
+                  if (r['band_id'] == id && r['user_id'] != myId)
+                    r['user_id'] as String: at(r['last_read_at']),
+              },
               proposals: [
                 for (final p in proposals)
                   if (p['band_id'] == id)
@@ -201,27 +264,80 @@ class SupabaseBandsRepository implements BandsRepository {
   }
 
   @override
-  Stream<void> changes() {
+  Stream<List<ChatMessage>> messages(String bandId) => _client
+      .from('band_messages')
+      .stream(primaryKey: ['id'])
+      .eq('band_id', bandId)
+      .order('created_at', ascending: true)
+      .map((rows) => [for (final row in rows) ChatMessage.fromRow(row)]);
+
+  @override
+  Future<void> send(String bandId, String body) async {
+    try {
+      await _client.from('band_messages').insert({
+        'band_id': bandId,
+        'body': body.trim(),
+      });
+    } on PostgrestException catch (e) {
+      // 42501: the chat is closed (too few members, or you left).
+      if (e.code == '42501') {
+        throw UserFacingException(L10n.current.errBandSendClosed);
+      }
+      throw UserFacingException(L10n.current.errSend);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errSendOffline);
+    }
+  }
+
+  @override
+  Future<void> markRead(String bandId) async {
+    try {
+      await _client.from('band_reads').upsert({
+        'band_id': bandId,
+        'user_id': myId,
+      });
+    } catch (_) {
+      // The next open marks it again.
+    }
+  }
+
+  @override
+  Stream<BandChange> changes() {
     late final RealtimeChannel channel;
-    final out = StreamController<void>(
+    final out = StreamController<BandChange>(
       onCancel: () => _client.removeChannel(channel),
     );
+    void add(BandChange change) {
+      if (!out.isClosed) out.add(change);
+    }
+
     channel = _client.channel('bands-$myId');
     for (final table in const [
       'bands',
       'band_members',
       'band_proposals',
       'band_votes',
+      'band_reads',
     ]) {
       channel.onPostgresChanges(
         event: PostgresChangeEvent.all,
         schema: 'public',
         table: table,
-        callback: (_) {
-          if (!out.isClosed) out.add(null);
-        },
+        callback: (_) => add(const BandsChanged()),
       );
     }
+    channel.onPostgresChanges(
+      event: PostgresChangeEvent.insert,
+      schema: 'public',
+      table: 'band_messages',
+      callback: (payload) => add(
+        BandMessageArrived(
+          bandId: payload.newRecord['band_id'] as String,
+          senderId: payload.newRecord['sender_id'] as String,
+          body: payload.newRecord['body'] as String,
+        ),
+      ),
+    );
     channel.subscribe();
     return out.stream;
   }

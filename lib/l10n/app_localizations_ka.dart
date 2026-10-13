@@ -1358,9 +1358,6 @@ class AppLocalizationsKa extends AppLocalizations {
       'ვეღარ ნახავ მის წევრებს და კენჭისყრებს. თუ ბოლო წევრი ხარ, ბენდი წაიშლება.';
 
   @override
-  String get bandChatSoon => 'ბენდის ჩატი მალე დაემატება.';
-
-  @override
   String get errBandLoad => 'ბენდები ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.';
 
   @override
@@ -1425,4 +1422,47 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get errBandCancelNotYours =>
       'გაუქმება მხოლოდ იმას შეუძლია, ვინც შესთავაზა.';
+
+  @override
+  String get bandChatOpen => 'ბენდის ჩატის გახსნა';
+
+  @override
+  String get bandChatEmpty => 'შეტყობინებები ჯერ არაა. მიესალმე ბენდს!';
+
+  @override
+  String get bandChatClosedAlone => 'ბენდის ჩატის დასაწყებად დაამატე წევრი.';
+
+  @override
+  String get bandChatClosedAges =>
+      'ჩატი შეჩერებულია: ბენდს, სადაც მოზარდები და ზრდასრულები არიან, მინიმუმ 3 წევრი სჭირდება. ჩატი ხელახლა გაიხსნება, როცა ვინმე შემოუერთდება.';
+
+  @override
+  String bandSeenBy(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ნახა $count-მა',
+      one: 'ნახა 1-მა',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bandSeenByAll => 'ყველამ ნახა';
+
+  @override
+  String get bandMembersButton => 'წევრები';
+
+  @override
+  String bandMessagePreview(String name, String message) {
+    return '$name: $message';
+  }
+
+  @override
+  String get errBandSendClosed => 'ბენდის ჩატი ახლა დახურულია.';
+
+  @override
+  String bandMemberRole(String instrument, String band) {
+    return '$instrument · $band';
+  }
 }

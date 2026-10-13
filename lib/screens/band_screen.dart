@@ -258,12 +258,6 @@ class _BandScreenState extends State<BandScreen> {
                                     : null,
                               ),
                           ],
-                          const SizedBox(height: 24),
-                          Text(
-                            t.bandChatSoon,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: colors.onSurfaceVariant),
-                          ),
                         ],
                       ),
                     ),
