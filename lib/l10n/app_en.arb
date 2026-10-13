@@ -677,5 +677,146 @@
   "@errEmailBusy": {
     "description": "Sign-up failed because the project's email sending limit was reached (affects everyone)."
   },
-  "clipPosition": "Position in the clip"
+  "clipPosition": "Position in the clip",
+  "bandsTitle": "Bands",
+  "bandCreate": "Create a band",
+  "bandCreateTitle": "Name your band",
+  "bandNameLabel": "Band name",
+  "bandNameError": "Give your band a name",
+  "bandCreateConfirm": "Create",
+  "bandInviteTitle": "{band} wants you to join",
+  "@bandInviteTitle": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "bandAccept": "Accept",
+  "bandDecline": "Decline",
+  "bandJoined": "You joined {band}!",
+  "@bandJoined": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "bandMemberCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@bandMemberCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bandVotesWaiting": "{count, plural, =1{1 vote waiting for you} other{{count} votes waiting for you}}",
+  "@bandVotesWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bandMembers": "Members",
+  "bandYou": "You",
+  "bandAddMember": "Add member",
+  "bandAddMemberTitle": "Propose one of your matches",
+  "bandAddMemberEmpty": "Nobody left to propose. Match with more musicians first.",
+  "bandProposedVote": "Proposed {name}. Your bandmates will vote.",
+  "@bandProposedVote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandProposedInvite": "Invite sent to {name}.",
+  "@bandProposedInvite": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandWaiting": "New members",
+  "@bandWaiting": {
+    "description": "Heading on a band's page above people proposed as new members (being voted on or invited)."
+  },
+  "bandProposedBy": "Proposed by {name}",
+  "@bandProposedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandApprovals": "{yes} of {total} approved",
+  "@bandApprovals": {
+    "placeholders": {
+      "yes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bandApprove": "Approve",
+  "bandReject": "Reject",
+  "bandYouApproved": "You approved",
+  "bandInvited": "Invited, waiting for their answer",
+  "bandRejectTitle": "Reject {name}?",
+  "@bandRejectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRejectBody": "One no is enough: they won't be invited, and they won't be told.",
+  "bandLeave": "Leave band",
+  "bandLeaveTitle": "Leave {band}?",
+  "@bandLeaveTitle": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "bandLeaveBody": "You'll stop seeing its members and votes. If you're the last member, the band is deleted.",
+  "bandChatSoon": "Band chat is coming soon.",
+  "errBandLoad": "Couldn't load your bands. Check your connection.",
+  "errBandAction": "That didn't work. Check your connection and try again.",
+  "errBandNotMatched": "You can only propose people you've matched with.",
+  "errBandAlreadyIn": "They're already in the band.",
+  "errBandAlreadyProposed": "They've already been proposed.",
+  "errBandFull": "A band can have at most 12 members.",
+  "errBandTooMany": "You can be in at most 10 bands.",
+  "errBandAgeRule": "A band needs at least 2 members before someone from another age group can join.",
+  "errBandUnavailable": "This person isn't available.",
+  "errBandVoteOver": "The vote on this person is already over.",
+  "errBandInviteClosed": "This invite is no longer open.",
+  "errBandNotMember": "You're not in this band anymore.",
+  "errBandNeedsProfile": "Set up your profile first.",
+  "bandCancelRequest": "Cancel request",
+  "bandCancelTitle": "Cancel the request for {name}?",
+  "@bandCancelTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandCancelBody": "They won't be told. You can propose them again later.",
+  "bandCancelKeep": "Keep it",
+  "bandCancelled": "Request for {name} cancelled.",
+  "@bandCancelled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errBandCancelNotYours": "Only the person who proposed them can cancel."
 }

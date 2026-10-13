@@ -1228,4 +1228,201 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get clipPosition => 'პოზიცია ჩანაწერში';
+
+  @override
+  String get bandsTitle => 'ბენდები';
+
+  @override
+  String get bandCreate => 'ბენდის შექმნა';
+
+  @override
+  String get bandCreateTitle => 'დაარქვი სახელი ბენდს';
+
+  @override
+  String get bandNameLabel => 'ბენდის სახელი';
+
+  @override
+  String get bandNameError => 'ბენდს სახელი სჭირდება';
+
+  @override
+  String get bandCreateConfirm => 'შექმნა';
+
+  @override
+  String bandInviteTitle(String band) {
+    return '$band გეპატიჟება';
+  }
+
+  @override
+  String get bandAccept => 'მიღება';
+
+  @override
+  String get bandDecline => 'უარი';
+
+  @override
+  String bandJoined(String band) {
+    return 'შეუერთდი ბენდს $band!';
+  }
+
+  @override
+  String bandMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count წევრი',
+      one: '1 წევრი',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bandVotesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count კენჭისყრა გელოდება',
+      one: '1 კენჭისყრა გელოდება',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bandMembers => 'წევრები';
+
+  @override
+  String get bandYou => 'შენ';
+
+  @override
+  String get bandAddMember => 'წევრის დამატება';
+
+  @override
+  String get bandAddMemberTitle => 'შესთავაზე ვინმე შენი მეჩებიდან';
+
+  @override
+  String get bandAddMemberEmpty =>
+      'შესათავაზებელი აღარავინაა. ჯერ მეტ მუსიკოსთან დაამეჩდი.';
+
+  @override
+  String bandProposedVote(String name) {
+    return 'შესთავაზე $name. ბენდის წევრები ხმას მისცემენ.';
+  }
+
+  @override
+  String bandProposedInvite(String name) {
+    return 'მოწვევა გაეგზავნა: $name.';
+  }
+
+  @override
+  String get bandWaiting => 'ახალი წევრები';
+
+  @override
+  String bandProposedBy(String name) {
+    return 'შესთავაზა: $name';
+  }
+
+  @override
+  String bandApprovals(int yes, int total) {
+    return '$yes / $total დაეთანხმა';
+  }
+
+  @override
+  String get bandApprove => 'თანხმობა';
+
+  @override
+  String get bandReject => 'უარყოფა';
+
+  @override
+  String get bandYouApproved => 'შენ დაეთანხმე';
+
+  @override
+  String get bandInvited => 'მოწვეულია, პასუხს ველოდებით';
+
+  @override
+  String bandRejectTitle(String name) {
+    return 'უარვყოთ $name?';
+  }
+
+  @override
+  String get bandRejectBody =>
+      'ერთი უარიც საკმარისია: ის არ მიიღებს მოწვევას და ამის შესახებ არ ეცოდინება.';
+
+  @override
+  String get bandLeave => 'ბენდიდან წასვლა';
+
+  @override
+  String bandLeaveTitle(String band) {
+    return 'ტოვებ ბენდს $band?';
+  }
+
+  @override
+  String get bandLeaveBody =>
+      'ვეღარ ნახავ მის წევრებს და კენჭისყრებს. თუ ბოლო წევრი ხარ, ბენდი წაიშლება.';
+
+  @override
+  String get bandChatSoon => 'ბენდის ჩატი მალე დაემატება.';
+
+  @override
+  String get errBandLoad => 'ბენდები ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.';
+
+  @override
+  String get errBandAction =>
+      'ვერ მოხერხდა. შეამოწმე ინტერნეტი და სცადე თავიდან.';
+
+  @override
+  String get errBandNotMatched =>
+      'შეგიძლია შესთავაზო მხოლოდ ის, ვისთანაც დამეჩდი.';
+
+  @override
+  String get errBandAlreadyIn => 'ის უკვე ბენდშია.';
+
+  @override
+  String get errBandAlreadyProposed => 'ის უკვე შეთავაზებულია.';
+
+  @override
+  String get errBandFull => 'ბენდში მაქსიმუმ 12 წევრი შეიძლება იყოს.';
+
+  @override
+  String get errBandTooMany => 'შეგიძლია იყო მაქსიმუმ 10 ბენდში.';
+
+  @override
+  String get errBandAgeRule =>
+      'სხვა ასაკობრივი ჯგუფის წევრის მისაღებად ბენდში უკვე მინიმუმ 2 წევრი უნდა იყოს.';
+
+  @override
+  String get errBandUnavailable => 'ეს ადამიანი ხელმისაწვდომი არაა.';
+
+  @override
+  String get errBandVoteOver => 'ამ ადამიანზე კენჭისყრა უკვე დასრულდა.';
+
+  @override
+  String get errBandInviteClosed => 'ეს მოწვევა აღარ მოქმედებს.';
+
+  @override
+  String get errBandNotMember => 'შენ აღარ ხარ ამ ბენდში.';
+
+  @override
+  String get errBandNeedsProfile => 'ჯერ შექმენი პროფილი.';
+
+  @override
+  String get bandCancelRequest => 'მოთხოვნის გაუქმება';
+
+  @override
+  String bandCancelTitle(String name) {
+    return 'გავაუქმოთ მოთხოვნა: $name?';
+  }
+
+  @override
+  String get bandCancelBody =>
+      'მას ამის შესახებ არ ეცოდინება. შეგიძლია მოგვიანებით ისევ შესთავაზო.';
+
+  @override
+  String get bandCancelKeep => 'დატოვება';
+
+  @override
+  String bandCancelled(String name) {
+    return 'მოთხოვნა გაუქმდა: $name.';
+  }
+
+  @override
+  String get errBandCancelNotYours =>
+      'გაუქმება მხოლოდ იმას შეუძლია, ვინც შესთავაზა.';
 }

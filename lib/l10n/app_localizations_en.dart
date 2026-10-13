@@ -1236,4 +1236,201 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clipPosition => 'Position in the clip';
+
+  @override
+  String get bandsTitle => 'Bands';
+
+  @override
+  String get bandCreate => 'Create a band';
+
+  @override
+  String get bandCreateTitle => 'Name your band';
+
+  @override
+  String get bandNameLabel => 'Band name';
+
+  @override
+  String get bandNameError => 'Give your band a name';
+
+  @override
+  String get bandCreateConfirm => 'Create';
+
+  @override
+  String bandInviteTitle(String band) {
+    return '$band wants you to join';
+  }
+
+  @override
+  String get bandAccept => 'Accept';
+
+  @override
+  String get bandDecline => 'Decline';
+
+  @override
+  String bandJoined(String band) {
+    return 'You joined $band!';
+  }
+
+  @override
+  String bandMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count members',
+      one: '1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bandVotesWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes waiting for you',
+      one: '1 vote waiting for you',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bandMembers => 'Members';
+
+  @override
+  String get bandYou => 'You';
+
+  @override
+  String get bandAddMember => 'Add member';
+
+  @override
+  String get bandAddMemberTitle => 'Propose one of your matches';
+
+  @override
+  String get bandAddMemberEmpty =>
+      'Nobody left to propose. Match with more musicians first.';
+
+  @override
+  String bandProposedVote(String name) {
+    return 'Proposed $name. Your bandmates will vote.';
+  }
+
+  @override
+  String bandProposedInvite(String name) {
+    return 'Invite sent to $name.';
+  }
+
+  @override
+  String get bandWaiting => 'New members';
+
+  @override
+  String bandProposedBy(String name) {
+    return 'Proposed by $name';
+  }
+
+  @override
+  String bandApprovals(int yes, int total) {
+    return '$yes of $total approved';
+  }
+
+  @override
+  String get bandApprove => 'Approve';
+
+  @override
+  String get bandReject => 'Reject';
+
+  @override
+  String get bandYouApproved => 'You approved';
+
+  @override
+  String get bandInvited => 'Invited, waiting for their answer';
+
+  @override
+  String bandRejectTitle(String name) {
+    return 'Reject $name?';
+  }
+
+  @override
+  String get bandRejectBody =>
+      'One no is enough: they won\'t be invited, and they won\'t be told.';
+
+  @override
+  String get bandLeave => 'Leave band';
+
+  @override
+  String bandLeaveTitle(String band) {
+    return 'Leave $band?';
+  }
+
+  @override
+  String get bandLeaveBody =>
+      'You\'ll stop seeing its members and votes. If you\'re the last member, the band is deleted.';
+
+  @override
+  String get bandChatSoon => 'Band chat is coming soon.';
+
+  @override
+  String get errBandLoad => 'Couldn\'t load your bands. Check your connection.';
+
+  @override
+  String get errBandAction =>
+      'That didn\'t work. Check your connection and try again.';
+
+  @override
+  String get errBandNotMatched =>
+      'You can only propose people you\'ve matched with.';
+
+  @override
+  String get errBandAlreadyIn => 'They\'re already in the band.';
+
+  @override
+  String get errBandAlreadyProposed => 'They\'ve already been proposed.';
+
+  @override
+  String get errBandFull => 'A band can have at most 12 members.';
+
+  @override
+  String get errBandTooMany => 'You can be in at most 10 bands.';
+
+  @override
+  String get errBandAgeRule =>
+      'A band needs at least 2 members before someone from another age group can join.';
+
+  @override
+  String get errBandUnavailable => 'This person isn\'t available.';
+
+  @override
+  String get errBandVoteOver => 'The vote on this person is already over.';
+
+  @override
+  String get errBandInviteClosed => 'This invite is no longer open.';
+
+  @override
+  String get errBandNotMember => 'You\'re not in this band anymore.';
+
+  @override
+  String get errBandNeedsProfile => 'Set up your profile first.';
+
+  @override
+  String get bandCancelRequest => 'Cancel request';
+
+  @override
+  String bandCancelTitle(String name) {
+    return 'Cancel the request for $name?';
+  }
+
+  @override
+  String get bandCancelBody =>
+      'They won\'t be told. You can propose them again later.';
+
+  @override
+  String get bandCancelKeep => 'Keep it';
+
+  @override
+  String bandCancelled(String name) {
+    return 'Request for $name cancelled.';
+  }
+
+  @override
+  String get errBandCancelNotYours =>
+      'Only the person who proposed them can cancel.';
 }

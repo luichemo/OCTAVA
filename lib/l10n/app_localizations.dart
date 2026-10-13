@@ -2233,6 +2233,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Position in the clip'**
   String get clipPosition;
+
+  /// No description provided for @bandsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bands'**
+  String get bandsTitle;
+
+  /// No description provided for @bandCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a band'**
+  String get bandCreate;
+
+  /// No description provided for @bandCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name your band'**
+  String get bandCreateTitle;
+
+  /// No description provided for @bandNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Band name'**
+  String get bandNameLabel;
+
+  /// No description provided for @bandNameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Give your band a name'**
+  String get bandNameError;
+
+  /// No description provided for @bandCreateConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get bandCreateConfirm;
+
+  /// No description provided for @bandInviteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} wants you to join'**
+  String bandInviteTitle(String band);
+
+  /// No description provided for @bandAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get bandAccept;
+
+  /// No description provided for @bandDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get bandDecline;
+
+  /// No description provided for @bandJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined {band}!'**
+  String bandJoined(String band);
+
+  /// No description provided for @bandMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 member} other{{count} members}}'**
+  String bandMemberCount(int count);
+
+  /// No description provided for @bandVotesWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 vote waiting for you} other{{count} votes waiting for you}}'**
+  String bandVotesWaiting(int count);
+
+  /// No description provided for @bandMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get bandMembers;
+
+  /// No description provided for @bandYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get bandYou;
+
+  /// No description provided for @bandAddMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add member'**
+  String get bandAddMember;
+
+  /// No description provided for @bandAddMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose one of your matches'**
+  String get bandAddMemberTitle;
+
+  /// No description provided for @bandAddMemberEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody left to propose. Match with more musicians first.'**
+  String get bandAddMemberEmpty;
+
+  /// No description provided for @bandProposedVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed {name}. Your bandmates will vote.'**
+  String bandProposedVote(String name);
+
+  /// No description provided for @bandProposedInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite sent to {name}.'**
+  String bandProposedInvite(String name);
+
+  /// Heading on a band's page above people proposed as new members (being voted on or invited).
+  ///
+  /// In en, this message translates to:
+  /// **'New members'**
+  String get bandWaiting;
+
+  /// No description provided for @bandProposedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed by {name}'**
+  String bandProposedBy(String name);
+
+  /// No description provided for @bandApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'{yes} of {total} approved'**
+  String bandApprovals(int yes, int total);
+
+  /// No description provided for @bandApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get bandApprove;
+
+  /// No description provided for @bandReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get bandReject;
+
+  /// No description provided for @bandYouApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'You approved'**
+  String get bandYouApproved;
+
+  /// No description provided for @bandInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited, waiting for their answer'**
+  String get bandInvited;
+
+  /// No description provided for @bandRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject {name}?'**
+  String bandRejectTitle(String name);
+
+  /// No description provided for @bandRejectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'One no is enough: they won\'t be invited, and they won\'t be told.'**
+  String get bandRejectBody;
+
+  /// No description provided for @bandLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave band'**
+  String get bandLeave;
+
+  /// No description provided for @bandLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave {band}?'**
+  String bandLeaveTitle(String band);
+
+  /// No description provided for @bandLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll stop seeing its members and votes. If you\'re the last member, the band is deleted.'**
+  String get bandLeaveBody;
+
+  /// No description provided for @bandChatSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Band chat is coming soon.'**
+  String get bandChatSoon;
+
+  /// No description provided for @errBandLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your bands. Check your connection.'**
+  String get errBandLoad;
+
+  /// No description provided for @errBandAction.
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t work. Check your connection and try again.'**
+  String get errBandAction;
+
+  /// No description provided for @errBandNotMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only propose people you\'ve matched with.'**
+  String get errBandNotMatched;
+
+  /// No description provided for @errBandAlreadyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'re already in the band.'**
+  String get errBandAlreadyIn;
+
+  /// No description provided for @errBandAlreadyProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ve already been proposed.'**
+  String get errBandAlreadyProposed;
+
+  /// No description provided for @errBandFull.
+  ///
+  /// In en, this message translates to:
+  /// **'A band can have at most 12 members.'**
+  String get errBandFull;
+
+  /// No description provided for @errBandTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'You can be in at most 10 bands.'**
+  String get errBandTooMany;
+
+  /// No description provided for @errBandAgeRule.
+  ///
+  /// In en, this message translates to:
+  /// **'A band needs at least 2 members before someone from another age group can join.'**
+  String get errBandAgeRule;
+
+  /// No description provided for @errBandUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This person isn\'t available.'**
+  String get errBandUnavailable;
+
+  /// No description provided for @errBandVoteOver.
+  ///
+  /// In en, this message translates to:
+  /// **'The vote on this person is already over.'**
+  String get errBandVoteOver;
+
+  /// No description provided for @errBandInviteClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite is no longer open.'**
+  String get errBandInviteClosed;
+
+  /// No description provided for @errBandNotMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not in this band anymore.'**
+  String get errBandNotMember;
+
+  /// No description provided for @errBandNeedsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your profile first.'**
+  String get errBandNeedsProfile;
+
+  /// No description provided for @bandCancelRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get bandCancelRequest;
+
+  /// No description provided for @bandCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel the request for {name}?'**
+  String bandCancelTitle(String name);
+
+  /// No description provided for @bandCancelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They won\'t be told. You can propose them again later.'**
+  String get bandCancelBody;
+
+  /// No description provided for @bandCancelKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get bandCancelKeep;
+
+  /// No description provided for @bandCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request for {name} cancelled.'**
+  String bandCancelled(String name);
+
+  /// No description provided for @errBandCancelNotYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the person who proposed them can cancel.'**
+  String get errBandCancelNotYours;
 }
 
 class _AppLocalizationsDelegate

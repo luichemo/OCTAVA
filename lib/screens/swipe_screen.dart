@@ -11,6 +11,7 @@ import '../data/avatar_repository.dart';
 import '../data/band_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
+import '../data/live_bands.dart';
 import '../data/live_updates.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
@@ -44,7 +45,11 @@ class SwipeScreen extends StatefulWidget {
     this.filterStore,
     this.bandNeeds,
     this.live,
+    this.bands,
   });
+
+  /// Your bands: invites and votes waiting add to the Matches badge.
+  final LiveBands? bands;
 
   /// Live matches: the unread badge on Matches, and reloading the band row
   /// when someone matches with you or unmatches.
@@ -599,6 +604,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                                 },
                           onMatches: widget.onOpenMatches,
                           live: widget.live,
+                          bands: widget.bands,
                           onRecord: widget.onRecord == null
                               ? null
                               : () async {
@@ -808,7 +814,16 @@ class _LocationPrompt extends StatelessWidget {
 /// Bottom navigation: Profile, Matches and Sign out, with labels.
 /// Bottom navigation: Profile, a round ➕ (record a clip) and Matches.
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({this.onProfile, this.onMatches, this.onRecord, this.live});
+  const _BottomBar({
+    this.onProfile,
+    this.onMatches,
+    this.onRecord,
+    this.live,
+    this.bands,
+  });
+
+  /// For invites and votes waiting, also counted on Matches.
+  final LiveBands? bands;
 
   /// For the unread count on Matches.
   final LiveUpdates? live;
@@ -862,12 +877,12 @@ class _BottomBar extends StatelessWidget {
             ),
           if (onMatches != null)
             ListenableBuilder(
-              listenable: live ?? const AlwaysStoppedAnimation(0),
+              listenable: Listenable.merge([?live, ?bands]),
               builder: (context, _) => _BarButton(
                 icon: Icons.chat_bubble_outline_rounded,
                 label: context.t.navMatches,
                 onTap: onMatches!,
-                badge: live?.unreadTotal ?? 0,
+                badge: (live?.unreadTotal ?? 0) + (bands?.actionCount ?? 0),
               ),
             ),
         ],

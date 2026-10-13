@@ -13,6 +13,13 @@ declare
   t1 uuid := gen_random_uuid();  -- 17, Tbilisi, no clip
   t2 uuid := gen_random_uuid();  -- 16, Tbilisi, has a clip
   u15 uuid := gen_random_uuid(); -- 15, can't join
+  bd uuid := gen_random_uuid();  -- adult bandmates for the band checks
+  be uuid := gen_random_uuid();
+  bf uuid := gen_random_uuid();
+  band uuid;
+  band2 uuid;
+  prop uuid;
+  st text;
   r text[] := '{}';
   n int;
   m uuid;
@@ -237,6 +244,181 @@ begin
   perform set_config('role', 'postgres', true);
   select (lat = 41.71 and lng = 44.83) into ok from public.profiles where id = t1;
   r := r || case when ok then 'PASS set_my_location rounds to ~1 km' else 'FAIL set_my_location not rounded' end;
+
+  -- ---------------------------------------------------------- bands
+  -- D, E, F are adults; T1 is 17. D has matched E, F and (made here by hand,
+  -- which the app can't do) T1, to test the age rule.
+  insert into auth.users (instance_id, id, aud, role, email, encrypted_password, created_at, updated_at)
+  select '00000000-0000-0000-0000-000000000000', u, 'authenticated', 'authenticated',
+         u::text || '@test.octava.invalid', '', now(), now()
+  from unnest(array[bd, be, bf]) u;
+  insert into public.profile_private (id, birth_date) values (bd, '1994-01-01'), (be, '1996-01-01'), (bf, '1993-01-01');
+  insert into public.profiles (id, display_name) values (bd, 'D'), (be, 'E'), (bf, 'F');
+  insert into public.profile_instruments (profile_id, instrument_id, skill, is_primary) values
+    (bd, 'guitar', 'pro', true), (be, 'bass', 'pro', true), (bf, 'drums', 'pro', true);
+  insert into public.matches (user_a, user_b)
+  select least(bd, x), greatest(bd, x) from unnest(array[be, bf, t1]) x;
+
+  perform set_config('role', 'authenticated', true);
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  band := public.create_band('The Rules');
+  select instrument_id into st from public.band_members where band_id = band and profile_id = bd;
+  r := r || case when st = 'guitar' then 'PASS creating a band makes you its first member, as your instrument' else 'FAIL creator not a member' end;
+
+  begin
+    insert into public.band_members (band_id, profile_id) values (band, be);
+    r := r || 'FAIL members can be added directly'::text;
+  exception when others then
+    r := r || 'PASS members can''t be added directly'::text;
+  end;
+  begin
+    perform public.propose_band_member(band, c);
+    r := r || 'FAIL proposed someone D never matched'::text;
+  exception when others then
+    r := r || 'PASS you can only propose your matches'::text;
+  end;
+  begin
+    perform public.propose_band_member(band, t1);
+    r := r || 'FAIL a teen joined a one-person adult band'::text;
+  exception when others then
+    r := r || 'PASS a teen can''t join a band of one adult'::text;
+  end;
+  begin
+    insert into public.band_messages (band_id, body) values (band, 'alone');
+    r := r || 'FAIL a band of one has an open chat'::text;
+  exception when others then
+    r := r || 'PASS a band of one can''t chat yet'::text;
+  end;
+
+  prop := public.propose_band_member(band, be);
+  select status::text into st from public.band_proposals where id = prop;
+  r := r || case when st = 'invited' then 'PASS in a band of one, the proposal is an invite straight away' else 'FAIL status ' || st end;
+
+  perform set_config('request.jwt.claims', json_build_object('sub', bf, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.bands where id = band;
+  r := r || case when n = 0 then 'PASS outsiders can''t see a band' else 'FAIL F sees the band' end;
+
+  perform set_config('request.jwt.claims', json_build_object('sub', be, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.band_members where band_id = band;
+  r := r || case when n = 1 then 'PASS the invited person sees the band and its members' else 'FAIL E sees ' || n || ' members' end;
+  begin
+    insert into public.band_messages (band_id, body) values (band, 'not yet');
+    r := r || 'FAIL an invited person can post before joining'::text;
+  exception when others then
+    r := r || 'PASS you can''t post before you join'::text;
+  end;
+  perform public.answer_band_invite(prop, true);
+  insert into public.band_messages (band_id, body) values (band, 'hi band');
+  r := r || 'PASS after accepting, two adults can chat'::text;
+
+  -- D proposes F: now E has to approve too.
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  prop := public.propose_band_member(band, bf);
+  select status::text into st from public.band_proposals where id = prop;
+  r := r || case when st = 'voting' then 'PASS with two members, a proposal waits for the vote' else 'FAIL status ' || st end;
+  perform set_config('request.jwt.claims', json_build_object('sub', bf, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.band_proposals where id = prop;
+  r := r || case when n = 0 then 'PASS the candidate can''t see the vote' else 'FAIL F sees the vote' end;
+  begin
+    perform public.answer_band_invite(prop, true);
+    r := r || 'FAIL joined before everyone approved'::text;
+  exception when others then
+    r := r || 'PASS nobody joins before every member approves'::text;
+  end;
+  perform set_config('request.jwt.claims', json_build_object('sub', be, 'role', 'authenticated')::text, true);
+  st := public.vote_band_member(prop, true)::text;
+  r := r || case when st = 'invited' then 'PASS the last yes turns the proposal into an invite' else 'FAIL status ' || st end;
+  perform set_config('request.jwt.claims', json_build_object('sub', bf, 'role', 'authenticated')::text, true);
+  perform public.answer_band_invite(prop, true);
+  select count(*) into n from public.band_members where band_id = band;
+  r := r || case when n = 3 then 'PASS F joined: three members' else 'FAIL ' || n || ' members' end;
+
+  -- Cancelling: only the proposer, and the request just disappears.
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  prop := public.propose_band_member(band, t1);
+  perform set_config('request.jwt.claims', json_build_object('sub', be, 'role', 'authenticated')::text, true);
+  begin
+    perform public.cancel_band_proposal(prop);
+    r := r || 'FAIL a member cancelled someone else''s proposal'::text;
+  exception when others then
+    r := r || 'PASS only the proposer can cancel a request'::text;
+  end;
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  perform public.cancel_band_proposal(prop);
+  select status::text into st from public.band_proposals where id = prop;
+  r := r || case when st = 'cancelled' then 'PASS the proposer can cancel a request' else 'FAIL status ' || st end;
+  perform set_config('request.jwt.claims', json_build_object('sub', t1, 'role', 'authenticated')::text, true);
+  begin
+    perform public.answer_band_invite(prop, true);
+    r := r || 'FAIL a cancelled invite was accepted'::text;
+  exception when others then
+    r := r || 'PASS a cancelled request can''t be accepted'::text;
+  end;
+
+  -- A no from anyone refuses. D proposes T1 (allowed now: 3 members).
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  prop := public.propose_band_member(band, t1);
+  r := r || 'PASS a teen can be proposed to a band of 3 adults'::text;
+  perform set_config('request.jwt.claims', json_build_object('sub', t1, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.profiles where id = bd;
+  r := r || case when n = 0 then 'PASS the teen doesn''t see the adults while it''s a vote' else 'FAIL teen sees D during the vote' end;
+  perform set_config('request.jwt.claims', json_build_object('sub', bf, 'role', 'authenticated')::text, true);
+  st := public.vote_band_member(prop, false)::text;
+  r := r || case when st = 'refused' then 'PASS one no refuses the proposal' else 'FAIL status ' || st end;
+  perform set_config('request.jwt.claims', json_build_object('sub', t1, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.band_proposals where id = prop;
+  r := r || case when n = 0 then 'PASS a refused person never sees the proposal' else 'FAIL teen sees the refusal' end;
+
+  -- Again, and this time everyone approves: a mixed band of four.
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  prop := public.propose_band_member(band, t1);
+  perform set_config('request.jwt.claims', json_build_object('sub', be, 'role', 'authenticated')::text, true);
+  perform public.vote_band_member(prop, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', bf, 'role', 'authenticated')::text, true);
+  perform public.vote_band_member(prop, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', t1, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.profiles where id in (bd, be, bf);
+  r := r || case when n = 3 then 'PASS an invited teen sees the band''s members' else 'FAIL teen sees ' || n || ' members' end;
+  perform public.answer_band_invite(prop, true);
+  insert into public.band_messages (band_id, body) values (band, 'hello from the teen');
+  r := r || 'PASS a teen can chat in a band of 4'::text;
+  select count(*) into n from public.get_deck(null) dk where dk.id in (bd, be, bf);
+  r := r || case when n = 0 then 'PASS bandmates still don''t show up in a teen''s deck' else 'FAIL adults in teen deck' end;
+
+  -- E and F leave: one adult and one teen left, so the chat locks.
+  perform set_config('request.jwt.claims', json_build_object('sub', be, 'role', 'authenticated')::text, true);
+  perform public.leave_band(band);
+  select count(*) into n from public.band_messages where band_id = band;
+  r := r || case when n = 0 then 'PASS someone who left can''t read the chat' else 'FAIL E still reads ' || n end;
+  perform set_config('request.jwt.claims', json_build_object('sub', bf, 'role', 'authenticated')::text, true);
+  perform public.leave_band(band);
+  perform set_config('request.jwt.claims', json_build_object('sub', bd, 'role', 'authenticated')::text, true);
+  begin
+    insert into public.band_messages (band_id, body) values (band, 'just us');
+    r := r || 'FAIL one adult and one teen can chat alone'::text;
+  exception when others then
+    r := r || 'PASS the chat locks when only one adult and one teen are left'::text;
+  end;
+
+  -- Blocks: E blocks F, so E's new band can't take F.
+  perform set_config('request.jwt.claims', json_build_object('sub', be, 'role', 'authenticated')::text, true);
+  insert into public.blocks (blocked_id) values (bf);
+  band2 := public.create_band('Second');
+  perform set_config('role', 'postgres', true);
+  insert into public.matches (user_a, user_b) values (least(be, bf), greatest(be, bf));
+  perform set_config('role', 'authenticated', true);
+  begin
+    perform public.propose_band_member(band2, bf);
+    r := r || 'FAIL proposed someone the member blocked'::text;
+  exception when others then
+    r := r || 'PASS blocked people can''t be proposed'::text;
+  end;
+
+  -- The last one out deletes the band.
+  perform public.leave_band(band2);
+  perform set_config('role', 'postgres', true);
+  select count(*) into n from public.bands where id = band2;
+  r := r || case when n = 0 then 'PASS the last member leaving deletes the band' else 'FAIL empty band left behind' end;
 
   raise exception E'RULES CHECK (rolled back)\n%', array_to_string(r, E'\n');
 end;

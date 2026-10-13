@@ -6,9 +6,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/avatar_repository.dart';
 import '../data/band_repository.dart';
+import '../data/bands_repository.dart';
 import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/deck.dart';
+import '../data/live_bands.dart';
 import '../data/live_updates.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
@@ -49,6 +51,7 @@ class AuthGate extends StatelessWidget {
           clips: SupabaseClipRepository(client),
           avatars: SupabaseAvatarRepository(client),
           bandNeeds: SupabaseBandNeeds(client),
+          bands: SupabaseBandsRepository(client),
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
         );
@@ -70,9 +73,13 @@ class ProfileGate extends StatefulWidget {
     this.location,
     this.filterStore,
     this.bandNeeds,
+    this.bands,
   });
 
   final ProfileRepository repository;
+
+  /// Bands you're in and invites. Shown in Matches (needs [chat] too).
+  final BandsRepository? bands;
 
   /// The roles your band needs (the "Your band" row).
   final BandNeedsRepository? bandNeeds;
@@ -115,10 +122,16 @@ class _ProfileGateState extends State<ProfileGate> {
       ? null
       : (LiveUpdates(widget.chat!)..start());
 
+  // Bands and invites for the whole session: the Bands section and badge.
+  late final LiveBands? _bands = widget.bands == null || widget.chat == null
+      ? null
+      : (LiveBands(widget.bands!)..start());
+
   @override
   void dispose() {
     _player?.dispose();
     _live?.dispose();
+    _bands?.dispose();
     super.dispose();
   }
 
@@ -150,6 +163,7 @@ class _ProfileGateState extends State<ProfileGate> {
           live: _live,
           safety: widget.safety,
           avatars: widget.avatars,
+          bands: _bands,
         ),
       ),
     );
@@ -228,6 +242,7 @@ class _ProfileGateState extends State<ProfileGate> {
               filterStore: widget.filterStore,
               bandNeeds: widget.bandNeeds,
               live: _live,
+              bands: _bands,
             ),
           ),
           final status => OnboardingScreen(
