@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,8 @@ import 'package:octava/screens/matches_screen.dart';
 import 'package:octava/widgets/live_banner.dart';
 
 import 'chat_test.dart' show FakeChatRepository;
+import 'profile_edit_test.dart' show FakeClipPlayer;
+import 'safety_test.dart' show FakeSafetyRepository;
 
 const me = BandPerson(id: 'me', name: 'Luka', instrumentId: 'guitar');
 const nika = BandPerson(id: 'nika', name: 'Nika', instrumentId: 'drums');
@@ -52,6 +55,11 @@ class FakeBandsRepository implements BandsRepository {
           name: b.name,
           members: b.members,
           proposals: b.proposals,
+          description: b.description,
+          genres: b.genres,
+          openRoles: b.openRoles,
+          clipPath: b.clipPath,
+          clipSeconds: b.clipSeconds,
           chatOpen: b.members.length > 1 && !closedChats.contains(b.id),
           unreadCount: (_messages[b.id] ?? const <ChatMessage>[])
               .where(
@@ -199,6 +207,76 @@ class FakeBandsRepository implements BandsRepository {
 
   @override
   Stream<BandChange> changes() => _changes.stream;
+
+  // ------------------------------------------------------------ profile
+  MyBand _copy(
+    MyBand b, {
+    String? name,
+    String? description,
+    List<String>? genres,
+    List<String>? openRoles,
+    String? clipPath,
+    int? clipSeconds,
+    bool clearClip = false,
+  }) => MyBand(
+    id: b.id,
+    name: name ?? b.name,
+    members: b.members,
+    proposals: b.proposals,
+    description: description ?? b.description,
+    genres: genres ?? b.genres,
+    openRoles: openRoles ?? b.openRoles,
+    clipPath: clearClip ? null : clipPath ?? b.clipPath,
+    clipSeconds: clearClip ? null : clipSeconds ?? b.clipSeconds,
+  );
+
+  MyBand _band(String id) => bands.firstWhere((b) => b.id == id);
+
+  @override
+  Future<void> updateProfile(
+    String bandId, {
+    String? name,
+    String? description,
+    List<String>? genres,
+    List<String>? openRoles,
+  }) async {
+    _check();
+    _replace(
+      _copy(
+        _band(bandId),
+        name: name?.trim(),
+        description: description,
+        genres: genres,
+        openRoles: openRoles,
+      ),
+    );
+  }
+
+  @override
+  Future<void> uploadClip(
+    String bandId, {
+    required Uint8List bytes,
+    required String fileName,
+    int? knownSeconds,
+  }) async {
+    _check();
+    _replace(
+      _copy(
+        _band(bandId),
+        clipPath: '$bandId/$fileName',
+        clipSeconds: knownSeconds ?? 30,
+      ),
+    );
+  }
+
+  @override
+  Future<void> removeClip(String bandId) async {
+    _check();
+    _replace(_copy(_band(bandId), clearClip: true));
+  }
+
+  @override
+  Future<String> clipUrl(String path) async => 'https://example.invalid/$path';
 
   // ------------------------------------------------------------ chat
   final _messages = <String, List<ChatMessage>>{};
@@ -485,6 +563,8 @@ void main() {
       tester,
     ) async {
       final repo = await pumpBand(tester, voting);
+      await tester.ensureVisible(find.text('Reject'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Reject'));
       await tester.pumpAndSettle();
       expect(find.text('Reject Tamar?'), findsOneWidget);
@@ -626,6 +706,70 @@ void main() {
       expect(repo.cancelled, ['p1']);
     });
 
+    testWidgets('edit the band profile: roles and description', (tester) async {
+      final repo = await pumpBand(
+        tester,
+        const MyBand(id: 'b1', name: 'Riot', members: [me, nika]),
+      );
+      expect(find.textContaining('Add a description, genres'), findsOneWidget);
+
+      await tester.tap(find.text('Edit'));
+      await tester.pumpAndSettle();
+      expect(find.text('Edit band'), findsOneWidget);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'About the band'),
+        'Loud and late',
+      );
+      for (final role in ['Keys', 'Bass']) {
+        final chip = find.widgetWithText(FilterChip, role);
+        await tester.ensureVisible(chip);
+        await tester.pumpAndSettle();
+        await tester.tap(chip);
+        await tester.pump();
+      }
+      await tester.scrollUntilVisible(
+        find.text('Save changes'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save changes'));
+      await tester.pumpAndSettle();
+
+      expect(repo.bands.single.openRoles, ['keys', 'bass']);
+      expect(find.text('Loud and late'), findsOneWidget);
+      expect(find.text('Looking for: Keys and Bass'), findsOneWidget);
+      expect(find.text('Band profile saved.'), findsOneWidget);
+    });
+
+    testWidgets('the band clip plays, and can be removed', (tester) async {
+      final repo = FakeBandsRepository(
+        bands: [
+          const MyBand(
+            id: 'b1',
+            name: 'Riot',
+            members: [me, nika],
+            clipPath: 'b1/song.m4a',
+            clipSeconds: 42,
+          ),
+        ],
+      );
+      final live = LiveBands(repo)..start();
+      final player = FakeClipPlayer();
+      addTearDown(live.dispose);
+      await pump(tester, BandScreen(bands: live, bandId: 'b1', player: player));
+      expect(find.text('Band clip · 0:42'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Play the band clip'));
+      await tester.pump();
+      expect(player.toggled, ['band:b1/song.m4a']);
+
+      await tester.tap(find.byTooltip('Remove the band clip'));
+      await tester.pumpAndSettle();
+      expect(repo.bands.single.clipPath, isNull);
+      expect(find.text('No band clip yet'), findsOneWidget);
+    });
+
     testWidgets('leaving asks first and goes back', (tester) async {
       final repo = await pumpBand(
         tester,
@@ -684,6 +828,35 @@ void main() {
       expect(find.text('Nika'), findsOneWidget);
       expect(find.text('Drums in Riot'), findsOneWidget);
       expect(find.text('bringing my snare'), findsOneWidget);
+    });
+
+    testWidgets('long-press a message from a bandmate to report it', (
+      tester,
+    ) async {
+      final repo = FakeBandsRepository(bands: [riot]);
+      final live = LiveBands(repo)..start();
+      final safety = FakeSafetyRepository();
+      addTearDown(live.dispose);
+      await live.refresh();
+      repo.receive('b1', 'nika', 'something rude');
+      await pump(
+        tester,
+        BandChatScreen(bands: live, bandId: 'b1', safety: safety),
+      );
+
+      await tester.longPress(find.text('something rude'));
+      await tester.pumpAndSettle();
+      // Straight to the report form, quoting it; no Block in bands.
+      expect(find.text('Report this message'), findsOneWidget);
+      expect(find.text('“something rude”'), findsOneWidget);
+      expect(find.textContaining('Block'), findsNothing);
+      expect(find.byType(CheckboxListTile), findsNothing);
+      await tester.tap(find.text('Harassment or hate'));
+      await tester.pump();
+      await tester.tap(find.text('Send report'));
+      await tester.pumpAndSettle();
+      expect(safety.reports.single.$1, 'nika');
+      expect(safety.reportedMessages, ['msg0']);
     });
 
     testWidgets('your newest message says who has seen it', (tester) async {

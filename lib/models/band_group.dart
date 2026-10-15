@@ -69,7 +69,23 @@ class MyBand {
     this.unreadCount = 0,
     this.lastMessage,
     this.readMarks = const {},
+    this.description,
+    this.genres = const [],
+    this.openRoles = const [],
+    this.clipPath,
+    this.clipSeconds,
   });
+
+  /// The band's public profile, shown on its card in other people's feeds.
+  final String? description;
+  final List<String> genres;
+
+  /// Instrument ids the band is looking for, in the order chosen.
+  final List<String> openRoles;
+
+  /// The band's own clip in the band-clips bucket, and its length.
+  final String? clipPath;
+  final int? clipSeconds;
 
   /// Whether members can post: 2+ members, 3+ when teens and adults mix.
   final bool chatOpen;
@@ -91,6 +107,11 @@ class MyBand {
     unreadCount: unreadCount ?? this.unreadCount,
     lastMessage: lastMessage,
     readMarks: readMarks,
+    description: description,
+    genres: genres,
+    openRoles: openRoles,
+    clipPath: clipPath,
+    clipSeconds: clipSeconds,
   );
 
   BandPerson? memberById(String id) =>

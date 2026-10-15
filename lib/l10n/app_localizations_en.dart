@@ -1097,7 +1097,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get genreSoundtrack => 'Soundtrack';
 
   @override
-  String get bandEdit => 'Choose the roles your band needs';
+  String get bandEdit => 'Edit';
 
   @override
   String get bandRolesTitle => 'Who does your band need?';
@@ -1483,4 +1483,79 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errResetSwipes =>
       'Couldn\'t reset your swipes. Check your connection.';
+
+  @override
+  String get reportMessage => 'Report this message';
+
+  @override
+  String get errBandProfile =>
+      'Some of those genres or roles aren\'t on the list.';
+
+  @override
+  String get bandEditTitle => 'Edit band';
+
+  @override
+  String get bandEditHint =>
+      'This is what musicians see on your band\'s card in their feed.';
+
+  @override
+  String get bandDescriptionLabel => 'About the band';
+
+  @override
+  String get bandDescriptionHint =>
+      'What you play, what you\'re aiming for, how often you rehearse…';
+
+  @override
+  String get bandOpenRolesLabel => 'Looking for';
+
+  @override
+  String get bandOpenRolesHint =>
+      'The instruments you\'d like to add. Musicians who play them see your band first.';
+
+  @override
+  String get bandProfileTitle => 'Band profile';
+
+  @override
+  String get bandProfileEmpty =>
+      'Add a description, genres and the roles you\'re looking for, so musicians know what you\'re about.';
+
+  @override
+  String bandLookingFor(String roles) {
+    return 'Looking for: $roles';
+  }
+
+  @override
+  String get bandClipPlay => 'Play the band clip';
+
+  @override
+  String get bandClipStop => 'Stop the band clip';
+
+  @override
+  String get bandClipNone => 'No band clip yet';
+
+  @override
+  String bandClipLength(String length) {
+    return 'Band clip · $length';
+  }
+
+  @override
+  String get bandClipAdd => 'Record or upload a band clip';
+
+  @override
+  String get bandClipReplace => 'Replace the band clip';
+
+  @override
+  String get bandClipRemove => 'Remove the band clip';
+
+  @override
+  String get bandClipSave => 'Use as band clip';
+
+  @override
+  String get bandClipSaved => 'Band clip saved.';
+
+  @override
+  String get bandClipRemoved => 'Band clip removed.';
+
+  @override
+  String get bandProfileSaved => 'Band profile saved.';
 }

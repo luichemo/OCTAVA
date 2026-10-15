@@ -683,7 +683,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String errClipTooLong(String length) {
-    return 'ჩანაწერი შეიძლება იყოს 2 წუთამდე. ეს არის $length.';
+    return 'ჩანაწერი მაქსიმუმ 2 წუთი შეიძლება იყოს. ეს არის $length.';
   }
 
   @override
@@ -1086,7 +1086,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get genreSoundtrack => 'საუნდტრეკი';
 
   @override
-  String get bandEdit => 'აირჩიე, ვინ სჭირდება შენს ბენდს';
+  String get bandEdit => 'რედაქტირება';
 
   @override
   String get bandRolesTitle => 'ვინ სჭირდება შენს ბენდს?';
@@ -1474,4 +1474,77 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get errResetSwipes => 'სვაიპები ვერ განულდა. შეამოწმე ინტერნეტი.';
+
+  @override
+  String get reportMessage => 'საჩივარი ამ შეტყობინებაზე';
+
+  @override
+  String get errBandProfile => 'ზოგიერთი ჟანრი ან როლი სიაში არაა.';
+
+  @override
+  String get bandEditTitle => 'ბენდის რედაქტირება';
+
+  @override
+  String get bandEditHint => 'ამას ხედავენ მუსიკოსები შენი ბენდის ბარათზე.';
+
+  @override
+  String get bandDescriptionLabel => 'ბენდის შესახებ';
+
+  @override
+  String get bandDescriptionHint =>
+      'რას უკრავთ, რისკენ მიისწრაფვით, რამდენად ხშირად გაქვთ რეპეტიცია…';
+
+  @override
+  String get bandOpenRolesLabel => 'ვეძებთ';
+
+  @override
+  String get bandOpenRolesHint =>
+      'ინსტრუმენტები, რომლებიც გინდა დაამატო. ვინც მათზე უკრავს, შენს ბენდს პირველს ნახავს.';
+
+  @override
+  String get bandProfileTitle => 'ბენდის პროფილი';
+
+  @override
+  String get bandProfileEmpty =>
+      'დაამატე აღწერა, ჟანრები და როლები, რომლებსაც ეძებთ, რომ მუსიკოსებმა იცოდნენ, ვინ ხართ.';
+
+  @override
+  String bandLookingFor(String roles) {
+    return 'ვეძებთ: $roles';
+  }
+
+  @override
+  String get bandClipPlay => 'ბენდის ჩანაწერის მოსმენა';
+
+  @override
+  String get bandClipStop => 'ბენდის ჩანაწერის გაჩერება';
+
+  @override
+  String get bandClipNone => 'ბენდის ჩანაწერი ჯერ არაა';
+
+  @override
+  String bandClipLength(String length) {
+    return 'ბენდის ჩანაწერი · $length';
+  }
+
+  @override
+  String get bandClipAdd => 'ბენდის ჩანაწერის ჩაწერა ან ატვირთვა';
+
+  @override
+  String get bandClipReplace => 'ბენდის ჩანაწერის შეცვლა';
+
+  @override
+  String get bandClipRemove => 'ბენდის ჩანაწერის წაშლა';
+
+  @override
+  String get bandClipSave => 'ბენდის ჩანაწერად გამოყენება';
+
+  @override
+  String get bandClipSaved => 'ბენდის ჩანაწერი შენახულია.';
+
+  @override
+  String get bandClipRemoved => 'ბენდის ჩანაწერი წაიშალა.';
+
+  @override
+  String get bandProfileSaved => 'ბენდის პროფილი შენახულია.';
 }

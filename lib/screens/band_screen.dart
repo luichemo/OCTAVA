@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 
 import '../data/avatar_repository.dart';
+import '../data/bands_repository.dart';
+import '../data/clip_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
+import '../data/profile_options.dart';
 import '../data/repositories.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
+import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 import '../widgets/person_avatar.dart';
+import '../widgets/record_sheet.dart';
+import 'band_profile_screen.dart';
 
-/// One of your bands: its members, the people proposed to join (with your
-/// vote), Add member and Leave band. Updates live.
+/// One of your bands: its public profile (Edit band, the band clip), its
+/// members, the people proposed to join (with your vote), Add member and
+/// Leave band. Updates live.
 class BandScreen extends StatefulWidget {
   const BandScreen({
     super.key,
@@ -19,7 +26,11 @@ class BandScreen extends StatefulWidget {
     required this.bandId,
     this.matches,
     this.avatars,
+    this.player,
   });
+
+  /// Plays the band clip.
+  final ClipPlayer? player;
 
   final LiveBands bands;
   final String bandId;
@@ -97,6 +108,47 @@ class _BandScreenState extends State<BandScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _editProfile(MyBand band) async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) =>
+            BandProfileScreen(repository: widget.bands.repository, band: band),
+      ),
+    );
+    if (saved == true) {
+      await widget.bands.refresh();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(context.t.bandProfileSaved)));
+      }
+    }
+  }
+
+  Future<void> _recordClip(MyBand band) async {
+    final t = context.t;
+    await widget.player?.stop();
+    if (!mounted) return;
+    await showRecordSheet(
+      context,
+      save: ({required bytes, required fileName, int? knownSeconds}) =>
+          widget.bands.repository.uploadClip(
+            band.id,
+            bytes: bytes,
+            fileName: fileName,
+            knownSeconds: knownSeconds,
+          ),
+      saveLabel: t.bandClipSave,
+      savedMessage: t.bandClipSaved,
+    );
+    await widget.bands.refresh();
+  }
+
+  Future<void> _removeClip(MyBand band) async {
+    final done = context.t.bandClipRemoved;
+    await widget.player?.stop();
+    await _run(() => widget.bands.repository.removeClip(band.id), done: done);
   }
 
   Future<void> _vote(BandProposal p, {required bool approve}) async {
@@ -214,6 +266,13 @@ class _BandScreenState extends State<BandScreen> {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                         children: [
+                          _BandProfileCard(
+                            band: band,
+                            player: widget.player,
+                            onEdit: () => _editProfile(band),
+                            onRecordClip: () => _recordClip(band),
+                            onRemoveClip: () => _removeClip(band),
+                          ),
                           _Heading(t.bandMembers),
                           for (final m in band.members)
                             _PersonTile(
@@ -489,6 +548,129 @@ class _PickMatchSheet extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The band's public profile, as others see it on its card: description,
+/// genres, the roles it's looking for and its clip, with Edit band.
+class _BandProfileCard extends StatelessWidget {
+  const _BandProfileCard({
+    required this.band,
+    required this.onEdit,
+    required this.onRecordClip,
+    required this.onRemoveClip,
+    this.player,
+  });
+
+  final MyBand band;
+  final VoidCallback onEdit;
+  final VoidCallback onRecordClip;
+  final VoidCallback onRemoveClip;
+  final ClipPlayer? player;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final colors = Theme.of(context).colorScheme;
+    final clip = band.clipPath;
+    final empty =
+        (band.description ?? '').isEmpty &&
+        band.genres.isEmpty &&
+        band.openRoles.isEmpty;
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 14),
+      decoration: printBox(context, radius: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 10,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  t.bandProfileTitle,
+                  style: displayStyle(size: 24, color: colors.onSurface),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: Text(t.bandEdit),
+              ),
+            ],
+          ),
+          if (empty)
+            Text(
+              t.bandProfileEmpty,
+              style: TextStyle(color: colors.onSurfaceVariant),
+            ),
+          if ((band.description ?? '').isNotEmpty) Text(band.description!),
+          if (band.openRoles.isNotEmpty)
+            Text(
+              t.bandLookingFor(
+                listJoin([for (final r in band.openRoles) instrumentLabel(r)]),
+              ),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          if (band.genres.isNotEmpty)
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final g in band.genres)
+                  Chip(
+                    label: Text(genreLabel(g)),
+                    visualDensity: VisualDensity.compact,
+                  ),
+              ],
+            ),
+          // The band's clip: play it, record or upload a new one, remove it.
+          Row(
+            children: [
+              if (clip != null && player != null)
+                ValueListenableBuilder<String?>(
+                  valueListenable: player!.playing,
+                  builder: (context, playing, _) {
+                    final on = playing == bandClipKey(clip);
+                    return IconButton.filled(
+                      tooltip: on ? t.bandClipStop : t.bandClipPlay,
+                      onPressed: () => player!.toggle(bandClipKey(clip)),
+                      style: IconButton.styleFrom(
+                        backgroundColor: OctavaColors.pink,
+                        foregroundColor: OctavaColors.ink,
+                      ),
+                      icon: Icon(
+                        on ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                      ),
+                    );
+                  },
+                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  clip == null
+                      ? t.bandClipNone
+                      : t.bandClipLength(clipLength(band.clipSeconds ?? 0)),
+                  style: TextStyle(color: colors.onSurfaceVariant),
+                ),
+              ),
+              IconButton(
+                tooltip: clip == null ? t.bandClipAdd : t.bandClipReplace,
+                onPressed: onRecordClip,
+                icon: const Icon(Icons.mic_none_rounded),
+              ),
+              if (clip != null)
+                IconButton(
+                  tooltip: t.bandClipRemove,
+                  onPressed: onRemoveClip,
+                  icon: const Icon(Icons.delete_outline_rounded),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

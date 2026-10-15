@@ -138,13 +138,14 @@ class SupabaseClipRepository implements ClipRepository {
 
     // Measure the uploaded file (unless the length is known); remove it again
     // if it can't be used.
-    final seconds = knownSeconds ?? await _measure(path);
+    final seconds =
+        knownSeconds ?? await measureClipSeconds(await playbackUrl(path));
     if (seconds == null || seconds > maxClipSeconds) {
       await _bucket.remove([path]).catchError((_) => <FileObject>[]);
       throw UserFacingException(
         seconds == null
             ? L10n.current.errClipUnreadable
-            : 'Clips can be up to 2 minutes. This one is ${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}.',
+            : L10n.current.errClipTooLong(clipLength(seconds)),
       );
     }
 
@@ -207,20 +208,6 @@ class SupabaseClipRepository implements ClipRepository {
     }
   }
 
-  /// Length in whole seconds (at least 1), or null if it can't be read.
-  Future<int?> _measure(String path) async {
-    final player = AudioPlayer();
-    try {
-      final duration = await player.setUrl(await playbackUrl(path));
-      if (duration == null) return null;
-      return (duration.inMilliseconds / 1000).ceil().clamp(1, 1 << 30);
-    } catch (_) {
-      return null;
-    } finally {
-      await player.dispose();
-    }
-  }
-
   /// "My Song (demo).mp3" → "My Song (demo)", at most 60 characters.
   static String _titleFrom(String fileName) {
     final base = fileName.contains('.')
@@ -230,6 +217,25 @@ class SupabaseClipRepository implements ClipRepository {
     return clean.length > 60 ? clean.substring(0, 60) : clean;
   }
 }
+
+/// The length of the audio at [url] in whole seconds (at least 1), or null
+/// if it can't be read.
+Future<int?> measureClipSeconds(String url) async {
+  final player = AudioPlayer();
+  try {
+    final duration = await player.setUrl(url);
+    if (duration == null) return null;
+    return (duration.inMilliseconds / 1000).ceil().clamp(1, 1 << 30);
+  } catch (_) {
+    return null;
+  } finally {
+    await player.dispose();
+  }
+}
+
+/// "1:05".
+String clipLength(int seconds) =>
+    '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 
 /// Plays one clip at a time, for the whole app.
 abstract interface class ClipPlayer {

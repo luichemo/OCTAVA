@@ -1997,7 +1997,7 @@ abstract class AppLocalizations {
   /// No description provided for @bandEdit.
   ///
   /// In en, this message translates to:
-  /// **'Choose the roles your band needs'**
+  /// **'Edit'**
   String get bandEdit;
 
   /// No description provided for @bandRolesTitle.
@@ -2611,6 +2611,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t reset your swipes. Check your connection.'**
   String get errResetSwipes;
+
+  /// No description provided for @reportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this message'**
+  String get reportMessage;
+
+  /// No description provided for @errBandProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of those genres or roles aren\'t on the list.'**
+  String get errBandProfile;
+
+  /// No description provided for @bandEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit band'**
+  String get bandEditTitle;
+
+  /// No description provided for @bandEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is what musicians see on your band\'s card in their feed.'**
+  String get bandEditHint;
+
+  /// No description provided for @bandDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'About the band'**
+  String get bandDescriptionLabel;
+
+  /// No description provided for @bandDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What you play, what you\'re aiming for, how often you rehearse…'**
+  String get bandDescriptionHint;
+
+  /// No description provided for @bandOpenRolesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for'**
+  String get bandOpenRolesLabel;
+
+  /// No description provided for @bandOpenRolesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The instruments you\'d like to add. Musicians who play them see your band first.'**
+  String get bandOpenRolesHint;
+
+  /// No description provided for @bandProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Band profile'**
+  String get bandProfileTitle;
+
+  /// No description provided for @bandProfileEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a description, genres and the roles you\'re looking for, so musicians know what you\'re about.'**
+  String get bandProfileEmpty;
+
+  /// No description provided for @bandLookingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for: {roles}'**
+  String bandLookingFor(String roles);
+
+  /// No description provided for @bandClipPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play the band clip'**
+  String get bandClipPlay;
+
+  /// No description provided for @bandClipStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop the band clip'**
+  String get bandClipStop;
+
+  /// No description provided for @bandClipNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No band clip yet'**
+  String get bandClipNone;
+
+  /// No description provided for @bandClipLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Band clip · {length}'**
+  String bandClipLength(String length);
+
+  /// No description provided for @bandClipAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Record or upload a band clip'**
+  String get bandClipAdd;
+
+  /// No description provided for @bandClipReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the band clip'**
+  String get bandClipReplace;
+
+  /// No description provided for @bandClipRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the band clip'**
+  String get bandClipRemove;
+
+  /// No description provided for @bandClipSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as band clip'**
+  String get bandClipSave;
+
+  /// No description provided for @bandClipSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Band clip saved.'**
+  String get bandClipSaved;
+
+  /// No description provided for @bandClipRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Band clip removed.'**
+  String get bandClipRemoved;
+
+  /// No description provided for @bandProfileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Band profile saved.'**
+  String get bandProfileSaved;
 }
 
 class _AppLocalizationsDelegate

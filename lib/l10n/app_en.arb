@@ -569,7 +569,7 @@
   "genreWorld": "World music",
   "genreClassical": "Classical",
   "genreSoundtrack": "Soundtrack",
-  "bandEdit": "Choose the roles your band needs",
+  "bandEdit": "Edit",
   "bandRolesTitle": "Who does your band need?",
   "bandRolesHint": "Room for up to {max} people besides you.",
   "@bandRolesHint": {
@@ -861,5 +861,41 @@
   "errResetSwipes": "Couldn't reset your swipes. Check your connection.",
   "@resetSwipes": {
     "description": "TEMPORARY tester button on the empty deck; remove before launch."
-  }
+  },
+  "reportMessage": "Report this message",
+  "errBandProfile": "Some of those genres or roles aren't on the list.",
+  "bandEditTitle": "Edit band",
+  "bandEditHint": "This is what musicians see on your band's card in their feed.",
+  "bandDescriptionLabel": "About the band",
+  "bandDescriptionHint": "What you play, what you're aiming for, how often you rehearse…",
+  "bandOpenRolesLabel": "Looking for",
+  "bandOpenRolesHint": "The instruments you'd like to add. Musicians who play them see your band first.",
+  "bandProfileTitle": "Band profile",
+  "bandProfileEmpty": "Add a description, genres and the roles you're looking for, so musicians know what you're about.",
+  "bandLookingFor": "Looking for: {roles}",
+  "@bandLookingFor": {
+    "placeholders": {
+      "roles": {
+        "type": "String"
+      }
+    }
+  },
+  "bandClipPlay": "Play the band clip",
+  "bandClipStop": "Stop the band clip",
+  "bandClipNone": "No band clip yet",
+  "bandClipLength": "Band clip · {length}",
+  "@bandClipLength": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  },
+  "bandClipAdd": "Record or upload a band clip",
+  "bandClipReplace": "Replace the band clip",
+  "bandClipRemove": "Remove the band clip",
+  "bandClipSave": "Use as band clip",
+  "bandClipSaved": "Band clip saved.",
+  "bandClipRemoved": "Band clip removed.",
+  "bandProfileSaved": "Band profile saved."
 }

@@ -99,9 +99,46 @@ class _Report {
   final bool alsoBlock;
 }
 
+/// Reports one band message: the report form with the message quoted.
+/// No Block here: blocking a bandmate doesn't hide them from the band, so
+/// offering it would mislead. (Leaving the band is on the band page.)
+Future<void> showReportMessage(
+  BuildContext context, {
+  required SafetyRepository safety,
+  required String userId,
+  required String name,
+  required ({String id, String text}) message,
+}) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final t = context.t;
+  final report = await showDialog<_Report>(
+    context: context,
+    builder: (_) =>
+        _ReportDialog(name: name, quote: message.text, allowBlock: false),
+  );
+  if (report == null) return;
+  try {
+    await safety.report(
+      userId,
+      report.reason,
+      report.details,
+      message: message,
+    );
+    messenger.showSnackBar(SnackBar(content: Text(t.reportThanks)));
+  } on UserFacingException catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text(e.message)));
+  }
+}
+
 class _ReportDialog extends StatefulWidget {
-  const _ReportDialog({required this.name});
+  const _ReportDialog({required this.name, this.quote, this.allowBlock = true});
   final String name;
+
+  /// The message being reported, shown at the top.
+  final String? quote;
+
+  /// Offers "Also block" (on by default).
+  final bool allowBlock;
 
   @override
   State<_ReportDialog> createState() => _ReportDialogState();
@@ -109,7 +146,7 @@ class _ReportDialog extends StatefulWidget {
 
 class _ReportDialogState extends State<_ReportDialog> {
   String? _reason;
-  bool _alsoBlock = true;
+  late bool _alsoBlock = widget.allowBlock;
   final _details = TextEditingController();
 
   @override
@@ -121,12 +158,26 @@ class _ReportDialogState extends State<_ReportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(context.t.reportName(widget.name)),
+      title: Text(
+        widget.quote != null
+            ? context.t.reportMessage
+            : context.t.reportName(widget.name),
+      ),
       scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (widget.quote case final quote?)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                '“$quote”',
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
           Text(context.t.whatsWrong),
           const SizedBox(height: 4),
           // RadioGroup holds the selected value for the radios inside it.
@@ -159,15 +210,16 @@ class _ReportDialogState extends State<_ReportDialog> {
               alignLabelWithHint: true,
             ),
           ),
-          CheckboxListTile(
-            value: _alsoBlock,
-            onChanged: (v) => setState(() {
-              _alsoBlock = v ?? false;
-            }),
-            title: Text(context.t.alsoBlock(widget.name)),
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
+          if (widget.allowBlock)
+            CheckboxListTile(
+              value: _alsoBlock,
+              onChanged: (v) => setState(() {
+                _alsoBlock = v ?? false;
+              }),
+              title: Text(context.t.alsoBlock(widget.name)),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
         ],
       ),
       actions: [

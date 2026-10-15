@@ -10,20 +10,36 @@ import '../data/voice_recorder.dart';
 import '../l10n/l10n.dart';
 import '../theme.dart';
 
-/// Opens the recorder: it starts recording right away, then the person adds
-/// the take to their profile, records again, or uploads a file instead.
+/// Where a take or file goes: your profile's clips, or a band's clip.
+/// [knownSeconds] is the recording's length (files are measured).
+typedef ClipSaver = Future<void> Function({
+  required Uint8List bytes,
+  required String fileName,
+  int? knownSeconds,
+});
+
+/// Opens the recorder: it starts recording right away, then the person
+/// saves the take (to [clips], their profile, or with [save]), records
+/// again, or uploads a file instead. [saveLabel] / [savedMessage] replace
+/// "Add to profile" / "Added to your profile" when saving elsewhere.
 Future<void> showRecordSheet(
   BuildContext context, {
-  required ClipRepository clips,
+  ClipRepository? clips,
+  ClipSaver? save,
+  String? saveLabel,
+  String? savedMessage,
   VoiceRecorder Function()? recorder,
   Future<(String, Uint8List)?> Function()? pickFile,
 }) {
+  assert(clips != null || save != null);
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (_) => RecordSheet(
-      clips: clips,
+      save: save ?? clips!.upload,
+      saveLabel: saveLabel,
+      savedMessage: savedMessage,
       recorder: (recorder ?? DeviceVoiceRecorder.new)(),
       pickFile: pickFile,
     ),
@@ -35,12 +51,16 @@ enum _Stage { starting, recording, recorded, saving }
 class RecordSheet extends StatefulWidget {
   const RecordSheet({
     super.key,
-    required this.clips,
+    required this.save,
     required this.recorder,
+    this.saveLabel,
+    this.savedMessage,
     this.pickFile,
   });
 
-  final ClipRepository clips;
+  final ClipSaver save;
+  final String? saveLabel;
+  final String? savedMessage;
   final VoiceRecorder recorder;
 
   /// Chooses a file for "Upload a file instead"; defaults to the system picker.
@@ -164,13 +184,13 @@ class _RecordSheetState extends State<RecordSheet> {
       _stage = _Stage.saving;
     });
     try {
-      await widget.clips.upload(
+      await widget.save(
         bytes: take.bytes,
         fileName: take.fileName,
         knownSeconds: take.seconds,
       );
       navigator.pop();
-      _say(t.clipAdded);
+      _say(widget.savedMessage ?? t.clipAdded);
     } on UserFacingException catch (e) {
       if (!mounted) return;
       setState(() {
@@ -203,9 +223,9 @@ class _RecordSheetState extends State<RecordSheet> {
       });
     }
     try {
-      await widget.clips.upload(fileName: picked.$1, bytes: picked.$2);
+      await widget.save(fileName: picked.$1, bytes: picked.$2);
       navigator.pop();
-      _say(t.clipAdded);
+      _say(widget.savedMessage ?? t.clipAdded);
     } on UserFacingException catch (e) {
       _say(e.message);
       if (mounted) _start();
@@ -302,7 +322,7 @@ class _RecordSheetState extends State<RecordSheet> {
                         child: CircularProgressIndicator(strokeWidth: 3),
                       )
                     : const Icon(Icons.check_rounded),
-                label: Text(t.recordSave),
+                label: Text(widget.saveLabel ?? t.recordSave),
               ),
               OutlinedButton.icon(
                 onPressed: _stage == _Stage.saving ? null : _start,

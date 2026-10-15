@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../data/avatar_repository.dart';
+import '../data/clip_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
 import '../data/repositories.dart';
+import '../data/safety_repository.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
 import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 import '../widgets/person_avatar.dart';
+import '../widgets/safety_sheet.dart';
 import 'band_screen.dart';
 import 'chat_screen.dart' show ChatBubble, DayChip, sameDay;
 
@@ -23,7 +26,15 @@ class BandChatScreen extends StatefulWidget {
     required this.bandId,
     this.matches,
     this.avatars,
+    this.safety,
+    this.player,
   });
+
+  /// Passed on to the band page, for the band clip.
+  final ClipPlayer? player;
+
+  /// Report (or block) a bandmate by long-pressing their message.
+  final SafetyRepository? safety;
 
   final LiveBands bands;
   final String bandId;
@@ -89,6 +100,7 @@ class _BandChatScreenState extends State<BandChatScreen> {
         bandId: widget.bandId,
         matches: widget.matches,
         avatars: widget.avatars,
+        player: widget.player,
       ),
     ),
   );
@@ -225,6 +237,19 @@ class _BandChatScreenState extends State<BandChatScreen> {
             final sender = band?.memberById(message.senderId);
             final senderName = sender?.name ?? context.t.musicianFallback;
             Widget bubble = ChatBubble(message: message, mine: mine);
+            if (!mine && widget.safety != null) {
+              // Long-press someone's message to report it.
+              bubble = GestureDetector(
+                onLongPress: () => showReportMessage(
+                  context,
+                  safety: widget.safety!,
+                  userId: message.senderId,
+                  name: senderName,
+                  message: (id: message.id, text: message.body),
+                ),
+                child: bubble,
+              );
+            }
             if (!mine) {
               bubble = Row(
                 crossAxisAlignment: CrossAxisAlignment.end,

@@ -8,7 +8,13 @@ abstract interface class SafetyRepository {
   Future<void> block(String userId);
 
   /// [reason] is a `report_reason` value (see reportReasonLabels).
-  Future<void> report(String userId, String reason, String details);
+  /// [message]: the band message being reported, if any (its id and text).
+  Future<void> report(
+    String userId,
+    String reason,
+    String details, {
+    ({String id, String text})? message,
+  });
 }
 
 /// `report_reason` enum → what people see when picking one.
@@ -39,12 +45,22 @@ class SupabaseSafetyRepository implements SafetyRepository {
   }
 
   @override
-  Future<void> report(String userId, String reason, String details) async {
+  Future<void> report(
+    String userId,
+    String reason,
+    String details, {
+    ({String id, String text})? message,
+  }) async {
     try {
       await _client.from('reports').insert({
         'reported_id': userId,
         'reason': reason,
         if (details.trim().isNotEmpty) 'details': details.trim(),
+        // The database checks it's really their message, word for word.
+        if (message != null) ...{
+          'band_message_id': message.id,
+          'reported_text': message.text,
+        },
       });
     } catch (_) {
       throw UserFacingException(L10n.current.errReport);

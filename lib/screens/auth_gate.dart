@@ -114,9 +114,15 @@ class _ProfileGateState extends State<ProfileGate> {
   late Future<ProfileStatus> _status = widget.repository.myStatus();
 
   // One player for the whole signed-in session, so only one clip plays at a time.
+  // Band clips (bandClipKey) come from the band-clips bucket.
   late final ClipPlayer? _player = widget.clips == null
       ? null
-      : JustAudioClipPlayer(widget.clips!.playbackUrl);
+      : JustAudioClipPlayer((key) {
+          final bandPath = bandClipPath(key);
+          return bandPath != null && widget.bands != null
+              ? widget.bands!.clipUrl(bandPath)
+              : widget.clips!.playbackUrl(key);
+        });
 
   // Live matches for the whole session: badges, banners, the Matches list.
   late final LiveUpdates? _live = widget.chat == null
@@ -165,6 +171,7 @@ class _ProfileGateState extends State<ProfileGate> {
           safety: widget.safety,
           avatars: widget.avatars,
           bands: _bands,
+          player: _player,
         ),
       ),
     );
@@ -186,6 +193,8 @@ class _ProfileGateState extends State<ProfileGate> {
           bandId: bandId,
           matches: _live,
           avatars: widget.avatars,
+          safety: widget.safety,
+          player: _player,
         ),
       ),
     );

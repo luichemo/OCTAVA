@@ -20,8 +20,18 @@ class FakeSafetyRepository implements SafetyRepository {
   Future<void> block(String userId) async => blocked.add(userId);
 
   @override
-  Future<void> report(String userId, String reason, String details) async =>
-      reports.add((userId, reason, details));
+  Future<void> report(
+    String userId,
+    String reason,
+    String details, {
+    ({String id, String text})? message,
+  }) async {
+    reports.add((userId, reason, details));
+    if (message != null) reportedMessages.add(message.id);
+  }
+
+  /// Ids of band messages that were reported.
+  final reportedMessages = <String>[];
 }
 
 /// Sample people with database-style ids, so they can be blocked.

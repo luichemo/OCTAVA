@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 
 import '../data/avatar_repository.dart';
 import '../data/chat_repository.dart';
+import '../data/clip_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
 import '../data/repositories.dart';
@@ -26,7 +27,11 @@ class MatchesScreen extends StatefulWidget {
     this.safety,
     this.avatars,
     this.bands,
+    this.player,
   });
+
+  /// Plays band clips on band pages.
+  final ClipPlayer? player;
 
   /// Your bands and invites, shown above the matches. Without it, matches only.
   final LiveBands? bands;
@@ -82,6 +87,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
         bandId: bandId,
         matches: _live,
         avatars: widget.avatars,
+        safety: widget.safety,
+        player: widget.player,
       ),
     ),
   );

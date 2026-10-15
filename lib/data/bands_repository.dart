@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
+import 'clip_repository.dart';
 import 'repositories.dart';
 
 /// Bands you're in, invites to join one, and the votes on new members.
@@ -31,6 +34,29 @@ abstract interface class BandsRepository {
 
   Future<void> leave(String bandId);
 
+  /// Saves the band's profile. Null leaves a field as it is; an empty
+  /// description clears it.
+  Future<void> updateProfile(
+    String bandId, {
+    String? name,
+    String? description,
+    List<String>? genres,
+    List<String>? openRoles,
+  });
+
+  /// Uploads (or replaces) the band's clip, checking type, size and length.
+  Future<void> uploadClip(
+    String bandId, {
+    required Uint8List bytes,
+    required String fileName,
+    int? knownSeconds,
+  });
+
+  Future<void> removeClip(String bandId);
+
+  /// A temporary link for playing a band clip.
+  Future<String> clipUrl(String path);
+
   /// A band's messages, oldest first, updated live.
   Stream<List<ChatMessage>> messages(String bandId);
 
@@ -54,7 +80,11 @@ class SupabaseBandsRepository implements BandsRepository {
   Future<BandsState> load() async {
     try {
       // Row-level security returns only bands you're in or invited to.
-      final bands = await _client.from('bands').select('id, name');
+      final bands = await _client
+          .from('bands')
+          .select(
+            'id, name, description, genres, open_roles, clip_path, clip_seconds',
+          );
       if (bands.isEmpty) return (bands: <MyBand>[], invites: <BandInvite>[]);
       final bandIds = [for (final b in bands) b['id'] as String];
 
@@ -151,6 +181,11 @@ class SupabaseBandsRepository implements BandsRepository {
             MyBand(
               id: id,
               name: b['name'] as String,
+              description: b['description'] as String?,
+              genres: (b['genres'] as List? ?? const []).cast<String>(),
+              openRoles: (b['open_roles'] as List? ?? const []).cast<String>(),
+              clipPath: b['clip_path'] as String?,
+              clipSeconds: b['clip_seconds'] as int?,
               members: bandMembers,
               chatOpen: chatOpen[id] ?? false,
               unreadCount: recent.where((m) {
@@ -264,6 +299,112 @@ class SupabaseBandsRepository implements BandsRepository {
   }
 
   @override
+  Future<void> updateProfile(
+    String bandId, {
+    String? name,
+    String? description,
+    List<String>? genres,
+    List<String>? openRoles,
+  }) => _call('update_band', {
+    'band': bandId,
+    'name': name?.trim(),
+    'description': description,
+    'genres': genres,
+    'open_roles': openRoles,
+  });
+
+  StorageFileApi get _clips => _client.storage.from('band-clips');
+
+  @override
+  Future<void> uploadClip(
+    String bandId, {
+    required Uint8List bytes,
+    required String fileName,
+    int? knownSeconds,
+  }) async {
+    final ext = fileName.contains('.')
+        ? fileName.split('.').last.toLowerCase()
+        : '';
+    final mime = clipMimeTypes[ext];
+    if (mime == null) throw UserFacingException(L10n.current.errClipType);
+    if (bytes.length > maxClipBytes) {
+      throw UserFacingException(L10n.current.errClipSize);
+    }
+    final path = '$bandId/${DateTime.now().millisecondsSinceEpoch}.$ext';
+    try {
+      await _clips.uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: mime),
+      );
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipUpload);
+    }
+    Future<void> discard() =>
+        _clips.remove([path]).catchError((_) => <FileObject>[]);
+    final seconds =
+        knownSeconds ?? await measureClipSeconds(await clipUrl(path));
+    if (seconds == null || seconds > maxClipSeconds) {
+      await discard();
+      throw UserFacingException(
+        seconds == null
+            ? L10n.current.errClipUnreadable
+            : L10n.current.errClipTooLong(clipLength(seconds)),
+      );
+    }
+    final old = await _currentClip(bandId);
+    try {
+      await _call('set_band_clip', {
+        'band': bandId,
+        'path': path,
+        'seconds': seconds,
+      });
+    } catch (_) {
+      await discard();
+      rethrow;
+    }
+    // The previous clip's file isn't needed any more.
+    if (old != null) {
+      await _clips.remove([old]).catchError((_) => <FileObject>[]);
+    }
+  }
+
+  @override
+  Future<void> removeClip(String bandId) async {
+    final old = await _currentClip(bandId);
+    await _call('set_band_clip', {
+      'band': bandId,
+      'path': null,
+      'seconds': null,
+    });
+    if (old != null) {
+      await _clips.remove([old]).catchError((_) => <FileObject>[]);
+    }
+  }
+
+  Future<String?> _currentClip(String bandId) async {
+    try {
+      final row = await _client
+          .from('bands')
+          .select('clip_path')
+          .eq('id', bandId)
+          .single();
+      return row['clip_path'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<String> clipUrl(String path) async {
+    try {
+      return await _clips.createSignedUrl(path, 60 * 60);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipPlay);
+    }
+  }
+
+  @override
   Stream<List<ChatMessage>> messages(String bandId) => _client
       .from('band_messages')
       .stream(primaryKey: ['id'])
@@ -352,6 +493,17 @@ class SupabaseBandsRepository implements BandsRepository {
   }
 }
 
+/// How a band clip is named to the session's ClipPlayer, which also plays
+/// people's clips from another bucket: `band:<path>`.
+String bandClipKey(String path) => '$_bandClipPrefix$path';
+
+const _bandClipPrefix = 'band:';
+
+/// The band-clips path inside a [bandClipKey], or null for a person's clip.
+String? bandClipPath(String key) => key.startsWith(_bandClipPrefix)
+    ? key.substring(_bandClipPrefix.length)
+    : null;
+
 /// The database's band rules answer in English (see the bands migration);
 /// this turns each one into the app's language.
 String bandErrorMessage(String serverMessage) {
@@ -373,5 +525,8 @@ String bandErrorMessage(String serverMessage) {
     return t.errBandCancelNotYours;
   }
   if (m.contains('profile first')) return t.errBandNeedsProfile;
+  if (m.contains('genres from the list') || m.contains('instruments from')) {
+    return t.errBandProfile;
+  }
   return t.errBandAction;
 }
