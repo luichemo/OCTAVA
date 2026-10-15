@@ -1465,4 +1465,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String bandMemberRole(String instrument, String band) {
     return '$instrument · $band';
   }
+
+  @override
+  String get resetSwipes => 'სვაიპების განულება (ტესტი)';
+
+  @override
+  String get resetSwipesDone => 'სვაიპები გასუფთავდა. ყველა ისევ აქ არის.';
+
+  @override
+  String get errResetSwipes => 'სვაიპები ვერ განულდა. შეამოწმე ინტერნეტი.';
 }

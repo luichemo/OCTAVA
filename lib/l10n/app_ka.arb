@@ -415,5 +415,8 @@
   "bandMembersButton": "წევრები",
   "bandMessagePreview": "{name}: {message}",
   "errBandSendClosed": "ბენდის ჩატი ახლა დახურულია.",
-  "bandMemberRole": "{instrument} · {band}"
+  "bandMemberRole": "{instrument} · {band}",
+  "resetSwipes": "სვაიპების განულება (ტესტი)",
+  "resetSwipesDone": "სვაიპები გასუფთავდა. ყველა ისევ აქ არის.",
+  "errResetSwipes": "სვაიპები ვერ განულდა. შეამოწმე ინტერნეტი."
 }

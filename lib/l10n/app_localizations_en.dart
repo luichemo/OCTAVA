@@ -1473,4 +1473,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String bandMemberRole(String instrument, String band) {
     return '$instrument in $band';
   }
+
+  @override
+  String get resetSwipes => 'Reset my swipes (test)';
+
+  @override
+  String get resetSwipesDone => 'Your swipes are cleared. Everyone\'s back.';
+
+  @override
+  String get errResetSwipes =>
+      'Couldn\'t reset your swipes. Check your connection.';
 }

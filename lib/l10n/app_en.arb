@@ -855,5 +855,11 @@
         "type": "String"
       }
     }
+  },
+  "resetSwipes": "Reset my swipes (test)",
+  "resetSwipesDone": "Your swipes are cleared. Everyone's back.",
+  "errResetSwipes": "Couldn't reset your swipes. Check your connection.",
+  "@resetSwipes": {
+    "description": "TEMPORARY tester button on the empty deck; remove before launch."
   }
 }

@@ -2593,6 +2593,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{instrument} in {band}'**
   String bandMemberRole(String instrument, String band);
+
+  /// TEMPORARY tester button on the empty deck; remove before launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset my swipes (test)'**
+  String get resetSwipes;
+
+  /// No description provided for @resetSwipesDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your swipes are cleared. Everyone\'s back.'**
+  String get resetSwipesDone;
+
+  /// No description provided for @errResetSwipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reset your swipes. Check your connection.'**
+  String get errResetSwipes;
 }
 
 class _AppLocalizationsDelegate

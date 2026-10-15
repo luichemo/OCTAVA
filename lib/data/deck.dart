@@ -24,6 +24,10 @@ abstract interface class DeckSource {
   /// shown again.
   Future<void> undo(Musician musician);
 
+  /// TEMPORARY, for testers: clears your swipes that didn't make a match,
+  /// so everyone shows up again. Remove before launch.
+  Future<void> resetSwipes();
+
   /// Your main instrument and your matches (oldest first), which fill the
   /// band lineup (see `buildLineup`).
   Future<({String? myRole, List<BandMember> members})> loadBand();
@@ -64,6 +68,9 @@ class SampleDeck implements DeckSource {
 
   @override
   Future<void> undo(Musician musician) async {}
+
+  @override
+  Future<void> resetSwipes() async {}
 }
 
 /// Real people and swipes, through the database functions get_deck and
@@ -109,6 +116,15 @@ class SupabaseDeck implements DeckSource {
       await _client.rpc('undo_swipe', params: {'target': musician.id});
     } catch (_) {
       throw UserFacingException(L10n.current.errUndo);
+    }
+  }
+
+  @override
+  Future<void> resetSwipes() async {
+    try {
+      await _client.rpc('reset_my_swipes');
+    } catch (_) {
+      throw UserFacingException(L10n.current.errResetSwipes);
     }
   }
 
