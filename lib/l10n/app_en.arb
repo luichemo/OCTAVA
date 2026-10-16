@@ -897,5 +897,71 @@
   "bandClipSave": "Use as band clip",
   "bandClipSaved": "Band clip saved.",
   "bandClipRemoved": "Band clip removed.",
-  "bandProfileSaved": "Band profile saved."
+  "bandProfileSaved": "Band profile saved.",
+  "errBandRemoveSelf": "To leave, use Leave band.",
+  "errBandNotInBand": "They're not in the band anymore.",
+  "errBandRemovalExists": "There's already a vote on removing them.",
+  "bandMemberOptions": "Options for {name}",
+  "@bandMemberOptions": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRemoveMember": "Remove from band",
+  "bandRemoveTitle": "Remove {name} from {band}?",
+  "@bandRemoveTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRemoveBody": "This starts a vote: a majority of the other members has to agree. {name} won't see the vote.",
+  "@bandRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRemoveConfirm": "Start the vote",
+  "bandRemoveStarted": "Vote started on removing {name}.",
+  "@bandRemoveStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRemovedNow": "{name} was removed from the band.",
+  "@bandRemovedNow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRemovalsHeading": "Removing members",
+  "bandRemovalCount": "{yes} of {needed} needed",
+  "@bandRemovalCount": {
+    "placeholders": {
+      "yes": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "bandRemovalYes": "Remove",
+  "bandRemovalNo": "Keep",
+  "bandYouAgreed": "You agreed",
+  "bandYouDisagreed": "You said keep",
+  "bandRemovalCancel": "Cancel vote",
+  "bandRemovalCancelled": "Vote cancelled."
 }

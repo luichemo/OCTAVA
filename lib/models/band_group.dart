@@ -43,6 +43,29 @@ class BandProposal {
   final Set<String> approvedBy;
 }
 
+/// A vote on removing a member. It passes with a majority of the other
+/// members (everyone but [target]); [target] never sees it.
+class BandRemoval {
+  const BandRemoval({
+    required this.id,
+    required this.target,
+    this.proposedBy,
+    this.yesBy = const {},
+    this.votedBy = const {},
+  });
+
+  final String id;
+  final BandPerson target;
+  final BandPerson? proposedBy;
+
+  /// Members who said yes, and everyone who voted either way.
+  final Set<String> yesBy;
+  final Set<String> votedBy;
+
+  /// Yes votes needed: more than half of the members other than [target].
+  int neededIn(int memberCount) => (memberCount - 1) ~/ 2 + 1;
+}
+
 /// The newest message in a band chat, for the Matches list.
 class BandMessagePreview {
   const BandMessagePreview({
@@ -74,7 +97,11 @@ class MyBand {
     this.openRoles = const [],
     this.clipPath,
     this.clipSeconds,
+    this.removals = const [],
   });
+
+  /// Open votes on removing a member (never about you: those are hidden).
+  final List<BandRemoval> removals;
 
   /// The band's public profile, shown on its card in other people's feeds.
   final String? description;
@@ -112,6 +139,7 @@ class MyBand {
     openRoles: openRoles,
     clipPath: clipPath,
     clipSeconds: clipSeconds,
+    removals: removals,
   );
 
   BandPerson? memberById(String id) =>
@@ -128,9 +156,10 @@ class MyBand {
 
   bool hasMember(String id) => members.any((m) => m.id == id);
 
-  /// Proposals still waiting for [me] to vote.
+  /// Votes still waiting for [me]: new members and removals.
   int votesWaitingFor(String me) =>
-      proposals.where((p) => !p.invited && !p.approvedBy.contains(me)).length;
+      proposals.where((p) => !p.invited && !p.approvedBy.contains(me)).length +
+      removals.where((r) => !r.votedBy.contains(me)).length;
 }
 
 /// An invite for you to join a band.

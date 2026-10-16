@@ -1547,4 +1547,71 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get bandProfileSaved => 'ბენდის პროფილი შენახულია.';
+
+  @override
+  String get errBandRemoveSelf => 'წასასვლელად გამოიყენე „ბენდიდან წასვლა“.';
+
+  @override
+  String get errBandNotInBand => 'ის ბენდში აღარ არის.';
+
+  @override
+  String get errBandRemovalExists =>
+      'მის გარიცხვაზე კენჭისყრა უკვე მიმდინარეობს.';
+
+  @override
+  String bandMemberOptions(String name) {
+    return 'პარამეტრები: $name';
+  }
+
+  @override
+  String get bandRemoveMember => 'ბენდიდან გარიცხვა';
+
+  @override
+  String bandRemoveTitle(String name, String band) {
+    return 'გავრიცხოთ $name ბენდიდან $band?';
+  }
+
+  @override
+  String bandRemoveBody(String name) {
+    return 'ეს იწყებს კენჭისყრას: დანარჩენი წევრების უმრავლესობა უნდა დაეთანხმოს. $name კენჭისყრას ვერ დაინახავს.';
+  }
+
+  @override
+  String get bandRemoveConfirm => 'კენჭისყრის დაწყება';
+
+  @override
+  String bandRemoveStarted(String name) {
+    return 'დაიწყო კენჭისყრა გარიცხვაზე: $name.';
+  }
+
+  @override
+  String bandRemovedNow(String name) {
+    return '$name ბენდიდან გაირიცხა.';
+  }
+
+  @override
+  String get bandRemovalsHeading => 'წევრების გარიცხვა';
+
+  @override
+  String bandRemovalCount(int yes, int needed) {
+    return '$yes / $needed საჭირო';
+  }
+
+  @override
+  String get bandRemovalYes => 'გარიცხვა';
+
+  @override
+  String get bandRemovalNo => 'დატოვება';
+
+  @override
+  String get bandYouAgreed => 'შენ დაეთანხმე';
+
+  @override
+  String get bandYouDisagreed => 'შენ დატოვება აირჩიე';
+
+  @override
+  String get bandRemovalCancel => 'კენჭისყრის გაუქმება';
+
+  @override
+  String get bandRemovalCancelled => 'კენჭისყრა გაუქმდა.';
 }

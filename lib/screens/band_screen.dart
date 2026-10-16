@@ -202,6 +202,45 @@ class _BandScreenState extends State<BandScreen> {
     );
   }
 
+  Future<void> _proposeRemoval(MyBand band, BandPerson person) async {
+    final t = context.t;
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.bandRemoveTitle(person.name, band.name)),
+        content: Text(t.bandRemoveBody(person.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(t.bandRemoveConfirm),
+          ),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
+    var removedNow = false;
+    final ok = await _run(() async {
+      removedNow = await widget.bands.repository.proposeRemoval(
+        band.id,
+        person.id,
+      );
+    });
+    if (!ok || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          removedNow
+              ? t.bandRemovedNow(person.name)
+              : t.bandRemoveStarted(person.name),
+        ),
+      ),
+    );
+  }
+
   Future<void> _leave(MyBand band) async {
     final t = context.t;
     final sure = await showDialog<bool>(
@@ -286,7 +325,21 @@ class _BandScreenState extends State<BandScreen> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     )
-                                  : null,
+                                  // Others: Remove from band (unless a vote
+                                  // on that is already open).
+                                  : band.removals.any(
+                                      (r) => r.target.id == m.id,
+                                    )
+                                  ? null
+                                  : PopupMenuButton<void>(
+                                      tooltip: t.bandMemberOptions(m.name),
+                                      itemBuilder: (_) => [
+                                        PopupMenuItem(
+                                          onTap: () => _proposeRemoval(band, m),
+                                          child: Text(t.bandRemoveMember),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           if (widget.matches != null) ...[
                             const SizedBox(height: 8),
@@ -298,6 +351,33 @@ class _BandScreenState extends State<BandScreen> {
                                 label: Text(t.bandAddMember),
                               ),
                             ),
+                          ],
+                          if (band.removals.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            _Heading(t.bandRemovalsHeading),
+                            for (final r in band.removals)
+                              _RemovalCard(
+                                removal: r,
+                                needed: r.neededIn(band.members.length),
+                                me: _me,
+                                avatars: widget.avatars,
+                                onVote: (yes) => _run(
+                                  () => widget.bands.repository.voteRemoval(
+                                    r.id,
+                                    approve: yes,
+                                  ),
+                                ),
+                                // Yours, or left by someone who left.
+                                onCancel:
+                                    r.proposedBy?.id == _me ||
+                                        !band.hasMember(r.proposedBy?.id ?? '')
+                                    ? () => _run(
+                                        () => widget.bands.repository
+                                            .cancelRemoval(r.id),
+                                        done: t.bandRemovalCancelled,
+                                      )
+                                    : null,
+                              ),
                           ],
                           if (band.proposals.isNotEmpty) ...[
                             const SizedBox(height: 16),
@@ -669,6 +749,86 @@ class _BandProfileCard extends StatelessWidget {
                   icon: const Icon(Icons.delete_outline_rounded),
                 ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A vote on removing a member: how many have agreed out of how many are
+/// needed, and your Remove / Keep (or Cancel vote, if you started it).
+class _RemovalCard extends StatelessWidget {
+  const _RemovalCard({
+    required this.removal,
+    required this.needed,
+    required this.me,
+    required this.onVote,
+    this.onCancel,
+    this.avatars,
+  });
+
+  final BandRemoval removal;
+  final int needed;
+  final String me;
+  final ValueChanged<bool> onVote;
+  final VoidCallback? onCancel;
+  final AvatarRepository? avatars;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final colors = Theme.of(context).colorScheme;
+    final r = removal;
+    final voted = r.votedBy.contains(me);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(4, 4, 12, 12),
+      decoration: printBox(context, radius: 20, shadow: 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _PersonTile(person: r.target, avatars: avatars),
+          Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Text(
+              [
+                if (r.proposedBy case final by?) t.bandProposedBy(by.name),
+                t.bandRemovalCount(r.yesBy.length, needed),
+              ].join(' · '),
+              style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (!voted) ...[
+                  FilledButton(
+                    onPressed: () => onVote(true),
+                    child: Text(t.bandRemovalYes),
+                  ),
+                  OutlinedButton(
+                    onPressed: () => onVote(false),
+                    child: Text(t.bandRemovalNo),
+                  ),
+                ] else
+                  Text(
+                    r.yesBy.contains(me) ? t.bandYouAgreed : t.bandYouDisagreed,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                if (onCancel != null)
+                  TextButton.icon(
+                    onPressed: onCancel,
+                    icon: const Icon(Icons.close_rounded),
+                    label: Text(t.bandRemovalCancel),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

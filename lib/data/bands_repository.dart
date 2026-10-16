@@ -32,6 +32,15 @@ abstract interface class BandsRepository {
   /// Withdraws a proposal or invite you made.
   Future<void> cancel(String proposalId);
 
+  /// Starts a vote on removing [targetId]. True when they were removed at
+  /// once (in a band of two, your yes is the majority).
+  Future<bool> proposeRemoval(String bandId, String targetId);
+
+  Future<void> voteRemoval(String removalId, {required bool approve});
+
+  /// Withdraws a removal vote you started.
+  Future<void> cancelRemoval(String removalId);
+
   Future<void> leave(String bandId);
 
   /// Saves the band's profile. Null leaves a field as it is; an empty
@@ -105,6 +114,20 @@ class SupabaseBandsRepository implements BandsRepository {
                 .from('band_votes')
                 .select('proposal_id, voter_id, approve')
                 .inFilter('proposal_id', [for (final p in proposals) p['id']]);
+
+      // Votes on removing members (the database hides ones about you).
+      final removals = await _client
+          .from('band_removals')
+          .select('id, band_id, target_id, proposed_by')
+          .inFilter('band_id', bandIds)
+          .eq('status', 'voting')
+          .order('created_at');
+      final removalVotes = removals.isEmpty
+          ? const <Map<String, dynamic>>[]
+          : await _client
+                .from('band_removal_votes')
+                .select('removal_id, voter_id, approve')
+                .inFilter('removal_id', [for (final r in removals) r['id']]);
 
       // Chat state for the bands you're in.
       final chatRows = await _client.rpc('my_band_chats') as List;
@@ -211,6 +234,27 @@ class SupabaseBandsRepository implements BandsRepository {
                   if (r['band_id'] == id && r['user_id'] != myId)
                     r['user_id'] as String: at(r['last_read_at']),
               },
+              removals: [
+                for (final r in removals)
+                  if (r['band_id'] == id)
+                    if (person(r['target_id'] as String) case final target?)
+                      BandRemoval(
+                        id: r['id'] as String,
+                        target: target,
+                        proposedBy: person(r['proposed_by'] as String?),
+                        yesBy: {
+                          for (final v in removalVotes)
+                            if (v['removal_id'] == r['id'] &&
+                                v['approve'] == true)
+                              v['voter_id'] as String,
+                        },
+                        votedBy: {
+                          for (final v in removalVotes)
+                            if (v['removal_id'] == r['id'])
+                              v['voter_id'] as String,
+                        },
+                      ),
+              ],
               proposals: [
                 for (final p in proposals)
                   if (p['band_id'] == id)
@@ -280,6 +324,32 @@ class SupabaseBandsRepository implements BandsRepository {
   @override
   Future<void> answerInvite(String proposalId, {required bool accept}) =>
       _call('answer_band_invite', {'proposal': proposalId, 'accept': accept});
+
+  @override
+  Future<bool> proposeRemoval(String bandId, String targetId) async {
+    final removalId = await _call('propose_band_removal', {
+      'band': bandId,
+      'target': targetId,
+    });
+    try {
+      // Removed at once (a band of two): the vote is no longer visible.
+      final rows = await _client
+          .from('band_removals')
+          .select('status')
+          .eq('id', removalId as String);
+      return rows.isEmpty || rows.first['status'] == 'removed';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<void> voteRemoval(String removalId, {required bool approve}) =>
+      _call('vote_band_removal', {'removal': removalId, 'approve': approve});
+
+  @override
+  Future<void> cancelRemoval(String removalId) =>
+      _call('cancel_band_removal', {'removal': removalId});
 
   @override
   Future<void> cancel(String proposalId) =>
@@ -458,6 +528,8 @@ class SupabaseBandsRepository implements BandsRepository {
       'band_members',
       'band_proposals',
       'band_votes',
+      'band_removals',
+      'band_removal_votes',
       'band_reads',
     ]) {
       channel.onPostgresChanges(
@@ -521,6 +593,11 @@ String bandErrorMessage(String serverMessage) {
   if (m.contains('vote on this person is over')) return t.errBandVoteOver;
   if (m.contains('invite isn\'t open')) return t.errBandInviteClosed;
   if (m.contains('not in this band')) return t.errBandNotMember;
+  if (m.contains('use leave band')) return t.errBandRemoveSelf;
+  if (m.contains('not in the band')) return t.errBandNotInBand;
+  if (m.contains('already a vote on removing')) {
+    return t.errBandRemovalExists;
+  }
   if (m.contains('who proposed them can cancel')) {
     return t.errBandCancelNotYours;
   }

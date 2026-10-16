@@ -1558,4 +1558,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bandProfileSaved => 'Band profile saved.';
+
+  @override
+  String get errBandRemoveSelf => 'To leave, use Leave band.';
+
+  @override
+  String get errBandNotInBand => 'They\'re not in the band anymore.';
+
+  @override
+  String get errBandRemovalExists =>
+      'There\'s already a vote on removing them.';
+
+  @override
+  String bandMemberOptions(String name) {
+    return 'Options for $name';
+  }
+
+  @override
+  String get bandRemoveMember => 'Remove from band';
+
+  @override
+  String bandRemoveTitle(String name, String band) {
+    return 'Remove $name from $band?';
+  }
+
+  @override
+  String bandRemoveBody(String name) {
+    return 'This starts a vote: a majority of the other members has to agree. $name won\'t see the vote.';
+  }
+
+  @override
+  String get bandRemoveConfirm => 'Start the vote';
+
+  @override
+  String bandRemoveStarted(String name) {
+    return 'Vote started on removing $name.';
+  }
+
+  @override
+  String bandRemovedNow(String name) {
+    return '$name was removed from the band.';
+  }
+
+  @override
+  String get bandRemovalsHeading => 'Removing members';
+
+  @override
+  String bandRemovalCount(int yes, int needed) {
+    return '$yes of $needed needed';
+  }
+
+  @override
+  String get bandRemovalYes => 'Remove';
+
+  @override
+  String get bandRemovalNo => 'Keep';
+
+  @override
+  String get bandYouAgreed => 'You agreed';
+
+  @override
+  String get bandYouDisagreed => 'You said keep';
+
+  @override
+  String get bandRemovalCancel => 'Cancel vote';
+
+  @override
+  String get bandRemovalCancelled => 'Vote cancelled.';
 }

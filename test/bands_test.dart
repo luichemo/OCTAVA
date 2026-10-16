@@ -60,6 +60,7 @@ class FakeBandsRepository implements BandsRepository {
           openRoles: b.openRoles,
           clipPath: b.clipPath,
           clipSeconds: b.clipSeconds,
+          removals: b.removals,
           chatOpen: b.members.length > 1 && !closedChats.contains(b.id),
           unreadCount: (_messages[b.id] ?? const <ChatMessage>[])
               .where(
@@ -228,6 +229,7 @@ class FakeBandsRepository implements BandsRepository {
     openRoles: openRoles ?? b.openRoles,
     clipPath: clearClip ? null : clipPath ?? b.clipPath,
     clipSeconds: clearClip ? null : clipSeconds ?? b.clipSeconds,
+    removals: b.removals,
   );
 
   MyBand _band(String id) => bands.firstWhere((b) => b.id == id);
@@ -277,6 +279,99 @@ class FakeBandsRepository implements BandsRepository {
 
   @override
   Future<String> clipUrl(String path) async => 'https://example.invalid/$path';
+
+  // ------------------------------------------------------------ removals
+  final removalVotes = <String>[];
+
+  /// Applies the majority rule, like private.settle_removal. True when
+  /// [removal] removed its target.
+  bool _settleRemoval(String bandId, BandRemoval removal) {
+    final band = _band(bandId);
+    final others = band.members.length - 1;
+    final needed = removal.neededIn(band.members.length);
+    final no = removal.votedBy.length - removal.yesBy.length;
+    final removed = removal.yesBy.length >= needed;
+    final refused = !removed && others - no < needed;
+    _replace(
+      MyBand(
+        id: band.id,
+        name: band.name,
+        members: [
+          for (final m in band.members)
+            if (!removed || m.id != removal.target.id) m,
+        ],
+        proposals: band.proposals,
+        removals: [
+          for (final r in band.removals)
+            if (r.id != removal.id) r else if (!removed && !refused) removal,
+        ],
+      ),
+    );
+    return removed;
+  }
+
+  @override
+  Future<bool> proposeRemoval(String bandId, String targetId) async {
+    _check();
+    final band = _band(bandId);
+    final removal = BandRemoval(
+      id: 'r-$targetId',
+      target: people[targetId]!,
+      proposedBy: me,
+      yesBy: {me.id},
+      votedBy: {me.id},
+    );
+    _replace(
+      MyBand(
+        id: band.id,
+        name: band.name,
+        members: band.members,
+        proposals: band.proposals,
+        removals: [...band.removals, removal],
+      ),
+    );
+    return _settleRemoval(bandId, removal);
+  }
+
+  @override
+  Future<void> voteRemoval(String removalId, {required bool approve}) async {
+    _check();
+    removalVotes.add('$removalId:$approve');
+    final band = bands.firstWhere(
+      (b) => b.removals.any((r) => r.id == removalId),
+    );
+    final r = band.removals.firstWhere((r) => r.id == removalId);
+    _settleRemoval(
+      band.id,
+      BandRemoval(
+        id: r.id,
+        target: r.target,
+        proposedBy: r.proposedBy,
+        yesBy: {...r.yesBy, if (approve) me.id},
+        votedBy: {...r.votedBy, me.id},
+      ),
+    );
+  }
+
+  @override
+  Future<void> cancelRemoval(String removalId) async {
+    _check();
+    final band = bands.firstWhere(
+      (b) => b.removals.any((r) => r.id == removalId),
+    );
+    _replace(
+      MyBand(
+        id: band.id,
+        name: band.name,
+        members: band.members,
+        proposals: band.proposals,
+        removals: [
+          for (final r in band.removals)
+            if (r.id != removalId) r,
+        ],
+      ),
+    );
+  }
 
   // ------------------------------------------------------------ chat
   final _messages = <String, List<ChatMessage>>{};
@@ -768,6 +863,77 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.bands.single.clipPath, isNull);
       expect(find.text('No band clip yet'), findsOneWidget);
+    });
+
+    testWidgets('start a vote to remove a member, after a confirm', (
+      tester,
+    ) async {
+      final repo = await pumpBand(
+        tester,
+        const MyBand(id: 'b1', name: 'Riot', members: [me, nika, tamar]),
+      );
+      final options = find.byTooltip('Options for Tamar');
+      await tester.ensureVisible(options);
+      await tester.pumpAndSettle();
+      await tester.tap(options);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove from band'));
+      await tester.pumpAndSettle();
+      expect(find.text('Remove Tamar from Riot?'), findsOneWidget);
+      await tester.tap(find.text('Start the vote'));
+      await tester.pumpAndSettle();
+
+      // 3 members: both others must agree; your yes is the first of 2.
+      expect(find.text('Vote started on removing Tamar.'), findsOneWidget);
+      expect(find.text('Removing members'), findsOneWidget);
+      expect(find.textContaining('1 of 2 needed'), findsOneWidget);
+      expect(find.text('You agreed'), findsOneWidget);
+      expect(repo.bands.single.members, hasLength(3));
+    });
+
+    testWidgets('a removal passes with a majority of the others', (
+      tester,
+    ) async {
+      final repo = await pumpBand(
+        tester,
+        const MyBand(
+          id: 'b1',
+          name: 'Riot',
+          members: [me, nika, tamar],
+          removals: [
+            BandRemoval(
+              id: 'r1',
+              target: tamar,
+              proposedBy: nika,
+              yesBy: {'nika'},
+              votedBy: {'nika'},
+            ),
+          ],
+        ),
+      );
+      final remove = find.widgetWithText(FilledButton, 'Remove');
+      await tester.ensureVisible(remove);
+      await tester.pumpAndSettle();
+      await tester.tap(remove);
+      await tester.pumpAndSettle();
+      expect(repo.removalVotes, ['r1:true']);
+      expect(repo.bands.single.members.map((m) => m.id), ['me', 'nika']);
+      expect(find.text('Removing members'), findsNothing);
+    });
+
+    testWidgets('in a band of two, removing happens at once', (tester) async {
+      final repo = await pumpBand(
+        tester,
+        const MyBand(id: 'b1', name: 'Duo', members: [me, nika]),
+      );
+      await tester.tap(find.byTooltip('Options for Nika'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Remove from band'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Start the vote'));
+      await tester.pumpAndSettle();
+      expect(find.text('Nika was removed from the band.'), findsOneWidget);
+      expect(repo.bands.single.members.single.id, 'me');
     });
 
     testWidgets('leaving asks first and goes back', (tester) async {

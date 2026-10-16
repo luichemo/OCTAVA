@@ -2743,6 +2743,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Band profile saved.'**
   String get bandProfileSaved;
+
+  /// No description provided for @errBandRemoveSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'To leave, use Leave band.'**
+  String get errBandRemoveSelf;
+
+  /// No description provided for @errBandNotInBand.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'re not in the band anymore.'**
+  String get errBandNotInBand;
+
+  /// No description provided for @errBandRemovalExists.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s already a vote on removing them.'**
+  String get errBandRemovalExists;
+
+  /// No description provided for @bandMemberOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Options for {name}'**
+  String bandMemberOptions(String name);
+
+  /// No description provided for @bandRemoveMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from band'**
+  String get bandRemoveMember;
+
+  /// No description provided for @bandRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from {band}?'**
+  String bandRemoveTitle(String name, String band);
+
+  /// No description provided for @bandRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This starts a vote: a majority of the other members has to agree. {name} won\'t see the vote.'**
+  String bandRemoveBody(String name);
+
+  /// No description provided for @bandRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the vote'**
+  String get bandRemoveConfirm;
+
+  /// No description provided for @bandRemoveStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote started on removing {name}.'**
+  String bandRemoveStarted(String name);
+
+  /// No description provided for @bandRemovedNow.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was removed from the band.'**
+  String bandRemovedNow(String name);
+
+  /// No description provided for @bandRemovalsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing members'**
+  String get bandRemovalsHeading;
+
+  /// No description provided for @bandRemovalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{yes} of {needed} needed'**
+  String bandRemovalCount(int yes, int needed);
+
+  /// No description provided for @bandRemovalYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get bandRemovalYes;
+
+  /// No description provided for @bandRemovalNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get bandRemovalNo;
+
+  /// No description provided for @bandYouAgreed.
+  ///
+  /// In en, this message translates to:
+  /// **'You agreed'**
+  String get bandYouAgreed;
+
+  /// No description provided for @bandYouDisagreed.
+  ///
+  /// In en, this message translates to:
+  /// **'You said keep'**
+  String get bandYouDisagreed;
+
+  /// No description provided for @bandRemovalCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel vote'**
+  String get bandRemovalCancel;
+
+  /// No description provided for @bandRemovalCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote cancelled.'**
+  String get bandRemovalCancelled;
 }
 
 class _AppLocalizationsDelegate
