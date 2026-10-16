@@ -8,9 +8,9 @@ import '../models/band.dart';
 
 export '../models/band.dart' show youMarker;
 
-/// The "Your band" row: your slot, then one slot per needed role, filled
-/// with a member's name or "Open". The slot at index [justFilled] briefly
-/// flashes pink when a match fills it. Tapping the row calls [onEdit].
+/// Your slot, then one slot per needed role, filled with a member's name or
+/// "Open". The slot at index [justFilled] briefly flashes pink when a match
+/// fills it. Tapping the lineup calls [onEdit].
 class BandLineup extends StatelessWidget {
   const BandLineup({
     super.key,
@@ -34,7 +34,6 @@ class BandLineup extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
     final scrolls = band.length > _fitSlots;
-    final filled = band.where((s) => s.member != null).length;
     final slots = [
       // `(i, (:role, member: who))` unpacks the index and the record's
       // fields, like `[i, { role, member: who }]` destructuring in JS.
@@ -143,45 +142,8 @@ class BandLineup extends StatelessWidget {
     final edit = onEdit;
     return Container(
       decoration: printBox(context, radius: 20),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          InkWell(
-            onTap: edit,
-            borderRadius: BorderRadius.circular(8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.t.yourBand,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: displayStyle(size: 22, color: colors.onSurface),
-                  ),
-                ),
-                Text(
-                  context.t.bandFilled(filled, band.length),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: OctavaColors.pink,
-                  ),
-                ),
-                if (edit != null)
-                  IconButton(
-                    tooltip: context.t.bandEdit,
-                    onPressed: edit,
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          if (edit == null) row else GestureDetector(onTap: edit, child: row),
-        ],
-      ),
+      padding: const EdgeInsets.all(12),
+      child: edit == null ? row : GestureDetector(onTap: edit, child: row),
     );
   }
 }

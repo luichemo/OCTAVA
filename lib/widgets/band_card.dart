@@ -7,12 +7,11 @@ import '../data/clip_repository.dart';
 import '../data/profile_options.dart';
 import '../l10n/l10n.dart';
 import '../models/band_card.dart';
-import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 
 /// A band in the swipe deck: its name in poster type over an aqua block,
-/// what it's looking for, its members (as instruments), genres, its story
-/// and its clip. Swiping Jam asks to join.
+/// its members (as instruments), genres, its story and its clip. Swiping Jam
+/// asks to join.
 class BandCard extends StatelessWidget {
   const BandCard({
     super.key,
@@ -176,23 +175,6 @@ class BandCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 8,
                     children: [
-                      Text(
-                        b.openRoles.isEmpty
-                            ? t.bandNoOpenRoles
-                            : t.bandLookingFor(
-                                listJoin([
-                                  for (final r in b.openRoles)
-                                    instrumentLabel(r),
-                                ]),
-                              ),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                          color: b.openRoles.isEmpty
-                              ? colors.onSurfaceVariant
-                              : colors.onSurface,
-                        ),
-                      ),
                       // The lineup: who's in it, then the open roles.
                       Wrap(
                         spacing: 6,
