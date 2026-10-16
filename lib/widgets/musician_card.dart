@@ -172,17 +172,36 @@ class MusicianCard extends StatelessWidget {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.bottomLeft,
-                        child: Text(
-                          m.instrument,
-                          maxLines: 1,
-                          style: displayStyle(size: headingSize).copyWith(
-                            height: 0.85,
-                            foreground: Paint()
-                              ..color = colors.onSurface
-                              ..blendMode = dark
-                                  ? BlendMode.srcOver
-                                  : BlendMode.multiply,
-                          ),
+                        // In dark mode a dark outline is painted under the
+                        // light letters, so they stand out on the portrait.
+                        child: Stack(
+                          children: [
+                            if (dark)
+                              Text(
+                                m.instrument,
+                                maxLines: 1,
+                                style: displayStyle(size: headingSize).copyWith(
+                                  height: 0.85,
+                                  foreground: Paint()
+                                    ..style = PaintingStyle.stroke
+                                    ..strokeWidth = headingSize / 12
+                                    ..strokeJoin = StrokeJoin.round
+                                    ..color = OctavaColors.darkShadow,
+                                ),
+                              ),
+                            Text(
+                              m.instrument,
+                              maxLines: 1,
+                              style: displayStyle(size: headingSize).copyWith(
+                                height: 0.85,
+                                foreground: Paint()
+                                  ..color = colors.onSurface
+                                  ..blendMode = dark
+                                      ? BlendMode.srcOver
+                                      : BlendMode.multiply,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
