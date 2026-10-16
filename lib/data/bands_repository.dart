@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'audio_length.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
@@ -450,7 +451,9 @@ class SupabaseBandsRepository implements BandsRepository {
     Future<void> discard() =>
         _clips.remove([path]).catchError((_) => <FileObject>[]);
     final seconds =
-        knownSeconds ?? await measureClipSeconds(await clipUrl(path));
+        knownSeconds ??
+        await audioBytesSeconds(bytes) ??
+        await measureClipSeconds(await clipUrl(path));
     if (seconds == null || seconds > maxClipSeconds) {
       await discard();
       throw UserFacingException(

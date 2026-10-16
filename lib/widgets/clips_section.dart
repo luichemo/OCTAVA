@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
 import '../theme.dart';
 
+import '../data/audio_file.dart';
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
 
@@ -63,18 +63,12 @@ class _ClipsSectionState extends State<ClipsSection> {
     }
   }
 
-  static Future<(String, Uint8List)?> _systemPicker() async {
-    final file = await FilePicker.pickFile(type: FileType.audio);
-    if (file == null) return null;
-    return (file.name, await file.readAsBytes());
-  }
-
   Future<void> _add() async {
     final messenger = ScaffoldMessenger.of(context);
     final t = context.t;
     final (String, Uint8List)? picked;
     try {
-      picked = await (widget.pickFile ?? _systemPicker)();
+      picked = await (widget.pickFile ?? pickAudioFile)();
     } catch (_) {
       messenger.showSnackBar(SnackBar(content: Text(t.errOpenFiles)));
       return;

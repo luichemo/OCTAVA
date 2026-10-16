@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../data/audio_file.dart';
 import '../data/clip_repository.dart';
 import '../data/repositories.dart';
 import '../data/voice_recorder.dart';
@@ -213,7 +213,7 @@ class _RecordSheetState extends State<RecordSheet> {
     if (_stage == _Stage.recording) await widget.recorder.cancel();
     final (String, Uint8List)? picked;
     try {
-      picked = await (widget.pickFile ?? _systemPicker)();
+      picked = await (widget.pickFile ?? pickAudioFile)();
     } catch (_) {
       _say(t.errOpenFiles);
       return;
@@ -236,12 +236,6 @@ class _RecordSheetState extends State<RecordSheet> {
       _say(e.message);
       if (mounted) _start();
     }
-  }
-
-  static Future<(String, Uint8List)?> _systemPicker() async {
-    final file = await FilePicker.pickFile(type: FileType.audio);
-    if (file == null) return null;
-    return (file.name, await file.readAsBytes());
   }
 
   static String _clock(int s) =>

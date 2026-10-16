@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'audio_length.dart';
 import 'repositories.dart';
 import '../l10n/l10n.dart';
 
@@ -139,7 +140,9 @@ class SupabaseClipRepository implements ClipRepository {
     // Measure the uploaded file (unless the length is known); remove it again
     // if it can't be used.
     final seconds =
-        knownSeconds ?? await measureClipSeconds(await playbackUrl(path));
+        knownSeconds ??
+        await audioBytesSeconds(bytes) ??
+        await measureClipSeconds(await playbackUrl(path));
     if (seconds == null || seconds > maxClipSeconds) {
       await _bucket.remove([path]).catchError((_) => <FileObject>[]);
       throw UserFacingException(

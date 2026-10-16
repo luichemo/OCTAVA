@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'audio_length.dart';
 import '../l10n/l10n.dart';
 import '../models/setlist.dart';
 import '../models/song.dart';
@@ -165,7 +166,9 @@ class SupabaseSongRepository implements SongRepository {
     Future<void> discard() =>
         _bucket.remove([path]).catchError((_) => <FileObject>[]);
     final seconds =
-        knownSeconds ?? await measureClipSeconds(await recordingUrl(path));
+        knownSeconds ??
+        await audioBytesSeconds(bytes) ??
+        await measureClipSeconds(await recordingUrl(path));
     if (seconds == null || seconds > maxSongSeconds) {
       await discard();
       throw UserFacingException(
