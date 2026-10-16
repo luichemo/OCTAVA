@@ -1259,5 +1259,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "publicPageTitle": "Public page",
+  "publicPageOffHint": "Off: only band members can see the band's page.",
+  "publicPageOnHint": "On: anyone with the link can see the name, profile, clip, members and ready songs. Members aged 16–17 show only as their instrument.",
+  "publicPageCopy": "Copy link",
+  "publicPageCopied": "Link copied.",
+  "publicPageView": "View page",
+  "publicPageTurnedOn": "The band's public page is on.",
+  "publicPageTurnedOff": "The public page is off.",
+  "publicBandSongs": "Ready to play",
+  "publicBandNotFound": "This band page isn't available. The band may have made it private.",
+  "publicBandJoin": "Join OCTAVA",
+  "publicBandJoinHint": "Musicians find each other and form bands on OCTAVA.",
+  "errPublicBandLoad": "Couldn't load this band. Check your connection."
 }

@@ -1,11 +1,15 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
+import 'data/clip_repository.dart';
+import 'data/public_band_repository.dart';
 import 'data/theme_setting.dart';
 import 'l10n/l10n.dart';
 import 'screens/auth_gate.dart';
+import 'screens/public_band_screen.dart';
 import 'theme.dart';
 
 // `async` + `await`: work like in TypeScript. Supabase and the saved language
@@ -18,7 +22,44 @@ Future<void> main() async {
   );
   await appLanguage.load();
   await appTheme.load();
-  runApp(const OctavaApp());
+  // A public band link (`?band=<id>`) opens that band's page, no sign-in.
+  final bandId = kIsWeb ? bandIdFromLink(Uri.base) : null;
+  runApp(
+    OctavaApp(
+      home: bandId == null ? const AuthGate() : PublicBandGate(bandId: bandId),
+    ),
+  );
+}
+
+/// A visitor's view of a band's public page, with its own clip player.
+/// "Join OCTAVA" goes on to sign-in (or the app, if already signed in).
+class PublicBandGate extends StatefulWidget {
+  const PublicBandGate({super.key, required this.bandId});
+  final String bandId;
+
+  @override
+  State<PublicBandGate> createState() => _PublicBandGateState();
+}
+
+class _PublicBandGateState extends State<PublicBandGate> {
+  // The page hands over the clip's temporary link as the key.
+  final _player = JustAudioClipPlayer((url) async => url);
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => PublicBandScreen(
+    source: SupabasePublicBands(Supabase.instance.client),
+    bandId: widget.bandId,
+    player: _player,
+    onJoin: () => Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const AuthGate()),
+    ),
+  );
 }
 
 class OctavaApp extends StatelessWidget {

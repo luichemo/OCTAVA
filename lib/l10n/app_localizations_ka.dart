@@ -2078,4 +2078,47 @@ class AppLocalizationsKa extends AppLocalizations {
   String rehearsalPractise(String name) {
     return 'ვარჯიში: $name';
   }
+
+  @override
+  String get publicPageTitle => 'საჯარო გვერდი';
+
+  @override
+  String get publicPageOffHint =>
+      'გამორთულია: ბენდის გვერდს მხოლოდ მისი წევრები ხედავენ.';
+
+  @override
+  String get publicPageOnHint =>
+      'ჩართულია: ბმულის მქონე ნებისმიერი ადამიანი ხედავს სახელს, პროფილს, ჩანაწერს, წევრებს და მზა სიმღერებს. 16–17 წლის წევრები მხოლოდ ინსტრუმენტით ჩანან.';
+
+  @override
+  String get publicPageCopy => 'ბმულის კოპირება';
+
+  @override
+  String get publicPageCopied => 'ბმული დაკოპირდა.';
+
+  @override
+  String get publicPageView => 'გვერდის ნახვა';
+
+  @override
+  String get publicPageTurnedOn => 'ბენდის საჯარო გვერდი ჩაირთო.';
+
+  @override
+  String get publicPageTurnedOff => 'საჯარო გვერდი გამოირთო.';
+
+  @override
+  String get publicBandSongs => 'მზადაა დასაკრავად';
+
+  @override
+  String get publicBandNotFound =>
+      'ბენდის ეს გვერდი მიუწვდომელია. შესაძლოა, ბენდმა ის დამალა.';
+
+  @override
+  String get publicBandJoin => 'შემოუერთდი OCTAVA-ს';
+
+  @override
+  String get publicBandJoinHint =>
+      'OCTAVA-ზე მუსიკოსები ერთმანეთს პოულობენ და ბენდებს ქმნიან.';
+
+  @override
+  String get errPublicBandLoad => 'ბენდი ვერ ჩაიტვირთა. შეამოწმე კავშირი.';
 }

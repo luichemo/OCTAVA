@@ -591,5 +591,18 @@
   "errSetlistSave": "სეტლისტი ვერ შეინახა. სცადე თავიდან.",
   "rehearsalSetlist": "სავარჯიშო სეტლისტი",
   "rehearsalNoSetlist": "არცერთი",
-  "rehearsalPractise": "ვარჯიში: {name}"
+  "rehearsalPractise": "ვარჯიში: {name}",
+  "publicPageTitle": "საჯარო გვერდი",
+  "publicPageOffHint": "გამორთულია: ბენდის გვერდს მხოლოდ მისი წევრები ხედავენ.",
+  "publicPageOnHint": "ჩართულია: ბმულის მქონე ნებისმიერი ადამიანი ხედავს სახელს, პროფილს, ჩანაწერს, წევრებს და მზა სიმღერებს. 16–17 წლის წევრები მხოლოდ ინსტრუმენტით ჩანან.",
+  "publicPageCopy": "ბმულის კოპირება",
+  "publicPageCopied": "ბმული დაკოპირდა.",
+  "publicPageView": "გვერდის ნახვა",
+  "publicPageTurnedOn": "ბენდის საჯარო გვერდი ჩაირთო.",
+  "publicPageTurnedOff": "საჯარო გვერდი გამოირთო.",
+  "publicBandSongs": "მზადაა დასაკრავად",
+  "publicBandNotFound": "ბენდის ეს გვერდი მიუწვდომელია. შესაძლოა, ბენდმა ის დამალა.",
+  "publicBandJoin": "შემოუერთდი OCTAVA-ს",
+  "publicBandJoinHint": "OCTAVA-ზე მუსიკოსები ერთმანეთს პოულობენ და ბენდებს ქმნიან.",
+  "errPublicBandLoad": "ბენდი ვერ ჩაიტვირთა. შეამოწმე კავშირი."
 }

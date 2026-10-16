@@ -3649,6 +3649,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Practise: {name}'**
   String rehearsalPractise(String name);
+
+  /// No description provided for @publicPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Public page'**
+  String get publicPageTitle;
+
+  /// No description provided for @publicPageOffHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Off: only band members can see the band\'s page.'**
+  String get publicPageOffHint;
+
+  /// No description provided for @publicPageOnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On: anyone with the link can see the name, profile, clip, members and ready songs. Members aged 16–17 show only as their instrument.'**
+  String get publicPageOnHint;
+
+  /// No description provided for @publicPageCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get publicPageCopy;
+
+  /// No description provided for @publicPageCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied.'**
+  String get publicPageCopied;
+
+  /// No description provided for @publicPageView.
+  ///
+  /// In en, this message translates to:
+  /// **'View page'**
+  String get publicPageView;
+
+  /// No description provided for @publicPageTurnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'The band\'s public page is on.'**
+  String get publicPageTurnedOn;
+
+  /// No description provided for @publicPageTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'The public page is off.'**
+  String get publicPageTurnedOff;
+
+  /// No description provided for @publicBandSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to play'**
+  String get publicBandSongs;
+
+  /// No description provided for @publicBandNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This band page isn\'t available. The band may have made it private.'**
+  String get publicBandNotFound;
+
+  /// No description provided for @publicBandJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join OCTAVA'**
+  String get publicBandJoin;
+
+  /// No description provided for @publicBandJoinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Musicians find each other and form bands on OCTAVA.'**
+  String get publicBandJoinHint;
+
+  /// No description provided for @errPublicBandLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this band. Check your connection.'**
+  String get errPublicBandLoad;
 }
 
 class _AppLocalizationsDelegate

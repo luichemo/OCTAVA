@@ -103,7 +103,12 @@ class MyBand {
     this.clipPath,
     this.clipSeconds,
     this.removals = const [],
+    this.isPublic = false,
   });
+
+  /// Whether the band's public page is switched on (anyone with the link
+  /// can open it).
+  final bool isPublic;
 
   /// Open votes on removing a member (never about you: those are hidden).
   final List<BandRemoval> removals;
@@ -145,6 +150,7 @@ class MyBand {
     clipPath: clipPath,
     clipSeconds: clipSeconds,
     removals: removals,
+    isPublic: isPublic,
   );
 
   BandPerson? memberById(String id) =>

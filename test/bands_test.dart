@@ -69,6 +69,7 @@ class FakeBandsRepository implements BandsRepository {
           clipPath: b.clipPath,
           clipSeconds: b.clipSeconds,
           removals: b.removals,
+          isPublic: b.isPublic,
           chatOpen: b.members.length > 1 && !closedChats.contains(b.id),
           unreadCount: (_messages[b.id] ?? const <ChatMessage>[])
               .where(
@@ -254,6 +255,7 @@ class FakeBandsRepository implements BandsRepository {
     String? clipPath,
     int? clipSeconds,
     bool clearClip = false,
+    bool? isPublic,
   }) => MyBand(
     id: b.id,
     name: name ?? b.name,
@@ -265,6 +267,7 @@ class FakeBandsRepository implements BandsRepository {
     clipPath: clearClip ? null : clipPath ?? b.clipPath,
     clipSeconds: clearClip ? null : clipSeconds ?? b.clipSeconds,
     removals: b.removals,
+    isPublic: isPublic ?? b.isPublic,
   );
 
   MyBand _band(String id) => bands.firstWhere((b) => b.id == id);
@@ -314,6 +317,12 @@ class FakeBandsRepository implements BandsRepository {
 
   @override
   Future<String> clipUrl(String path) async => 'https://example.invalid/$path';
+
+  @override
+  Future<void> setPublic(String bandId, {required bool public}) async {
+    _check();
+    _replace(_copy(_band(bandId), isPublic: public));
+  }
 
   // ------------------------------------------------------------ removals
   final removalVotes = <String>[];
@@ -784,6 +793,8 @@ void main() {
       final repo = await pumpBand(tester, voting);
       expect(find.text('Proposed by Nika · 1 of 3 approved'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Approve'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Approve'));
       await tester.pumpAndSettle();
       expect(repo.votes, ['p1:true']);
@@ -897,6 +908,8 @@ void main() {
       expect(find.text('Cancel request'), findsOneWidget);
       expect(find.text('You approved'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Cancel request'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel request'));
       await tester.pumpAndSettle();
       expect(find.text('Cancel the request for Dato?'), findsOneWidget);
@@ -904,6 +917,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.cancelled, isEmpty);
 
+      await tester.ensureVisible(find.text('Cancel request'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel request'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Cancel request'));
@@ -931,6 +946,8 @@ void main() {
           ],
         ),
       );
+      await tester.ensureVisible(find.text('Cancel request'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel request'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Cancel request'));

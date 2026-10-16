@@ -67,6 +67,9 @@ abstract interface class BandsRepository {
 
   Future<void> removeClip(String bandId);
 
+  /// Switches the band's public page on or off.
+  Future<void> setPublic(String bandId, {required bool public});
+
   /// A temporary link for playing a band clip.
   Future<String> clipUrl(String path);
 
@@ -118,7 +121,7 @@ class SupabaseBandsRepository implements BandsRepository {
       final bands = await _client
           .from('bands')
           .select(
-            'id, name, description, genres, open_roles, clip_path, clip_seconds',
+            'id, name, description, genres, open_roles, clip_path, clip_seconds, is_public',
           );
       if (bands.isEmpty) {
         return (bands: <MyBand>[], invites: <BandInvite>[], requests: requests);
@@ -237,6 +240,7 @@ class SupabaseBandsRepository implements BandsRepository {
               openRoles: (b['open_roles'] as List? ?? const []).cast<String>(),
               clipPath: b['clip_path'] as String?,
               clipSeconds: b['clip_seconds'] as int?,
+              isPublic: b['is_public'] as bool? ?? false,
               members: bandMembers,
               chatOpen: chatOpen[id] ?? false,
               unreadCount: recent.where((m) {
@@ -484,6 +488,10 @@ class SupabaseBandsRepository implements BandsRepository {
       await _clips.remove([old]).catchError((_) => <FileObject>[]);
     }
   }
+
+  @override
+  Future<void> setPublic(String bandId, {required bool public}) =>
+      _call('set_band_public', {'band': bandId, 'visible': public});
 
   Future<String?> _currentClip(String bandId) async {
     try {

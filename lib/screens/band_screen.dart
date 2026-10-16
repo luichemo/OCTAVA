@@ -15,6 +15,7 @@ import '../models/chat.dart';
 import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 import '../widgets/person_avatar.dart';
+import '../widgets/public_page_card.dart';
 import '../widgets/record_sheet.dart';
 import '../widgets/rehearsals_section.dart';
 import '../widgets/setlists_section.dart';
@@ -162,6 +163,14 @@ class _BandScreenState extends State<BandScreen> {
     final done = context.t.bandClipRemoved;
     await widget.player?.stop();
     await _run(() => widget.bands.repository.removeClip(band.id), done: done);
+  }
+
+  Future<void> _setPublic(MyBand band, bool public) {
+    final t = context.t;
+    return _run(
+      () => widget.bands.repository.setPublic(band.id, public: public),
+      done: public ? t.publicPageTurnedOn : t.publicPageTurnedOff,
+    );
   }
 
   Future<void> _vote(BandProposal p, {required bool approve}) async {
@@ -333,6 +342,11 @@ class _BandScreenState extends State<BandScreen> {
                             onEdit: () => _editProfile(band),
                             onRecordClip: () => _recordClip(band),
                             onRemoveClip: () => _removeClip(band),
+                          ),
+                          PublicPageCard(
+                            bandId: band.id,
+                            isPublic: band.isPublic,
+                            onChanged: (on) => _setPublic(band, on),
                           ),
                           if (widget.rehearsals case final rehearsals?)
                             RehearsalsSection(

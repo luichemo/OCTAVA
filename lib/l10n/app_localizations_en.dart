@@ -2094,4 +2094,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String rehearsalPractise(String name) {
     return 'Practise: $name';
   }
+
+  @override
+  String get publicPageTitle => 'Public page';
+
+  @override
+  String get publicPageOffHint =>
+      'Off: only band members can see the band\'s page.';
+
+  @override
+  String get publicPageOnHint =>
+      'On: anyone with the link can see the name, profile, clip, members and ready songs. Members aged 16–17 show only as their instrument.';
+
+  @override
+  String get publicPageCopy => 'Copy link';
+
+  @override
+  String get publicPageCopied => 'Link copied.';
+
+  @override
+  String get publicPageView => 'View page';
+
+  @override
+  String get publicPageTurnedOn => 'The band\'s public page is on.';
+
+  @override
+  String get publicPageTurnedOff => 'The public page is off.';
+
+  @override
+  String get publicBandSongs => 'Ready to play';
+
+  @override
+  String get publicBandNotFound =>
+      'This band page isn\'t available. The band may have made it private.';
+
+  @override
+  String get publicBandJoin => 'Join OCTAVA';
+
+  @override
+  String get publicBandJoinHint =>
+      'Musicians find each other and form bands on OCTAVA.';
+
+  @override
+  String get errPublicBandLoad =>
+      'Couldn\'t load this band. Check your connection.';
 }
