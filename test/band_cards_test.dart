@@ -87,7 +87,7 @@ void main() {
     );
     expect(find.text('RIOT'), findsOneWidget);
     expect(find.text('Needs your instrument'), findsOneWidget);
-    expect(find.text('Looking for: Drums and Keys'), findsOneWidget);
+    expect(find.text('Looking for: Drums and Keys'), findsNothing);
     // The lineup: two members, then the two open roles.
     expect(find.text('Guitar'), findsOneWidget);
     expect(find.text('In the band'), findsNWidgets(2));

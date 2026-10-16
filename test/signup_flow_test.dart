@@ -119,7 +119,7 @@ void main() {
       expect(repo.saved?.displayName, 'Luka');
       expect(repo.saved?.instruments, {'drums': 'intermediate'});
       expect(find.text('Set up your profile'), findsNothing);
-      expect(find.text('Your band'), findsOneWidget);
+      expect(find.text('Your band'), findsNothing);
     });
 
     testWidgets('asks for a name and an instrument', (tester) async {
@@ -151,7 +151,7 @@ void main() {
       final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true);
       await pump(tester, ProfileGate(repository: repo));
 
-      expect(find.text('Your band'), findsOneWidget);
+      expect(find.text('Your band'), findsNothing);
       // Sign out is on the profile screen.
       repo.saved = const ProfileDraft(
         displayName: 'Luka',

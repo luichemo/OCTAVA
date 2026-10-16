@@ -22,7 +22,7 @@ void main() {
     await pumpApp(tester);
 
     expect(find.bySemanticsLabel('OCTAVA'), findsOneWidget); // the logo
-    expect(find.text('Your band'), findsOneWidget);
+    expect(find.text('Your band'), findsNothing);
     expect(find.text('Open'), findsNWidgets(4));
     expect(find.text('Nika, 24'), findsOneWidget);
     expect(find.text('Fits your open drums slot'), findsOneWidget);

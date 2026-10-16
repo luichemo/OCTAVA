@@ -56,12 +56,12 @@ void main() {
   });
 
   group('choosing roles', () {
-    testWidgets('tap the band row, set counts and save', (tester) async {
+    testWidgets('tap the lineup, set counts and save', (tester) async {
       final needs = MemoryBandNeeds();
       await pump(tester, SwipeScreen(bandNeeds: needs));
       expect(find.text('Open'), findsNWidgets(4));
 
-      await tester.tap(find.text('Your band'));
+      await tester.tap(find.text('Open').first);
       await tester.pumpAndSettle();
       expect(find.text('Who does your band need?'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('more-drums')));
@@ -80,7 +80,7 @@ void main() {
       tester,
     ) async {
       await pump(tester, SwipeScreen(bandNeeds: MemoryBandNeeds({'bass': 1})));
-      await tester.tap(find.text('Your band'));
+      await tester.tap(find.text('Open').first);
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const ValueKey('fewer-bass')));

@@ -39,7 +39,7 @@ void main() {
       ),
     );
 
-    expect(find.text('შენი ბენდი'), findsOneWidget); // Your band
+    expect(find.text('შენი ბენდი'), findsNothing); // Your band heading is hidden.
     expect(find.text('დასარტყამები'), findsWidgets); // Drums (lineup + card)
     expect(find.text('თავისუფალი'), findsNWidgets(4)); // Open
     expect(find.text('ყველგან'), findsOneWidget); // Everywhere
