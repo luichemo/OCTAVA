@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/chat.dart';
+import 'clip_repository.dart';
 import 'profile_options.dart';
 import 'repositories.dart';
 import '../l10n/l10n.dart';
@@ -19,6 +21,17 @@ abstract interface class ChatRepository {
   Stream<List<ChatMessage>> messages(String matchId);
 
   Future<void> send(String matchId, String body);
+
+  /// Uploads a voice recording and posts it in the match.
+  Future<void> sendVoice(
+    String matchId, {
+    required Uint8List bytes,
+    required String fileName,
+    required int seconds,
+  });
+
+  /// A temporary link for playing a voice message (one-on-one or band).
+  Future<String> voiceUrl(String path);
 
   /// Marks a chat read up to now (for unread counts and their "Seen").
   /// Failing quietly is fine: it's retried the next time.
@@ -62,7 +75,7 @@ class SupabaseChatRepository implements ChatRepository {
       // Newest first, so the first message seen per match is its latest.
       final recent = await _client
           .from('messages')
-          .select('match_id, sender_id, body, created_at')
+          .select('match_id, sender_id, body, audio_path, created_at')
           .inFilter('match_id', [for (final m in matches) m['id']])
           .order('created_at', ascending: false)
           .limit(500);
@@ -105,7 +118,9 @@ class SupabaseChatRepository implements ChatRepository {
             name: person['display_name'] as String,
             instrument: _mainInstrument(person),
             matchedAt: DateTime.parse(m['created_at'] as String).toLocal(),
-            lastMessage: last?['body'] as String?,
+            lastMessage: last == null
+                ? null
+                : messagePreview(last['body'] as String?),
             lastMessageAt: last == null
                 ? null
                 : DateTime.parse(last['created_at'] as String).toLocal(),
@@ -147,6 +162,34 @@ class SupabaseChatRepository implements ChatRepository {
       throw UserFacingException(L10n.current.errSend);
     } catch (_) {
       throw UserFacingException(L10n.current.errSendOffline);
+    }
+  }
+
+  @override
+  Future<void> sendVoice(
+    String matchId, {
+    required Uint8List bytes,
+    required String fileName,
+    required int seconds,
+  }) => uploadVoice(
+    _client,
+    folder: 'm/$matchId',
+    bytes: bytes,
+    fileName: fileName,
+    seconds: seconds,
+    insert: (path) => _client.from('messages').insert({
+      'match_id': matchId,
+      'audio_path': path,
+      'audio_seconds': seconds,
+    }),
+  );
+
+  @override
+  Future<String> voiceUrl(String path) async {
+    try {
+      return await _client.storage.from('voice').createSignedUrl(path, 3600);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errClipPlay);
     }
   }
 
@@ -205,7 +248,7 @@ class SupabaseChatRepository implements ChatRepository {
       (row) => MessageArrived(
         matchId: row['match_id'] as String,
         senderId: row['sender_id'] as String,
-        body: row['body'] as String,
+        body: messagePreview(row['body'] as String?),
       ),
     );
     on(
@@ -230,6 +273,56 @@ class SupabaseChatRepository implements ChatRepository {
         list.firstOrNull;
     return instrumentLabels[primary?['instrument_id']] ??
         L10n.current.musicianFallback;
+  }
+}
+
+/// How a voice message is named to the session's ClipPlayer:
+/// `voice:<path>`. ProfileGate resolves it with [ChatRepository.voiceUrl].
+String voiceKey(String path) => '$_voicePrefix$path';
+
+const _voicePrefix = 'voice:';
+
+/// The voice-bucket path inside a [voiceKey], or null for other clips.
+String? voicePath(String key) =>
+    key.startsWith(_voicePrefix) ? key.substring(_voicePrefix.length) : null;
+
+/// Uploads a voice recording to `voice/<folder>/<millis>.<ext>`, then
+/// [insert]s the message row. The file is removed again if posting fails.
+/// A refusal from the rules (blocked, age rule, closed band chat) becomes
+/// errSendBlocked.
+Future<void> uploadVoice(
+  SupabaseClient client, {
+  required String folder,
+  required Uint8List bytes,
+  required String fileName,
+  required int seconds,
+  required Future<void> Function(String path) insert,
+}) async {
+  final ext = fileName.contains('.')
+      ? fileName.split('.').last.toLowerCase()
+      : 'm4a';
+  final mime = clipMimeTypes[ext] ?? 'audio/mp4';
+  final path = '$folder/${DateTime.now().millisecondsSinceEpoch}.$ext';
+  final bucket = client.storage.from('voice');
+  try {
+    await bucket.uploadBinary(
+      path,
+      bytes,
+      fileOptions: FileOptions(contentType: mime),
+    );
+  } on StorageException {
+    throw UserFacingException(L10n.current.errSendBlocked);
+  } catch (_) {
+    throw UserFacingException(L10n.current.errSendOffline);
+  }
+  try {
+    await insert(path);
+  } catch (e) {
+    await bucket.remove([path]).catchError((_) => <FileObject>[]);
+    if (e is PostgrestException && e.code == '42501') {
+      throw UserFacingException(L10n.current.errSendBlocked);
+    }
+    throw UserFacingException(L10n.current.errSend);
   }
 }
 

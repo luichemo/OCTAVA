@@ -1672,4 +1672,27 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get resetSwipesConfirm => 'სვაიპების განულება';
+
+  @override
+  String get voiceMessage => '🎤 ხმოვანი შეტყობინება';
+
+  @override
+  String get voiceRecord => 'ხმოვანი შეტყობინების ჩაწერა';
+
+  @override
+  String get voiceCancel => 'ჩაწერის გაუქმება';
+
+  @override
+  String get voiceSend => 'ხმოვანის გაგზავნა';
+
+  @override
+  String voiceRecording(String time) {
+    return 'იწერება… $time';
+  }
+
+  @override
+  String get voicePlay => 'ხმოვანის მოსმენა';
+
+  @override
+  String get voiceStop => 'ხმოვანის გაჩერება';
 }

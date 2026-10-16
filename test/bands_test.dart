@@ -19,6 +19,7 @@ import 'package:octava/widgets/live_banner.dart';
 
 import 'chat_test.dart' show FakeChatRepository;
 import 'profile_edit_test.dart' show FakeClipPlayer;
+import 'record_test.dart' show FakeRecorder;
 import 'safety_test.dart' show FakeSafetyRepository;
 
 const me = BandPerson(id: 'me', name: 'Luka', instrumentId: 'guitar');
@@ -80,7 +81,7 @@ class FakeBandsRepository implements BandsRepository {
             final m? => BandMessagePreview(
               senderId: m.senderId,
               senderName: people[m.senderId]?.name ?? '?',
-              body: m.body,
+              body: messagePreview(m.body),
               sentAt: m.sentAt,
             ),
             null => null,
@@ -427,7 +428,13 @@ class FakeBandsRepository implements BandsRepository {
     return controller.stream;
   }
 
-  void _post(String bandId, String senderId, String body) {
+  void _post(
+    String bandId,
+    String senderId,
+    String body, {
+    String? audioPath,
+    int? audioSeconds,
+  }) {
     final list = _messages.putIfAbsent(bandId, () => []);
     list.add(
       ChatMessage(
@@ -435,13 +442,51 @@ class FakeBandsRepository implements BandsRepository {
         senderId: senderId,
         body: body,
         sentAt: DateTime.now(),
+        audioPath: audioPath,
+        audioSeconds: audioSeconds,
       ),
     );
     _streams[bandId]?.add(List.of(list));
     _changes.add(
-      BandMessageArrived(bandId: bandId, senderId: senderId, body: body),
+      BandMessageArrived(
+        bandId: bandId,
+        senderId: senderId,
+        body: messagePreview(body),
+      ),
     );
   }
+
+  final voiceSent = <String>[];
+
+  @override
+  Future<void> sendVoice(
+    String bandId, {
+    required Uint8List bytes,
+    required String fileName,
+    required int seconds,
+  }) async {
+    _check();
+    if (closedChats.contains(bandId)) {
+      throw UserFacingException(L10n.current.errBandSendClosed);
+    }
+    voiceSent.add('$bandId:$seconds');
+    _post(
+      bandId,
+      me.id,
+      '',
+      audioPath: 'b/$bandId/$fileName',
+      audioSeconds: seconds,
+    );
+  }
+
+  /// A bandmate sends a voice message.
+  void receiveVoice(String bandId, String senderId, int seconds) => _post(
+    bandId,
+    senderId,
+    '',
+    audioPath: 'b/$bandId/v$seconds.m4a',
+    audioSeconds: seconds,
+  );
 
   @override
   Future<void> send(String bandId, String body) async {
@@ -1070,6 +1115,7 @@ void main() {
       expect(find.text('Luka, Nika and Tamar'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'Rehearsal Friday?');
+      await tester.pump(); // the mic turns into Send
       await tester.tap(find.byTooltip('Send'));
       await tester.pumpAndSettle();
       expect(repo.sent, ['Rehearsal Friday?']);
@@ -1120,9 +1166,69 @@ void main() {
       expect(safety.reportedMessages, ['msg0']);
     });
 
+    testWidgets('record and send a voice message; it plays', (tester) async {
+      final repo = FakeBandsRepository(bands: [riot]);
+      final live = LiveBands(repo)..start();
+      final player = FakeClipPlayer();
+      addTearDown(live.dispose);
+      await live.refresh();
+      await pump(
+        tester,
+        BandChatScreen(
+          bands: live,
+          bandId: 'b1',
+          player: player,
+          recorder: () => FakeRecorder(seconds: 7),
+        ),
+      );
+      // With nothing typed, the button records.
+      await tester.tap(find.byTooltip('Record a voice message'));
+      await tester.pump();
+      expect(find.textContaining('Recording…'), findsOneWidget);
+      await tester.tap(find.byTooltip('Send voice message'));
+      await tester.pumpAndSettle();
+      expect(repo.voiceSent, ['b1:7']);
+      expect(find.text('0:07'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Play voice message'));
+      await tester.pump();
+      expect(player.toggled, ['voice:b/b1/Recording.wav']);
+    });
+
+    testWidgets('a cancelled recording sends nothing', (tester) async {
+      final repo = FakeBandsRepository(bands: [riot]);
+      final live = LiveBands(repo)..start();
+      addTearDown(live.dispose);
+      await live.refresh();
+      await pump(
+        tester,
+        BandChatScreen(
+          bands: live,
+          bandId: 'b1',
+          recorder: () => FakeRecorder(),
+        ),
+      );
+      await tester.tap(find.byTooltip('Record a voice message'));
+      await tester.pump();
+      await tester.tap(find.byTooltip('Cancel recording'));
+      await tester.pumpAndSettle();
+      expect(repo.voiceSent, isEmpty);
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
+    testWidgets('a bandmate\'s voice message shows in the list as such', (
+      tester,
+    ) async {
+      final (repo, _) = await pumpMatches(tester, bands: [riot]);
+      repo.receiveVoice('b1', 'nika', 12);
+      await tester.pumpAndSettle();
+      expect(find.text('Nika: 🎤 Voice message'), findsOneWidget);
+    });
+
     testWidgets('your newest message says who has seen it', (tester) async {
       final (repo, _) = await pumpChat(tester);
       await tester.enterText(find.byType(TextField), 'Setlist ready');
+      await tester.pump(); // the mic turns into Send
       await tester.tap(find.byTooltip('Send'));
       await tester.pumpAndSettle();
       expect(find.textContaining('Seen'), findsNothing);

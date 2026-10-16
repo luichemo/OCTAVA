@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
+import 'chat_repository.dart' show uploadVoice;
 import 'clip_repository.dart';
 import 'repositories.dart';
 
@@ -73,6 +74,14 @@ abstract interface class BandsRepository {
   Stream<List<ChatMessage>> messages(String bandId);
 
   Future<void> send(String bandId, String body);
+
+  /// Uploads a voice recording and posts it in the band chat.
+  Future<void> sendVoice(
+    String bandId, {
+    required Uint8List bytes,
+    required String fileName,
+    required int seconds,
+  });
 
   /// Marks a band chat read up to now. Failing quietly is fine.
   Future<void> markRead(String bandId);
@@ -156,7 +165,7 @@ class SupabaseBandsRepository implements BandsRepository {
           ? const <Map<String, dynamic>>[]
           : await _client
                 .from('band_messages')
-                .select('band_id, sender_id, body, created_at')
+                .select('band_id, sender_id, body, audio_path, created_at')
                 .inFilter('band_id', myBandIds)
                 .order('created_at', ascending: false)
                 .limit(500);
@@ -242,7 +251,7 @@ class SupabaseBandsRepository implements BandsRepository {
                               .firstOrNull
                               ?.name ??
                           L10n.current.musicianFallback,
-                      body: latest['body'] as String,
+                      body: messagePreview(latest['body'] as String?),
                       sentAt: at(latest['created_at']),
                     ),
               readMarks: {
@@ -522,6 +531,25 @@ class SupabaseBandsRepository implements BandsRepository {
   }
 
   @override
+  Future<void> sendVoice(
+    String bandId, {
+    required Uint8List bytes,
+    required String fileName,
+    required int seconds,
+  }) => uploadVoice(
+    _client,
+    folder: 'b/$bandId',
+    bytes: bytes,
+    fileName: fileName,
+    seconds: seconds,
+    insert: (path) => _client.from('band_messages').insert({
+      'band_id': bandId,
+      'audio_path': path,
+      'audio_seconds': seconds,
+    }),
+  );
+
+  @override
   Future<void> markRead(String bandId) async {
     try {
       await _client.from('band_reads').upsert({
@@ -568,7 +596,7 @@ class SupabaseBandsRepository implements BandsRepository {
         BandMessageArrived(
           bandId: payload.newRecord['band_id'] as String,
           senderId: payload.newRecord['sender_id'] as String,
-          body: payload.newRecord['body'] as String,
+          body: messagePreview(payload.newRecord['body'] as String?),
         ),
       ),
     );

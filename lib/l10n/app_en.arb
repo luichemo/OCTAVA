@@ -1007,5 +1007,19 @@
   "bandWithdrawn": "Request withdrawn.",
   "resetSwipesTitle": "Reset all your swipes?",
   "resetSwipesBody": "Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.",
-  "resetSwipesConfirm": "Reset swipes"
+  "resetSwipesConfirm": "Reset swipes",
+  "voiceMessage": "🎤 Voice message",
+  "voiceRecord": "Record a voice message",
+  "voiceCancel": "Cancel recording",
+  "voiceSend": "Send voice message",
+  "voiceRecording": "Recording… {time}",
+  "@voiceRecording": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "voicePlay": "Play voice message",
+  "voiceStop": "Stop voice message"
 }

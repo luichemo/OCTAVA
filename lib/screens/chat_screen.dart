@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n.dart';
 
 import '../data/chat_repository.dart';
+import '../data/clip_repository.dart';
+import '../data/voice_recorder.dart';
+import '../widgets/chat_composer.dart';
 import '../data/live_updates.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
@@ -21,7 +24,15 @@ class ChatScreen extends StatefulWidget {
     required this.instrument,
     this.safety,
     this.live,
+    this.player,
+    this.recorder,
   });
+
+  /// Plays voice messages.
+  final ClipPlayer? player;
+
+  /// Makes the voice recorder (tests pass a fake).
+  final VoiceRecorder Function()? recorder;
 
   final ChatRepository repository;
 
@@ -44,8 +55,6 @@ class _ChatScreenState extends State<ChatScreen> {
   late final Stream<List<ChatMessage>> _messages = widget.repository.messages(
     widget.matchId,
   );
-  final _input = TextEditingController();
-  bool _sending = false;
 
   @override
   void initState() {
@@ -56,7 +65,6 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     widget.live?.closeChat(widget.matchId);
-    _input.dispose();
     super.dispose();
   }
 
@@ -100,29 +108,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
     messenger.showSnackBar(SnackBar(content: Text(t.unmatchDone(widget.name))));
     if (mounted) Navigator.of(context).pop();
-  }
-
-  Future<void> _send() async {
-    final text = _input.text.trim();
-    if (text.isEmpty || _sending) return;
-    setState(() {
-      _sending = true;
-    });
-    try {
-      await widget.repository.send(widget.matchId, text);
-      _input.clear();
-    } on UserFacingException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _sending = false;
-        });
-      }
-    }
   }
 
   @override
@@ -228,10 +213,18 @@ class _ChatScreenState extends State<ChatScreen> {
                               ? Column(
                                   children: [
                                     DayChip(day: message.sentAt),
-                                    ChatBubble(message: message, mine: mine),
+                                    ChatBubble(
+                                      message: message,
+                                      mine: mine,
+                                      player: widget.player,
+                                    ),
                                   ],
                                 )
-                              : ChatBubble(message: message, mine: mine);
+                              : ChatBubble(
+                                  message: message,
+                                  mine: mine,
+                                  player: widget.player,
+                                );
                           // "Seen" goes under your newest message only.
                           if (i != 0 || !mine || widget.live == null) {
                             return bubble;
@@ -273,38 +266,16 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 8, 12),
-                  child: Row(
-                    spacing: 6,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _input,
-                          minLines: 1,
-                          maxLines: 5,
-                          maxLength: 2000,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _send(),
-                          decoration: InputDecoration(
-                            hintText: context.t.messageHint,
-                            counterText: '',
-                          ),
-                        ),
-                      ),
-                      IconButton.filled(
-                        tooltip: context.t.send,
-                        onPressed: _sending ? null : _send,
-                        style: IconButton.styleFrom(
-                          backgroundColor: OctavaColors.pink,
-                          foregroundColor: OctavaColors.ink,
-                          minimumSize: const Size(48, 48),
-                        ),
-                        icon: const Icon(Icons.send_rounded),
-                      ),
-                    ],
+                ChatComposer(
+                  onSendText: (text) =>
+                      widget.repository.send(widget.matchId, text),
+                  onSendVoice: (take) => widget.repository.sendVoice(
+                    widget.matchId,
+                    bytes: take.bytes,
+                    fileName: take.fileName,
+                    seconds: take.seconds,
                   ),
+                  recorder: widget.recorder,
                 ),
               ],
             ),
@@ -359,11 +330,15 @@ class ChatBubble extends StatelessWidget {
     required this.message,
     required this.mine,
     this.sender,
+    this.player,
   });
 
   final ChatMessage message;
   final bool mine;
   final String? sender;
+
+  /// Plays a voice message; without it the play button is disabled.
+  final ClipPlayer? player;
 
   @override
   Widget build(BuildContext context) {
@@ -405,13 +380,21 @@ class ChatBubble extends StatelessWidget {
                       color: colors.onSurface,
                     ),
                   ),
-                Text(
-                  message.body,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: mine ? OctavaColors.ink : colors.onSurface,
+                if (message.audioPath case final path?)
+                  _VoiceRow(
+                    path: path,
+                    seconds: message.audioSeconds ?? 0,
+                    mine: mine,
+                    player: player,
+                  )
+                else
+                  Text(
+                    message.body,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: mine ? OctavaColors.ink : colors.onSurface,
+                    ),
                   ),
-                ),
                 const SizedBox(height: 2),
                 Text(
                   formatClock(message.sentAt),
@@ -428,6 +411,60 @@ class ChatBubble extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A voice message inside a bubble: play / stop and its length.
+class _VoiceRow extends StatelessWidget {
+  const _VoiceRow({
+    required this.path,
+    required this.seconds,
+    required this.mine,
+    this.player,
+  });
+
+  final String path;
+  final int seconds;
+  final bool mine;
+  final ClipPlayer? player;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final colors = Theme.of(context).colorScheme;
+    final ink = mine ? OctavaColors.ink : colors.onSurface;
+    final player = this.player;
+    Widget button(bool playing) => IconButton(
+      tooltip: playing ? t.voiceStop : t.voicePlay,
+      onPressed: player == null ? null : () => player.toggle(voiceKey(path)),
+      color: ink,
+      icon: Icon(
+        playing ? Icons.stop_circle_rounded : Icons.play_circle_fill_rounded,
+        size: 34,
+      ),
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
+      children: [
+        if (player == null)
+          button(false)
+        else
+          ValueListenableBuilder<String?>(
+            valueListenable: player.playing,
+            builder: (context, playing, _) => button(playing == voiceKey(path)),
+          ),
+        Icon(Icons.graphic_eq_rounded, color: ink),
+        Text(
+          clipLength(seconds),
+          style: TextStyle(
+            color: ink,
+            fontWeight: FontWeight.w600,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
     );
   }
 }

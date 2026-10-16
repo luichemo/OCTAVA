@@ -2947,6 +2947,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset swipes'**
   String get resetSwipesConfirm;
+
+  /// No description provided for @voiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'🎤 Voice message'**
+  String get voiceMessage;
+
+  /// No description provided for @voiceRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a voice message'**
+  String get voiceRecord;
+
+  /// No description provided for @voiceCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel recording'**
+  String get voiceCancel;
+
+  /// No description provided for @voiceSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send voice message'**
+  String get voiceSend;
+
+  /// No description provided for @voiceRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording… {time}'**
+  String voiceRecording(String time);
+
+  /// No description provided for @voicePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play voice message'**
+  String get voicePlay;
+
+  /// No description provided for @voiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop voice message'**
+  String get voiceStop;
 }
 
 class _AppLocalizationsDelegate

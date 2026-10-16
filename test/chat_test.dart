@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'record_test.dart' show FakeRecorder;
 import 'swipe_helpers.dart';
 
 import 'package:octava/data/chat_repository.dart';
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/chat.dart';
+import 'package:octava/screens/chat_screen.dart';
 import 'package:octava/screens/matches_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
 
@@ -95,7 +98,13 @@ class FakeChatRepository implements ChatRepository {
   Stream<LiveChange> changes() => _changes.stream;
 
   /// A message arriving from either side.
-  void receive(String matchId, String senderId, String body) {
+  void receive(
+    String matchId,
+    String senderId,
+    String body, {
+    String? audioPath,
+    int? audioSeconds,
+  }) {
     final list = _messages.putIfAbsent(matchId, () => []);
     list.add(
       ChatMessage(
@@ -103,13 +112,47 @@ class FakeChatRepository implements ChatRepository {
         senderId: senderId,
         body: body,
         sentAt: DateTime.now(),
+        audioPath: audioPath,
+        audioSeconds: audioSeconds,
       ),
     );
     _streams[matchId]?.add(List.of(list));
     _changes.add(
-      MessageArrived(matchId: matchId, senderId: senderId, body: body),
+      MessageArrived(
+        matchId: matchId,
+        senderId: senderId,
+        body: messagePreview(body),
+      ),
     );
   }
+
+  /// Voice messages sent, as "matchId:seconds".
+  final voiceSent = <String>[];
+
+  @override
+  Future<void> sendVoice(
+    String matchId, {
+    required Uint8List bytes,
+    required String fileName,
+    required int seconds,
+  }) async {
+    if (refuseSends) {
+      throw const UserFacingException(
+        "You can't send messages in this chat anymore.",
+      );
+    }
+    voiceSent.add('$matchId:$seconds');
+    receive(
+      matchId,
+      'me',
+      '',
+      audioPath: 'm/$matchId/$fileName',
+      audioSeconds: seconds,
+    );
+  }
+
+  @override
+  Future<String> voiceUrl(String path) async => 'https://example.invalid/$path';
 
   /// Someone else's swipe completes a match with you.
   void matchWith(MatchSummary match, {String createdBy = 'them'}) {
@@ -158,6 +201,7 @@ void main() {
       find.byType(TextField),
       'Hi Nika! Free on Thursday?',
     );
+    await tester.pump(); // the mic turns into Send
     await tester.tap(find.byTooltip('Send'));
     await tester.pumpAndSettle();
     expect(find.text('Hi Nika! Free on Thursday?'), findsOneWidget);
@@ -179,6 +223,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'Hello?');
+    await tester.pump(); // the mic turns into Send
     await tester.tap(find.byTooltip('Send'));
     await tester.pumpAndSettle();
 
@@ -187,6 +232,27 @@ void main() {
       findsOneWidget,
     );
     expect(find.widgetWithText(TextField, 'Hello?'), findsOneWidget);
+  });
+
+  testWidgets('send a voice message in a one-on-one chat', (tester) async {
+    final chat = FakeChatRepository(matches: [nika]);
+    await pump(
+      tester,
+      ChatScreen(
+        repository: chat,
+        matchId: nika.matchId,
+        otherUserId: nika.otherUserId,
+        name: nika.name,
+        instrument: nika.instrument,
+        recorder: () => FakeRecorder(seconds: 9),
+      ),
+    );
+    await tester.tap(find.byTooltip('Record a voice message'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Send voice message'));
+    await tester.pumpAndSettle();
+    expect(chat.voiceSent, ['${nika.matchId}:9']);
+    expect(find.text('0:09'), findsOneWidget);
   });
 
   testWidgets('"Say hi" after a match opens the chat', (tester) async {

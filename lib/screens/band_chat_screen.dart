@@ -11,6 +11,8 @@ import '../models/band_group.dart';
 import '../models/chat.dart';
 import '../models/musician.dart' show listJoin;
 import '../theme.dart';
+import '../data/voice_recorder.dart';
+import '../widgets/chat_composer.dart';
 import '../widgets/person_avatar.dart';
 import '../widgets/safety_sheet.dart';
 import 'band_screen.dart';
@@ -28,7 +30,11 @@ class BandChatScreen extends StatefulWidget {
     this.avatars,
     this.safety,
     this.player,
+    this.recorder,
   });
+
+  /// Makes the voice recorder (tests pass a fake).
+  final VoiceRecorder Function()? recorder;
 
   /// Passed on to the band page, for the band clip.
   final ClipPlayer? player;
@@ -50,8 +56,6 @@ class BandChatScreen extends StatefulWidget {
 class _BandChatScreenState extends State<BandChatScreen> {
   late final Stream<List<ChatMessage>> _messages = widget.bands.repository
       .messages(widget.bandId);
-  final _input = TextEditingController();
-  bool _sending = false;
 
   String get _me => widget.bands.repository.myId;
 
@@ -64,33 +68,7 @@ class _BandChatScreenState extends State<BandChatScreen> {
   @override
   void dispose() {
     widget.bands.closeChat(widget.bandId);
-    _input.dispose();
     super.dispose();
-  }
-
-  Future<void> _send() async {
-    final text = _input.text.trim();
-    if (text.isEmpty || _sending) return;
-    setState(() {
-      _sending = true;
-    });
-    try {
-      await widget.bands.repository.send(widget.bandId, text);
-      _input.clear();
-    } on UserFacingException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
-      }
-      // The band may have changed (someone left), so the closed state shows.
-      await widget.bands.refresh();
-    } finally {
-      if (mounted) {
-        setState(() {
-          _sending = false;
-        });
-      }
-    }
   }
 
   Future<void> _openMembers() => Navigator.of(context).push(
@@ -236,8 +214,13 @@ class _BandChatScreenState extends State<BandChatScreen> {
                 !sameDay(newer.sentAt, message.sentAt);
             final sender = band?.memberById(message.senderId);
             final senderName = sender?.name ?? context.t.musicianFallback;
-            Widget bubble = ChatBubble(message: message, mine: mine);
-            if (!mine && widget.safety != null) {
+            Widget bubble = ChatBubble(
+              message: message,
+              mine: mine,
+              player: widget.player,
+            );
+            // Long-press someone's text message to report it.
+            if (!mine && !message.isVoice && widget.safety != null) {
               // Long-press someone's message to report it.
               bubble = GestureDetector(
                 onLongPress: () => showReportMessage(
@@ -339,39 +322,30 @@ class _BandChatScreenState extends State<BandChatScreen> {
         ),
       );
 
-  Widget _composer() => Padding(
-    padding: const EdgeInsets.fromLTRB(12, 4, 8, 12),
-    child: Row(
-      spacing: 6,
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _input,
-            minLines: 1,
-            maxLines: 5,
-            maxLength: 2000,
-            textCapitalization: TextCapitalization.sentences,
-            textInputAction: TextInputAction.send,
-            onSubmitted: (_) => _send(),
-            decoration: InputDecoration(
-              hintText: context.t.messageHint,
-              counterText: '',
-            ),
-          ),
-        ),
-        IconButton.filled(
-          tooltip: context.t.send,
-          onPressed: _sending ? null : _send,
-          style: IconButton.styleFrom(
-            backgroundColor: OctavaColors.pink,
-            foregroundColor: OctavaColors.ink,
-            minimumSize: const Size(48, 48),
-          ),
-          icon: const Icon(Icons.send_rounded),
-        ),
-      ],
+  Widget _composer() => ChatComposer(
+    onSendText: (text) =>
+        _sendOrRefresh(() => widget.bands.repository.send(widget.bandId, text)),
+    onSendVoice: (take) => _sendOrRefresh(
+      () => widget.bands.repository.sendVoice(
+        widget.bandId,
+        bytes: take.bytes,
+        fileName: take.fileName,
+        seconds: take.seconds,
+      ),
     ),
+    recorder: widget.recorder,
   );
+
+  /// Sends; if the rules refuse it (someone left, so the chat closed),
+  /// reloads the band so the closed notice shows, then reports the error.
+  Future<void> _sendOrRefresh(Future<void> Function() send) async {
+    try {
+      await send();
+    } on UserFacingException {
+      await widget.bands.refresh();
+      rethrow;
+    }
+  }
 }
 
 /// "Luka, Nika and Tamar": who's in the band, under its name.

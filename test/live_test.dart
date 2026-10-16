@@ -195,6 +195,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField), 'Hi!');
+      await tester.pump(); // the mic turns into Send
       await tester.tap(find.byTooltip('Send'));
       await tester.pumpAndSettle();
       expect(find.text('Seen'), findsNothing);

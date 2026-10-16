@@ -73,6 +73,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
           safety: widget.safety,
           name: match.name,
           instrument: match.instrument,
+          player: widget.player,
         ),
       ),
     );

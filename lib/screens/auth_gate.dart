@@ -118,6 +118,10 @@ class _ProfileGateState extends State<ProfileGate> {
   late final ClipPlayer? _player = widget.clips == null
       ? null
       : JustAudioClipPlayer((key) {
+          final voice = voicePath(key);
+          if (voice != null && widget.chat != null) {
+            return widget.chat!.voiceUrl(voice);
+          }
           final bandPath = bandClipPath(key);
           return bandPath != null && widget.bands != null
               ? widget.bands!.clipUrl(bandPath)
@@ -224,6 +228,7 @@ class _ProfileGateState extends State<ProfileGate> {
           safety: widget.safety,
           name: name,
           instrument: instrument,
+          player: _player,
         ),
       ),
     );

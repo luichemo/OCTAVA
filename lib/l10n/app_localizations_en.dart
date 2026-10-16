@@ -1683,4 +1683,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetSwipesConfirm => 'Reset swipes';
+
+  @override
+  String get voiceMessage => '🎤 Voice message';
+
+  @override
+  String get voiceRecord => 'Record a voice message';
+
+  @override
+  String get voiceCancel => 'Cancel recording';
+
+  @override
+  String get voiceSend => 'Send voice message';
+
+  @override
+  String voiceRecording(String time) {
+    return 'Recording… $time';
+  }
+
+  @override
+  String get voicePlay => 'Play voice message';
+
+  @override
+  String get voiceStop => 'Stop voice message';
 }

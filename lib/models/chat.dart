@@ -98,27 +98,44 @@ class ReadMarked extends LiveChange {
   const ReadMarked();
 }
 
-/// One chat message.
+/// One chat message: text, or a voice clip ([audioPath]).
 class ChatMessage {
   const ChatMessage({
     required this.id,
     required this.senderId,
     required this.body,
     required this.sentAt,
+    this.audioPath,
+    this.audioSeconds,
   });
 
   factory ChatMessage.fromRow(Map<String, dynamic> row) => ChatMessage(
     id: row['id'] as String,
     senderId: row['sender_id'] as String,
-    body: row['body'] as String,
+    body: row['body'] as String? ?? '',
     sentAt: DateTime.parse(row['created_at'] as String).toLocal(),
+    audioPath: row['audio_path'] as String?,
+    audioSeconds: row['audio_seconds'] as int?,
   );
 
   final String id;
   final String senderId;
+
+  /// The text; empty for a voice message.
   final String body;
   final DateTime sentAt;
+
+  /// A voice message's file in the `voice` bucket, and its length.
+  final String? audioPath;
+  final int? audioSeconds;
+
+  bool get isVoice => audioPath != null;
 }
+
+/// What a message reads as in previews and banners: its text, or
+/// "🎤 Voice message".
+String messagePreview(String? body) =>
+    body == null || body.isEmpty ? L10n.current.voiceMessage : body;
 
 /// "14:05" for today, "Yesterday", or a short date like "Oct 12", in the
 /// app's language.
