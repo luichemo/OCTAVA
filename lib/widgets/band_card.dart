@@ -170,8 +170,8 @@ class BandCard extends StatelessWidget {
               child: Container(
                 color: colors.surface,
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                // Scrolls inside the card when the details don't fit.
                 child: SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 8,

@@ -63,307 +63,329 @@ class MusicianCard extends StatelessWidget {
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: printBox(context, radius: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: HalftonePainter(
-                        tone: tone,
-                        dot: OctavaColors.ink,
-                        spotlight: m.spotlight,
-                      ),
-                    ),
-                  ),
-                  if (avatars != null && m.avatarPath != null)
+        // The details scroll inside the card when they don't fit, so the
+        // portrait always keeps at least 40% of the card.
+        child: LayoutBuilder(
+          builder: (context, box) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
                     Positioned.fill(
-                      child: ExcludeSemantics(
-                        child: AvatarImage(
-                          avatars: avatars!,
-                          path: m.avatarPath!,
+                      child: CustomPaint(
+                        painter: HalftonePainter(
+                          tone: tone,
+                          dot: OctavaColors.ink,
+                          spotlight: m.spotlight,
                         ),
                       ),
                     ),
-                  if (fitsOpenSlot)
-                    Positioned(
-                      top: 14,
-                      left: 14,
-                      right: 64,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Transform.rotate(
-                          angle: -2 * pi / 180,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: printBox(
-                              context,
-                              color: OctavaColors.pink,
-                              radius: 999,
-                              shadow: 2,
-                              borderColor: OctavaColors.ink,
-                              shadowColor: OctavaColors.ink,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 4,
-                              children: [
-                                const Icon(
-                                  Icons.star_rounded,
-                                  size: 16,
-                                  color: OctavaColors.ink,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    context.t.fitsSlot(
-                                      m.instrument.toLowerCase(),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: OctavaColors.ink,
+                    if (avatars != null && m.avatarPath != null)
+                      Positioned.fill(
+                        child: ExcludeSemantics(
+                          child: AvatarImage(
+                            avatars: avatars!,
+                            path: m.avatarPath!,
+                          ),
+                        ),
+                      ),
+                    if (fitsOpenSlot)
+                      Positioned(
+                        top: 14,
+                        left: 14,
+                        right: 64,
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Transform.rotate(
+                            angle: -2 * pi / 180,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: printBox(
+                                context,
+                                color: OctavaColors.pink,
+                                radius: 999,
+                                shadow: 2,
+                                borderColor: OctavaColors.ink,
+                                shadowColor: OctavaColors.ink,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 4,
+                                children: [
+                                  const Icon(
+                                    Icons.star_rounded,
+                                    size: 16,
+                                    color: OctavaColors.ink,
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      context.t.fitsSlot(
+                                        m.instrument.toLowerCase(),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: OctavaColors.ink,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
+                    Positioned(
+                      top: 18,
+                      left: 16,
+                      child: _Stamp(
+                        label: context.t.stampJam,
+                        opacity: jamStamp,
+                        angle: -12,
+                        background: OctavaColors.pink,
+                        foreground: OctavaColors.ink,
+                      ),
                     ),
-                  Positioned(
-                    top: 18,
-                    left: 16,
-                    child: _Stamp(
-                      label: context.t.stampJam,
-                      opacity: jamStamp,
-                      angle: -12,
-                      background: OctavaColors.pink,
-                      foreground: OctavaColors.ink,
+                    Positioned(
+                      top: 18,
+                      right: 16,
+                      child: _Stamp(
+                        label: context.t.stampPass,
+                        opacity: passStamp,
+                        angle: 12,
+                        background: colors.surfaceContainer,
+                        foreground: colors.onSurface,
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    top: 18,
-                    right: 16,
-                    child: _Stamp(
-                      label: context.t.stampPass,
-                      opacity: passStamp,
-                      angle: 12,
-                      background: colors.surfaceContainer,
-                      foreground: colors.onSurface,
-                    ),
-                  ),
-                  // The instrument overlaps the bottom edge of the portrait,
-                  // overprinted (multiplied) like riso ink in light mode.
-                  Positioned(
-                    left: 18,
-                    right: 18,
-                    bottom: -headingSize * 0.34,
-                    child: ExcludeSemantics(
-                      // Long names (Georgian especially) shrink to the card width.
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.bottomLeft,
-                        // In dark mode a dark outline is painted under the
-                        // light letters, so they stand out on the portrait.
-                        child: Stack(
-                          children: [
-                            if (dark)
+                    // The instrument overlaps the bottom edge of the portrait,
+                    // overprinted (multiplied) like riso ink in light mode.
+                    Positioned(
+                      left: 18,
+                      right: 18,
+                      bottom: -headingSize * 0.34,
+                      child: ExcludeSemantics(
+                        // Long names (Georgian especially) shrink to the card width.
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.bottomLeft,
+                          // In dark mode a dark outline is painted under the
+                          // light letters, so they stand out on the portrait.
+                          child: Stack(
+                            children: [
+                              if (dark)
+                                Text(
+                                  m.instrument,
+                                  maxLines: 1,
+                                  style: displayStyle(size: headingSize)
+                                      .copyWith(
+                                        height: 0.85,
+                                        foreground: Paint()
+                                          ..style = PaintingStyle.stroke
+                                          ..strokeWidth = headingSize / 12
+                                          ..strokeJoin = StrokeJoin.round
+                                          ..color = OctavaColors.darkShadow,
+                                      ),
+                                ),
                               Text(
                                 m.instrument,
                                 maxLines: 1,
                                 style: displayStyle(size: headingSize).copyWith(
                                   height: 0.85,
                                   foreground: Paint()
-                                    ..style = PaintingStyle.stroke
-                                    ..strokeWidth = headingSize / 12
-                                    ..strokeJoin = StrokeJoin.round
-                                    ..color = OctavaColors.darkShadow,
+                                    ..color = colors.onSurface
+                                    ..blendMode = dark
+                                        ? BlendMode.srcOver
+                                        : BlendMode.multiply,
                                 ),
                               ),
-                            Text(
-                              m.instrument,
-                              maxLines: 1,
-                              style: displayStyle(size: headingSize).copyWith(
-                                height: 0.85,
-                                foreground: Paint()
-                                  ..color = colors.onSurface
-                                  ..blendMode = dark
-                                      ? BlendMode.srcOver
-                                      : BlendMode.multiply,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: box.maxHeight.isFinite
+                      ? box.maxHeight * 0.6
+                      : double.infinity,
+                ),
+                // The space under the instrument heading stays put; only the
+                // details below it scroll.
+                child: Padding(
+                  padding: EdgeInsets.only(top: headingSize * 0.34 + 8),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 8,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                context.t.nameAge(m.name, m.age),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: displayStyle(
+                                  size: 30,
+                                  color: colors.onSurface,
+                                  latin: !hasGeorgian(m.name),
+                                ),
                               ),
                             ),
+                            if (onSafety != null)
+                              IconButton(
+                                tooltip: context.t.blockOrReport,
+                                onPressed: onSafety,
+                                icon: const Icon(Icons.flag_outlined, size: 20),
+                                color: colors.onSurfaceVariant,
+                                visualDensity: VisualDensity.compact,
+                              ),
                           ],
                         ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(18, headingSize * 0.34 + 8, 18, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 8,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          context.t.nameAge(m.name, m.age),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: displayStyle(
-                            size: 30,
-                            color: colors.onSurface,
-                            latin: !hasGeorgian(m.name),
-                          ),
-                        ),
-                      ),
-                      if (onSafety != null)
-                        IconButton(
-                          tooltip: context.t.blockOrReport,
-                          onPressed: onSafety,
-                          icon: const Icon(Icons.flag_outlined, size: 20),
-                          color: colors.onSurfaceVariant,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                    ],
-                  ),
-                  if (m.otherInstruments.isNotEmpty)
-                    Text(
-                      context.t.cardAlsoPlays(
-                        [
-                          for (final i in m.otherInstruments)
-                            '${instrumentLabel(i.id)} · ${skillLabels[i.skill] ?? i.skill}',
-                        ].join(', '),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  // Where they are, as a small outlined pill.
-                  if (m.whereText.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 2,
-                      ),
-                      decoration: printBox(context, radius: 999, shadow: 0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 4,
-                        children: [
-                          Icon(
-                            Icons.near_me_outlined,
-                            size: 14,
-                            color: colors.onSurfaceVariant,
-                          ),
-                          Flexible(
-                            child: Text(
-                              m.whereText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: colors.onSurfaceVariant,
-                              ),
+                        if (m.otherInstruments.isNotEmpty)
+                          Text(
+                            context.t.cardAlsoPlays(
+                              [
+                                for (final i in m.otherInstruments)
+                                  '${instrumentLabel(i.id)} · ${skillLabels[i.skill] ?? i.skill}',
+                              ].join(', '),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  if (m.clipSeconds != null) _Clip(musician: m, player: player),
-                  if (m.genres.isNotEmpty)
-                    // Genre pills in the three spot inks, in turn.
-                    Semantics(
-                      label: context.t.plays(
-                        listJoin([for (final g in m.genres) genreLabel(g)]),
-                      ),
-                      child: ExcludeSemantics(
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            for (final (i, g) in m.genres.take(4).indexed)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 3,
+                        // Where they are, as a small outlined pill.
+                        if (m.whereText.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 2,
+                            ),
+                            decoration: printBox(
+                              context,
+                              radius: 999,
+                              shadow: 0,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 4,
+                              children: [
+                                Icon(
+                                  Icons.near_me_outlined,
+                                  size: 14,
+                                  color: colors.onSurfaceVariant,
                                 ),
-                                decoration: printBox(
-                                  context,
-                                  color: const [
-                                    OctavaColors.yellow,
-                                    OctavaColors.aqua,
-                                    OctavaColors.pinkTint,
-                                  ][i % 3],
-                                  radius: 999,
-                                  shadow: 2,
-                                  borderColor: OctavaColors.ink,
-                                ),
-                                child: Text(
-                                  genreLabel(g),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: OctavaColors.ink,
+                                Flexible(
+                                  child: Text(
+                                    m.whereText,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: colors.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  if (!compact && m.links.isNotEmpty)
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        for (final link in m.links)
-                          ActionChip(
-                            avatar: const Icon(
-                              Icons.open_in_new_rounded,
-                              size: 16,
+                              ],
                             ),
-                            label: Text(link.label),
-                            tooltip: link.url,
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => launchUrl(
-                              Uri.parse(link.url),
-                              mode: LaunchMode.externalApplication,
+                          ),
+                        if (m.clipSeconds != null)
+                          _Clip(musician: m, player: player),
+                        if (m.genres.isNotEmpty)
+                          // Genre pills in the three spot inks, in turn.
+                          Semantics(
+                            label: context.t.plays(
+                              listJoin([
+                                for (final g in m.genres) genreLabel(g),
+                              ]),
+                            ),
+                            child: ExcludeSemantics(
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  for (final (i, g) in m.genres.indexed)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3,
+                                      ),
+                                      decoration: printBox(
+                                        context,
+                                        color: const [
+                                          OctavaColors.yellow,
+                                          OctavaColors.aqua,
+                                          OctavaColors.pinkTint,
+                                        ][i % 3],
+                                        radius: 999,
+                                        shadow: 2,
+                                        borderColor: OctavaColors.ink,
+                                      ),
+                                      child: Text(
+                                        genreLabel(g),
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: OctavaColors.ink,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        if (m.links.isNotEmpty)
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              for (final link in m.links)
+                                ActionChip(
+                                  avatar: const Icon(
+                                    Icons.open_in_new_rounded,
+                                    size: 16,
+                                  ),
+                                  label: Text(link.label),
+                                  tooltip: link.url,
+                                  visualDensity: VisualDensity.compact,
+                                  onPressed: () => launchUrl(
+                                    Uri.parse(link.url),
+                                    mode: LaunchMode.externalApplication,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        if ((m.lookingFor ?? '').isNotEmpty)
+                          Text(
+                            context.t.quoted(m.lookingFor!),
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: colors.onSurfaceVariant,
                             ),
                           ),
                       ],
                     ),
-                  if (!compact && (m.lookingFor ?? '').isNotEmpty)
-                    Text(
-                      context.t.quoted(m.lookingFor!),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                ],
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
