@@ -570,7 +570,10 @@ class _SwipeScreenState extends State<SwipeScreen>
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
-                              child: const OctavaLogo(height: 44),
+                              child: const OctavaLogo(
+                                height: 44,
+                                spinning: true,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),

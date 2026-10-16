@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:octava/main.dart';
+import 'package:octava/widgets/octava_logo.dart';
 import 'package:octava/widgets/splash.dart';
 
 void main() {
@@ -105,5 +108,44 @@ void main() {
     ready.value = true;
     await tester.pumpAndSettle();
     expect(find.byType(SplashLogo), findsNothing);
+  });
+
+  group('the feed logo', () {
+    setUp(() => spinningLogoEnabled = true);
+    tearDown(() => spinningLogoEnabled = false);
+
+    Future<void> logo(WidgetTester tester, {bool reduceMotion = false}) =>
+        tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(disableAnimations: reduceMotion),
+            child: const OctavaApp(
+              home: Scaffold(
+                body: Center(child: OctavaLogo(height: 44, spinning: true)),
+              ),
+            ),
+          ),
+        );
+
+    double angle(WidgetTester tester) =>
+        tester.widget<SpinningRecord>(find.byType(SpinningRecord)).angle;
+
+    testWidgets('its record keeps turning slowly', (tester) async {
+      await logo(tester);
+      expect(find.bySemanticsLabel('OCTAVA'), findsOneWidget);
+      final first = angle(tester);
+      await tester.pump(SpinningLogo.turn ~/ 4);
+      expect(angle(tester), closeTo(first + pi / 2, 0.01));
+      // Still turning a few turns later.
+      await tester.pump(SpinningLogo.turn * 3);
+      expect(tester.hasRunningAnimations, isTrue);
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('it stands still with reduce motion', (tester) async {
+      await logo(tester, reduceMotion: true);
+      expect(find.byType(SpinningRecord), findsNothing);
+      expect(find.bySemanticsLabel('OCTAVA'), findsOneWidget);
+      expect(tester.hasRunningAnimations, isFalse);
+    });
   });
 }

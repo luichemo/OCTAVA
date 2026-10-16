@@ -290,6 +290,26 @@ class _Columns extends CustomClipper<Rect> {
 const _navy = Color(0xFF233065);
 const _groove = Color(0xFFE8EBF8);
 
+/// The logo's record "O" at [size], turned to [angle]: the rim and inside
+/// stay put and only the grooves turn. The grooves are drawn once (a
+/// RepaintBoundary), so turning them is cheap.
+class SpinningRecord extends StatelessWidget {
+  const SpinningRecord({super.key, required this.size, required this.angle});
+
+  final Size size;
+  final double angle;
+
+  /// Where the record sits in logo.png (410 × 174).
+  static const inLogo = SplashLogo._record;
+
+  @override
+  Widget build(BuildContext context) => _Spinning(
+    size: size,
+    angle: angle,
+    child: RepaintBoundary(child: _Record(size: size)),
+  );
+}
+
 /// The record's rim (pink) and inside (navy), with the turning [child]
 /// (the grooves) clipped to the inside.
 class _Spinning extends StatelessWidget {
