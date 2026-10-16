@@ -17,6 +17,7 @@ import '../data/rehearsal_repository.dart';
 import '../data/song_repository.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
+import '../widgets/splash.dart';
 import '../widgets/record_sheet.dart';
 import '../data/safety_repository.dart';
 import '../models/chat.dart';
@@ -43,6 +44,7 @@ class AuthGate extends StatelessWidget {
       builder: (context, _) {
         final user = client.auth.currentUser;
         if (user == null) {
+          markAppReady();
           return AuthScreen(auth: SupabaseAuthRepository(client));
         }
         // A new key per user resets ProfileGate's state when the account changes.
@@ -268,6 +270,8 @@ class _ProfileGateState extends State<ProfileGate> {
     return FutureBuilder<ProfileStatus>(
       future: _status,
       builder: (context, snapshot) {
+        // The first real screen (or an error) can show: the splash can go.
+        if (snapshot.hasError || snapshot.data != null) markAppReady();
         if (snapshot.hasError) {
           return _Problem(
             message: snapshot.error.toString(),

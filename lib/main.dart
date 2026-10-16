@@ -11,6 +11,7 @@ import 'l10n/l10n.dart';
 import 'screens/auth_gate.dart';
 import 'screens/public_band_screen.dart';
 import 'theme.dart';
+import 'widgets/splash.dart';
 
 // `async` + `await`: work like in TypeScript. Supabase and the saved language
 // and theme must be ready before the first screen draws, so main waits.
@@ -26,7 +27,15 @@ Future<void> main() async {
   final bandId = kIsWeb ? bandIdFromLink(Uri.base) : null;
   runApp(
     OctavaApp(
-      home: bandId == null ? const AuthGate() : PublicBandGate(bandId: bandId),
+      home: bandId != null
+          ? PublicBandGate(bandId: bandId)
+          // The web page plays its own splash while the app downloads
+          // (web/index.html), so only phones show it here.
+          // The web page has its own splash (web/index.html), removed
+          // when the app is ready; phones show it in Flutter.
+          : kIsWeb
+          ? const AuthGate()
+          : SplashGate(ready: appReady, child: const AuthGate()),
     ),
   );
 }
@@ -52,14 +61,18 @@ class _PublicBandGateState extends State<PublicBandGate> {
   }
 
   @override
-  Widget build(BuildContext context) => PublicBandScreen(
-    source: SupabasePublicBands(Supabase.instance.client),
-    bandId: widget.bandId,
-    player: _player,
-    onJoin: () => Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const AuthGate()),
-    ),
-  );
+  Widget build(BuildContext context) {
+    // The page shows its own loading; the splash can go.
+    markAppReady();
+    return PublicBandScreen(
+      source: SupabasePublicBands(Supabase.instance.client),
+      bandId: widget.bandId,
+      player: _player,
+      onJoin: () => Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => const AuthGate()),
+      ),
+    );
+  }
 }
 
 class OctavaApp extends StatelessWidget {

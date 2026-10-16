@@ -31,8 +31,91 @@
 
   <title>OCTAVA</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    The splash, shown only if the app takes longer than 0.8 s to load: the
+    logo's record "O" spins while the OCTAVA letters slide in, and keeps
+    turning until the app says it's ready (markAppReady in
+    lib/widgets/splash.dart removes #splash). The spinning disc is a plain
+    element turned with a CSS transform, which the browser animates on its
+    compositor thread, so it stays smooth while the app's code loads.
+    Positions are the record's place in logo.png (410 x 174); phones show
+    the same animation in Flutter (SplashGate).
+  -->
+  <style>
+    html, body { margin: 0; height: 100%; }
+    body, #splash { background: #EEF0EC; }
+    @media (prefers-color-scheme: dark) { body, #splash { background: #10173A; } }
+    #splash {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .3s ease;
+    }
+    #splash.gone { opacity: 0; pointer-events: none; }
+    #splash .logo {
+      position: relative; width: min(72vw, 340px); aspect-ratio: 410 / 174;
+      opacity: 0; animation: octava-show .01s linear .8s forwards;
+    }
+    #splash .letters {
+      position: absolute; inset: 0;
+      background: url("assets/assets/images/logo.png") center / 100% 100% no-repeat;
+      clip-path: inset(0 0 0 25.1%);
+      opacity: 0; will-change: transform, opacity;
+      animation: octava-letters .55s cubic-bezier(.2,.8,.2,1) 1.1s forwards;
+    }
+    #splash .record {
+      position: absolute; left: 3.66%; top: 14.94%; width: 20.98%; height: 79.31%;
+      background: #FF4FA3; border-radius: 999px;
+      transform: scale(.5); opacity: 0; will-change: transform, opacity;
+      animation: octava-pop .45s cubic-bezier(.3,1.6,.5,1) .8s forwards;
+    }
+    #splash .inside {
+      position: absolute; inset: 4.99% 8%;
+      background: #233065; border-radius: 999px; overflow: hidden;
+      transform: translateZ(0); /* its own layer, so the clip stays cheap */
+    }
+    #splash .disc {
+      position: absolute; left: 50%; top: 50%; width: 191.03%; aspect-ratio: 1;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 138 138'%3E%3Cpath d='M44.82 52.56A29.24 29.24 0 0 1 93.18 52.56M44.82 85.44A29.24 29.24 0 0 0 93.18 85.44M40.19 49.42A34.83 34.83 0 0 1 97.81 49.42M40.19 88.58A34.83 34.83 0 0 0 97.81 88.58M35.57 46.28A40.42 40.42 0 0 1 102.43 46.28M35.57 91.72A40.42 40.42 0 0 0 102.43 91.72M30.95 43.14A46.01 46.01 0 0 1 107.05 43.14M30.95 94.86A46.01 46.01 0 0 0 107.05 94.86M26.32 40A51.6 51.6 0 0 1 111.68 40M26.32 98A51.6 51.6 0 0 0 111.68 98M21.7 36.85A57.19 57.19 0 0 1 116.3 36.85M21.7 101.15A57.19 57.19 0 0 0 116.3 101.15M17.08 33.71A62.78 62.78 0 0 1 120.92 33.71M17.08 104.29A62.78 62.78 0 0 0 120.92 104.29M12.45 30.57A68.37 68.37 0 0 1 125.55 30.57M12.45 107.43A68.37 68.37 0 0 0 125.55 107.43' fill='none' stroke='%23E8EBF8' stroke-width='1.89' stroke-linecap='round'/%3E%3Ccircle cx='69' cy='69' r='17.2' fill='%23E8EBF8'/%3E%3Ccircle cx='69' cy='69' r='12.38' fill='none' stroke='%23233065' stroke-width='2.15'/%3E%3Ccircle cx='69' cy='56.62' r='2.58' fill='%23FF4FA3'/%3E%3Ccircle cx='69' cy='69' r='4.73' fill='%23233065'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+      transform: translate(-50%, -50%); will-change: transform;
+      animation: octava-spin .8s linear .8s infinite;
+    }
+    @keyframes octava-show { to { opacity: 1; } }
+    @keyframes octava-pop { to { transform: scale(1); opacity: 1; } }
+    @keyframes octava-letters {
+      from { opacity: 0; transform: translateX(11%); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes octava-spin {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #splash .letters, #splash .record { animation: octava-show .01s linear .8s forwards; transform: none; }
+      #splash .disc { animation: none; }
+    }
+  </style>
 </head>
 <body>
+  <div id="splash" aria-label="OCTAVA" role="img">
+    <div class="logo">
+      <div class="record"><div class="inside"><div class="disc"></div></div></div>
+      <div class="letters"></div>
+    </div>
+  </div>
+  <script>
+    // The app removes the splash once its first real screen can show
+    // (markAppReady). If that never comes (an error before it), take it
+    // away a few seconds after the app's first frame anyway.
+    window.addEventListener('flutter-first-frame', function () {
+      setTimeout(function () {
+        var splash = document.getElementById('splash');
+        if (!splash) return;
+        splash.classList.add('gone');
+        setTimeout(function () { splash.remove(); }, 400);
+      }, 8000);
+    });
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

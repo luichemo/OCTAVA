@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#131824</color>
+    <!-- Behind the launch screen, the same as the app's paper colour, so the
+         animated splash (SplashGate) follows on without a flash. -->
+    <color name="splash_background">#EEF0EC</color>
 </resources>
