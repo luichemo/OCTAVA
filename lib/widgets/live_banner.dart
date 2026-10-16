@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import '../data/avatar_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
+import '../data/rehearsal_repository.dart';
+
+import 'package:intl/intl.dart';
+
 import '../l10n/l10n.dart';
 import '../models/chat.dart';
 import '../theme.dart';
@@ -23,7 +27,11 @@ class LiveBannerListener extends StatefulWidget {
     this.avatars,
     this.bands,
     this.onOpenBand,
+    this.reminders,
   });
+
+  /// Rehearsals about to start (opened with [onOpenBand]).
+  final Stream<BandRehearsal>? reminders;
 
   final LiveUpdates? live;
 
@@ -46,6 +54,7 @@ class LiveBannerListener extends StatefulWidget {
 class _LiveBannerListenerState extends State<LiveBannerListener> {
   StreamSubscription<LiveBanner>? _sub;
   StreamSubscription<BandMessageBanner>? _bandSub;
+  StreamSubscription<BandRehearsal>? _reminderSub;
   OverlayEntry? _entry;
   Timer? _timer;
 
@@ -58,6 +67,7 @@ class _LiveBannerListenerState extends State<LiveBannerListener> {
         () => widget.onOpen(banner.match),
       ),
     );
+    _reminderSub = widget.reminders?.listen(_showReminder);
     _bandSub = widget.bands?.banners.listen(
       (banner) => _show(
         _BannerData(
@@ -76,6 +86,23 @@ class _LiveBannerListenerState extends State<LiveBannerListener> {
         ),
         () => widget.onOpenBand?.call(banner.band.id),
       ),
+    );
+  }
+
+  void _showReminder(BandRehearsal r) {
+    final time = DateFormat.Hm(L10n.current.localeName).format(r.date.startsAt);
+    _show(
+      _BannerData(
+        key: r,
+        title: L10n.current.rehearsalReminder(r.bandName, time),
+        body: L10n.current.rehearsalReminderBody,
+        leading: const CircleAvatar(
+          backgroundColor: OctavaColors.yellow,
+          foregroundColor: OctavaColors.ink,
+          child: Icon(Icons.event_rounded, size: 20),
+        ),
+      ),
+      () => widget.onOpenBand?.call(r.bandId),
     );
   }
 
@@ -111,6 +138,7 @@ class _LiveBannerListenerState extends State<LiveBannerListener> {
   void dispose() {
     _sub?.cancel();
     _bandSub?.cancel();
+    _reminderSub?.cancel();
     _hide();
     super.dispose();
   }

@@ -572,9 +572,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get recordRecording => 'მიმდინარეობს ჩაწერა';
 
   @override
-  String get recordLimit => 'ჩაწერა 2:00-ზე თავისით შეწყდება.';
-
-  @override
   String get recordStop => 'გაჩერება';
 
   @override
@@ -1717,4 +1714,271 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get errEdit => 'შეტყობინება ვერ შეიცვალა. სცადე თავიდან.';
+
+  @override
+  String get rehearsalsTitle => 'რეპეტიციები';
+
+  @override
+  String get rehearsalAdd => 'დამატება';
+
+  @override
+  String get rehearsalsEmpty =>
+      'რეპეტიცია დაგეგმილი არაა. დაამატე და ყველა იტყვის, მოვა თუ არა.';
+
+  @override
+  String get rehearsalsShowAll => 'ყველას ნახვა';
+
+  @override
+  String get rehearsalsShowLess => 'ნაკლების ნახვა';
+
+  @override
+  String get rehearsalGoing => 'მოვალ';
+
+  @override
+  String get rehearsalCant => 'ვერ მოვალ';
+
+  @override
+  String get rehearsalNoAnswer => 'ჯერ არ უპასუხიათ';
+
+  @override
+  String rehearsalCounts(int going, int cant) {
+    return '$going მოვა · $cant ვერ მოვა';
+  }
+
+  @override
+  String get rehearsalCancelledLabel => 'გაუქმებულია';
+
+  @override
+  String get rehearsalEdit => 'რეპეტიციის რედაქტირება';
+
+  @override
+  String get rehearsalCallOff => 'ამ დღის გაუქმება';
+
+  @override
+  String get rehearsalRestore => 'ამ დღის დაბრუნება';
+
+  @override
+  String get rehearsalDelete => 'რეპეტიციის წაშლა';
+
+  @override
+  String get rehearsalDeleteTitle => 'წავშალოთ რეპეტიცია?';
+
+  @override
+  String get rehearsalDeleteBody => 'ის ბენდის ყველა წევრისთვის გაქრება.';
+
+  @override
+  String get rehearsalDeleteWeeklyBody =>
+      'ეს წაშლის ყველა კვირის რეპეტიციას, ბენდის ყველა წევრისთვის. ერთი კვირის გამოსატოვებლად ის დღე გააუქმე.';
+
+  @override
+  String get rehearsalAdded => 'რეპეტიცია დაემატა.';
+
+  @override
+  String get rehearsalSaved => 'რეპეტიცია შენახულია.';
+
+  @override
+  String get rehearsalCalledOff => 'ეს დღე გაუქმდა.';
+
+  @override
+  String get rehearsalDeleted => 'რეპეტიცია წაიშალა.';
+
+  @override
+  String get rehearsalAddTitle => 'რეპეტიციის დამატება';
+
+  @override
+  String get rehearsalEditTitle => 'რეპეტიციის რედაქტირება';
+
+  @override
+  String get rehearsalDay => 'დღე';
+
+  @override
+  String get rehearsalStart => 'იწყება';
+
+  @override
+  String get rehearsalLength => 'ხანგრძლივობა';
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes წთ';
+  }
+
+  @override
+  String durationHours(int hours) {
+    return '$hours სთ';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours სთ $minutes წთ';
+  }
+
+  @override
+  String get rehearsalPlace => 'ადგილი (არასავალდებულო)';
+
+  @override
+  String get rehearsalPlaceHint => 'მაგ. სტუდია 4, რუსთაველის 12';
+
+  @override
+  String get rehearsalNotes => 'შენიშვნები (არასავალდებულო)';
+
+  @override
+  String get rehearsalNotesHint => 'რა წამოვიღოთ, რა ვივარჯიშოთ…';
+
+  @override
+  String get rehearsalWeekly => 'ყოველ კვირა გამეორება';
+
+  @override
+  String rehearsalWeeklyHint(String weekday) {
+    return 'ყოველკვირეულად ($weekday), იმავე დროს';
+  }
+
+  @override
+  String get rehearsalUntil => 'სანამდე';
+
+  @override
+  String get rehearsalNoEnd => 'დასრულების თარიღის გარეშე';
+
+  @override
+  String get rehearsalClearEnd => 'დასრულების თარიღის გარეშე';
+
+  @override
+  String rehearsalReminder(String band, String time) {
+    return '$band: რეპეტიცია $time-ზე';
+  }
+
+  @override
+  String get rehearsalReminderBody => 'მალე იწყება. შეეხე, რომ ნახო ვინ მოდის.';
+
+  @override
+  String get errRehearsalsLoad =>
+      'რეპეტიციები ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.';
+
+  @override
+  String get errRehearsalSave => 'რეპეტიცია ვერ შეინახა. სცადე თავიდან.';
+
+  @override
+  String get rehearsalsNoneThisWeek => 'მომდევნო 7 დღეში არაფერია.';
+
+  @override
+  String recordLimitAt(String time) {
+    return 'ჩაწერა თავისით შეჩერდება $time-ზე.';
+  }
+
+  @override
+  String get songsTitle => 'სიმღერები';
+
+  @override
+  String get songsEmpty =>
+      'სიმღერები ჯერ არაა. დაამატე ის, რასაც უკრავთ ან გინდათ ისწავლოთ.';
+
+  @override
+  String songsShowAll(int count) {
+    return 'ყველა სიმღერა ($count)';
+  }
+
+  @override
+  String get songReady => 'მზადაა';
+
+  @override
+  String get songLearning => 'ვსწავლობთ';
+
+  @override
+  String get songIdea => 'იდეა';
+
+  @override
+  String songBpm(int bpm) {
+    return '$bpm BPM';
+  }
+
+  @override
+  String get songPlay => 'ჩანაწერის მოსმენა';
+
+  @override
+  String get songAddTitle => 'სიმღერის დამატება';
+
+  @override
+  String get songTitleLabel => 'სიმღერის სახელი';
+
+  @override
+  String get songTitleError => 'სიმღერას სახელი სჭირდება.';
+
+  @override
+  String get songTempoError => 'ტემპი უნდა იყოს რიცხვი 20-დან 320-მდე.';
+
+  @override
+  String get songPageTitle => 'სიმღერა';
+
+  @override
+  String get songKeyLabel => 'ტონალობა';
+
+  @override
+  String get songKeyHint => 'მაგ. მი მინორი';
+
+  @override
+  String get songTempoLabel => 'ტემპი (BPM)';
+
+  @override
+  String get songNotesLabel => 'შენიშვნები';
+
+  @override
+  String get songNotesHint => 'სტრუქტურა, კაპო, ვინ რას მღერის…';
+
+  @override
+  String get songLinksLabel => 'ბმულები';
+
+  @override
+  String get songLinkHint => 'YouTube, Spotify, აკორდების ან ტექსტის ბმული';
+
+  @override
+  String get songAddLink => 'ბმულის დამატება';
+
+  @override
+  String get songRemoveLink => 'ბმულის წაშლა';
+
+  @override
+  String get songRecordingLabel => 'ჩანაწერი';
+
+  @override
+  String get songNoRecording => 'ჩანაწერი ჯერ არაა';
+
+  @override
+  String get songAddRecording => 'ჩაწერა ან ატვირთვა';
+
+  @override
+  String get songReplaceRecording => 'ჩანაწერის შეცვლა';
+
+  @override
+  String get songRemoveRecording => 'ჩანაწერის წაშლა';
+
+  @override
+  String get songUseRecording => 'ამ სიმღერისთვის გამოყენება';
+
+  @override
+  String get songRecordingSaved => 'ჩანაწერი შენახულია.';
+
+  @override
+  String get songSaved => 'სიმღერა შენახულია.';
+
+  @override
+  String get songDelete => 'სიმღერის წაშლა';
+
+  @override
+  String songDeleteTitle(String title) {
+    return 'წავშალოთ „$title“?';
+  }
+
+  @override
+  String get songDeleteBody =>
+      'ის და მისი ჩანაწერი ბენდის ყველა წევრისთვის გაქრება.';
+
+  @override
+  String get errSongsLoad => 'სიმღერები ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.';
+
+  @override
+  String get errSongSave => 'სიმღერა ვერ შეინახა. სცადე თავიდან.';
+
+  @override
+  String errSongTooLong(String length) {
+    return 'სიმღერის ჩანაწერი მაქსიმუმ 10 წუთი შეიძლება იყოს. ეს არის $length.';
+  }
 }

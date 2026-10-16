@@ -4,6 +4,8 @@ import '../data/avatar_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
+import '../data/rehearsal_repository.dart';
+import '../data/song_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../l10n/l10n.dart';
@@ -31,7 +33,13 @@ class BandChatScreen extends StatefulWidget {
     this.safety,
     this.player,
     this.recorder,
+    this.rehearsals,
+    this.songs,
   });
+
+  /// Passed on to the band page, for its calendar and songs.
+  final RehearsalRepository? rehearsals;
+  final SongRepository? songs;
 
   /// Makes the voice recorder (tests pass a fake).
   final VoiceRecorder Function()? recorder;
@@ -79,6 +87,8 @@ class _BandChatScreenState extends State<BandChatScreen> {
         matches: widget.matches,
         avatars: widget.avatars,
         player: widget.player,
+        rehearsals: widget.rehearsals,
+        songs: widget.songs,
       ),
     ),
   );

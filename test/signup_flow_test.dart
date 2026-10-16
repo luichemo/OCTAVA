@@ -157,7 +157,7 @@ void main() {
         displayName: 'Luka',
         instruments: {'vocals': 'pro'},
       );
-      await tester.tap(find.text('Profile'));
+      await tester.tap(find.byTooltip('Profile'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Sign out'));
       await tester.pumpAndSettle();

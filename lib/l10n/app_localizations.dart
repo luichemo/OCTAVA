@@ -1058,12 +1058,6 @@ abstract class AppLocalizations {
   /// **'Recording'**
   String get recordRecording;
 
-  /// No description provided for @recordLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'Recording stops by itself at 2:00.'**
-  String get recordLimit;
-
   /// No description provided for @recordStop.
   ///
   /// In en, this message translates to:
@@ -3025,6 +3019,486 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t edit the message. Try again.'**
   String get errEdit;
+
+  /// No description provided for @rehearsalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsals'**
+  String get rehearsalsTitle;
+
+  /// No description provided for @rehearsalAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get rehearsalAdd;
+
+  /// No description provided for @rehearsalsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No rehearsals planned. Add one, and everyone can say if they\'re coming.'**
+  String get rehearsalsEmpty;
+
+  /// No description provided for @rehearsalsShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get rehearsalsShowAll;
+
+  /// No description provided for @rehearsalsShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get rehearsalsShowLess;
+
+  /// No description provided for @rehearsalGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Going'**
+  String get rehearsalGoing;
+
+  /// No description provided for @rehearsalCant.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t'**
+  String get rehearsalCant;
+
+  /// No description provided for @rehearsalNoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No answer yet'**
+  String get rehearsalNoAnswer;
+
+  /// No description provided for @rehearsalCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{going} going · {cant} can\'t'**
+  String rehearsalCounts(int going, int cant);
+
+  /// No description provided for @rehearsalCancelledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Called off'**
+  String get rehearsalCancelledLabel;
+
+  /// No description provided for @rehearsalEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rehearsal'**
+  String get rehearsalEdit;
+
+  /// No description provided for @rehearsalCallOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Call off this date'**
+  String get rehearsalCallOff;
+
+  /// No description provided for @rehearsalRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Put this date back'**
+  String get rehearsalRestore;
+
+  /// No description provided for @rehearsalDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete rehearsal'**
+  String get rehearsalDelete;
+
+  /// No description provided for @rehearsalDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this rehearsal?'**
+  String get rehearsalDeleteTitle;
+
+  /// No description provided for @rehearsalDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It disappears for everyone in the band.'**
+  String get rehearsalDeleteBody;
+
+  /// No description provided for @rehearsalDeleteWeeklyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes every week of it, for everyone in the band. To skip one week, call off that date instead.'**
+  String get rehearsalDeleteWeeklyBody;
+
+  /// No description provided for @rehearsalAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal added.'**
+  String get rehearsalAdded;
+
+  /// No description provided for @rehearsalSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal saved.'**
+  String get rehearsalSaved;
+
+  /// No description provided for @rehearsalCalledOff.
+  ///
+  /// In en, this message translates to:
+  /// **'That date is called off.'**
+  String get rehearsalCalledOff;
+
+  /// No description provided for @rehearsalDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Rehearsal deleted.'**
+  String get rehearsalDeleted;
+
+  /// No description provided for @rehearsalAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rehearsal'**
+  String get rehearsalAddTitle;
+
+  /// No description provided for @rehearsalEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rehearsal'**
+  String get rehearsalEditTitle;
+
+  /// No description provided for @rehearsalDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get rehearsalDay;
+
+  /// No description provided for @rehearsalStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get rehearsalStart;
+
+  /// No description provided for @rehearsalLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get rehearsalLength;
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutes(int minutes);
+
+  /// No description provided for @durationHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours, plural, =1{1 hour} other{{hours} hours}}'**
+  String durationHours(int hours);
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @rehearsalPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Place (optional)'**
+  String get rehearsalPlace;
+
+  /// No description provided for @rehearsalPlaceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Studio 4, Rustaveli 12'**
+  String get rehearsalPlaceHint;
+
+  /// No description provided for @rehearsalNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get rehearsalNotes;
+
+  /// No description provided for @rehearsalNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What to bring, what to practise…'**
+  String get rehearsalNotesHint;
+
+  /// No description provided for @rehearsalWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every week'**
+  String get rehearsalWeekly;
+
+  /// No description provided for @rehearsalWeeklyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {weekday}, same time'**
+  String rehearsalWeeklyHint(String weekday);
+
+  /// No description provided for @rehearsalUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until'**
+  String get rehearsalUntil;
+
+  /// No description provided for @rehearsalNoEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'No end date'**
+  String get rehearsalNoEnd;
+
+  /// No description provided for @rehearsalClearEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'No end date'**
+  String get rehearsalClearEnd;
+
+  /// No description provided for @rehearsalReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'{band}: rehearsal at {time}'**
+  String rehearsalReminder(String band, String time);
+
+  /// No description provided for @rehearsalReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts soon. Tap to see who\'s coming.'**
+  String get rehearsalReminderBody;
+
+  /// No description provided for @errRehearsalsLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load rehearsals. Check your connection.'**
+  String get errRehearsalsLoad;
+
+  /// No description provided for @errRehearsalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the rehearsal. Try again.'**
+  String get errRehearsalSave;
+
+  /// No description provided for @rehearsalsNoneThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in the next 7 days.'**
+  String get rehearsalsNoneThisWeek;
+
+  /// No description provided for @recordLimitAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording stops by itself at {time}.'**
+  String recordLimitAt(String time);
+
+  /// No description provided for @songsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs'**
+  String get songsTitle;
+
+  /// No description provided for @songsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No songs yet. Add the ones you play or want to learn.'**
+  String get songsEmpty;
+
+  /// No description provided for @songsShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} songs'**
+  String songsShowAll(int count);
+
+  /// No description provided for @songReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get songReady;
+
+  /// No description provided for @songLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning'**
+  String get songLearning;
+
+  /// No description provided for @songIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'Idea'**
+  String get songIdea;
+
+  /// No description provided for @songBpm.
+  ///
+  /// In en, this message translates to:
+  /// **'{bpm} BPM'**
+  String songBpm(int bpm);
+
+  /// No description provided for @songPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play the recording'**
+  String get songPlay;
+
+  /// No description provided for @songAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a song'**
+  String get songAddTitle;
+
+  /// No description provided for @songTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Song title'**
+  String get songTitleLabel;
+
+  /// No description provided for @songTitleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the song a title.'**
+  String get songTitleError;
+
+  /// No description provided for @songTempoError.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempo should be a number between 20 and 320.'**
+  String get songTempoError;
+
+  /// No description provided for @songPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get songPageTitle;
+
+  /// No description provided for @songKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Key'**
+  String get songKeyLabel;
+
+  /// No description provided for @songKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. E minor'**
+  String get songKeyHint;
+
+  /// No description provided for @songTempoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempo (BPM)'**
+  String get songTempoLabel;
+
+  /// No description provided for @songNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get songNotesLabel;
+
+  /// No description provided for @songNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Structure, capo, who sings what…'**
+  String get songNotesHint;
+
+  /// No description provided for @songLinksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get songLinksLabel;
+
+  /// No description provided for @songLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube, Spotify, chords or lyrics link'**
+  String get songLinkHint;
+
+  /// No description provided for @songAddLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Add link'**
+  String get songAddLink;
+
+  /// No description provided for @songRemoveLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove link'**
+  String get songRemoveLink;
+
+  /// No description provided for @songRecordingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get songRecordingLabel;
+
+  /// No description provided for @songNoRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'No recording yet'**
+  String get songNoRecording;
+
+  /// No description provided for @songAddRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Record or upload'**
+  String get songAddRecording;
+
+  /// No description provided for @songReplaceRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the recording'**
+  String get songReplaceRecording;
+
+  /// No description provided for @songRemoveRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the recording'**
+  String get songRemoveRecording;
+
+  /// No description provided for @songUseRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Use for this song'**
+  String get songUseRecording;
+
+  /// No description provided for @songRecordingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording saved.'**
+  String get songRecordingSaved;
+
+  /// No description provided for @songSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Song saved.'**
+  String get songSaved;
+
+  /// No description provided for @songDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete song'**
+  String get songDelete;
+
+  /// No description provided for @songDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{title}”?'**
+  String songDeleteTitle(String title);
+
+  /// No description provided for @songDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It and its recording disappear for everyone in the band.'**
+  String get songDeleteBody;
+
+  /// No description provided for @errSongsLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the songs. Check your connection.'**
+  String get errSongsLoad;
+
+  /// No description provided for @errSongSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the song. Try again.'**
+  String get errSongSave;
+
+  /// No description provided for @errSongTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Song recordings can be up to 10 minutes. This one is {length}.'**
+  String errSongTooLong(String length);
 }
 
 class _AppLocalizationsDelegate

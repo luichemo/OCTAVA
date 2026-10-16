@@ -44,7 +44,7 @@ void main() {
     expect(find.text('თავისუფალი'), findsNWidgets(4)); // Open
     expect(find.text('ყველგან'), findsOneWidget); // Everywhere
     expect(find.text('გაზიარება'), findsOneWidget); // Share (location)
-    expect(find.text('პროფილი'), findsOneWidget); // Profile
+    expect(find.byTooltip('პროფილი'), findsOneWidget); // Profile
     expect(find.text('შენს ბენდს სჭირდება: დასარტყამები'), findsOneWidget);
     expect(find.text('Your band'), findsNothing);
   });

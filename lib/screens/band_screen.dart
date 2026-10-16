@@ -5,6 +5,8 @@ import '../data/bands_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
+import '../data/rehearsal_repository.dart';
+import '../data/song_repository.dart';
 import '../data/profile_options.dart';
 import '../data/repositories.dart';
 import '../l10n/l10n.dart';
@@ -14,6 +16,8 @@ import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 import '../widgets/person_avatar.dart';
 import '../widgets/record_sheet.dart';
+import '../widgets/rehearsals_section.dart';
+import '../widgets/songs_section.dart';
 import 'band_profile_screen.dart';
 
 /// One of your bands: its public profile (Edit band, the band clip), its
@@ -27,10 +31,18 @@ class BandScreen extends StatefulWidget {
     this.matches,
     this.avatars,
     this.player,
+    this.rehearsals,
+    this.songs,
   });
+
+  /// The band's songs. Without it there's no Songs section.
+  final SongRepository? songs;
 
   /// Plays the band clip.
   final ClipPlayer? player;
+
+  /// The rehearsal calendar. Without it there's no Rehearsals section.
+  final RehearsalRepository? rehearsals;
 
   final LiveBands bands;
   final String bandId;
@@ -321,6 +333,17 @@ class _BandScreenState extends State<BandScreen> {
                             onRecordClip: () => _recordClip(band),
                             onRemoveClip: () => _removeClip(band),
                           ),
+                          if (widget.rehearsals case final rehearsals?)
+                            RehearsalsSection(
+                              repository: rehearsals,
+                              band: band,
+                            ),
+                          if (widget.songs case final songs?)
+                            SongsSection(
+                              repository: songs,
+                              bandId: band.id,
+                              player: widget.player,
+                            ),
                           _Heading(t.bandMembers),
                           for (final m in band.members)
                             _PersonTile(

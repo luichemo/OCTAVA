@@ -7,6 +7,8 @@ import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
+import '../data/rehearsal_repository.dart';
+import '../data/song_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../models/band_group.dart';
@@ -28,7 +30,13 @@ class MatchesScreen extends StatefulWidget {
     this.avatars,
     this.bands,
     this.player,
+    this.rehearsals,
+    this.songs,
   });
+
+  /// Band calendars and songs, on band pages.
+  final RehearsalRepository? rehearsals;
+  final SongRepository? songs;
 
   /// Plays band clips on band pages.
   final ClipPlayer? player;
@@ -90,6 +98,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
         avatars: widget.avatars,
         safety: widget.safety,
         player: widget.player,
+        rehearsals: widget.rehearsals,
+        songs: widget.songs,
       ),
     ),
   );

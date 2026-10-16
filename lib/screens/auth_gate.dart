@@ -12,6 +12,9 @@ import '../data/clip_repository.dart';
 import '../data/deck.dart';
 import '../data/live_bands.dart';
 import '../data/live_updates.dart';
+import '../data/rehearsal_reminders.dart';
+import '../data/rehearsal_repository.dart';
+import '../data/song_repository.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../widgets/record_sheet.dart';
@@ -53,6 +56,8 @@ class AuthGate extends StatelessWidget {
           avatars: SupabaseAvatarRepository(client),
           bandNeeds: SupabaseBandNeeds(client),
           bands: SupabaseBandsRepository(client),
+          rehearsals: SupabaseRehearsalRepository(client),
+          songs: SupabaseSongRepository(client),
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
         );
@@ -75,9 +80,17 @@ class ProfileGate extends StatefulWidget {
     this.filterStore,
     this.bandNeeds,
     this.bands,
+    this.rehearsals,
+    this.songs,
   });
 
   final ProfileRepository repository;
+
+  /// Band songs and their recordings.
+  final SongRepository? songs;
+
+  /// Band rehearsal calendars and reminders.
+  final RehearsalRepository? rehearsals;
 
   /// Bands you're in and invites. Shown in Matches (needs [chat] too).
   final BandsRepository? bands;
@@ -118,6 +131,10 @@ class _ProfileGateState extends State<ProfileGate> {
   late final ClipPlayer? _player = widget.clips == null
       ? null
       : JustAudioClipPlayer((key) {
+          final song = songPath(key);
+          if (song != null && widget.songs != null) {
+            return widget.songs!.recordingUrl(song);
+          }
           final voice = voicePath(key);
           if (voice != null && widget.chat != null) {
             return widget.chat!.voiceUrl(voice);
@@ -138,8 +155,14 @@ class _ProfileGateState extends State<ProfileGate> {
       ? null
       : (LiveBands(widget.bands!)..start());
 
+  // In-app reminders an hour before your bands' rehearsals.
+  late final RehearsalReminders? _reminders = widget.rehearsals == null
+      ? null
+      : (RehearsalReminders(widget.rehearsals!)..start());
+
   @override
   void dispose() {
+    _reminders?.dispose();
     _player?.dispose();
     _live?.dispose();
     _bands?.dispose();
@@ -176,6 +199,8 @@ class _ProfileGateState extends State<ProfileGate> {
           avatars: widget.avatars,
           bands: _bands,
           player: _player,
+          rehearsals: widget.rehearsals,
+          songs: widget.songs,
         ),
       ),
     );
@@ -199,6 +224,8 @@ class _ProfileGateState extends State<ProfileGate> {
           avatars: widget.avatars,
           safety: widget.safety,
           player: _player,
+          rehearsals: widget.rehearsals,
+          songs: widget.songs,
         ),
       ),
     );
@@ -258,6 +285,7 @@ class _ProfileGateState extends State<ProfileGate> {
             onOpen: _openChatFor,
             bands: _bands,
             onOpenBand: _openBandChat,
+            reminders: _reminders?.banners,
             child: SwipeScreen(
               source: widget.deck,
               onRecord: widget.clips == null

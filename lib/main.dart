@@ -60,17 +60,38 @@ class OctavaApp extends StatelessWidget {
           // Keeps translations for code without a BuildContext in step.
           builder: (context, child) {
             L10n.current = AppLocalizations.of(context);
-            if (!georgianType) return child!;
+            final media = MediaQuery.of(context);
+            // Alerts (snack bars) show at the top, where banners appear, and
+            // swipe away upwards. Flutter only anchors them at the bottom,
+            // so the bottom margin pushes them up to just below the status
+            // bar (keeping clear of the keyboard).
+            final top =
+                ((media.size.height -
+                            media.viewInsets.bottom -
+                            media.padding.top -
+                            96)
+                        .clamp(16.0, double.infinity))
+                    .toDouble();
+            final themed = Theme(
+              data: Theme.of(context).copyWith(
+                snackBarTheme: Theme.of(context).snackBarTheme.copyWith(
+                  behavior: SnackBarBehavior.floating,
+                  insetPadding: EdgeInsets.fromLTRB(16, 0, 16, top),
+                  dismissDirection: DismissDirection.up,
+                ),
+              ),
+              child: child!,
+            );
+            if (!georgianType) return themed;
             // Georgian letters read larger than Latin ones at the same size,
             // so all text is 10% smaller (on top of the person's own setting).
-            final media = MediaQuery.of(context);
             return MediaQuery(
               data: media.copyWith(
                 textScaler: TextScaler.linear(
                   media.textScaler.scale(16) / 16 * 0.9,
                 ),
               ),
-              child: child!,
+              child: themed,
             );
           },
           home: home,

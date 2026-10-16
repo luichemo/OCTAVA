@@ -28,6 +28,7 @@ Future<void> showRecordSheet(
   ClipSaver? save,
   String? saveLabel,
   String? savedMessage,
+  int maxSeconds = maxClipSeconds,
   VoiceRecorder Function()? recorder,
   Future<(String, Uint8List)?> Function()? pickFile,
 }) {
@@ -40,6 +41,7 @@ Future<void> showRecordSheet(
       save: save ?? clips!.upload,
       saveLabel: saveLabel,
       savedMessage: savedMessage,
+      maxSeconds: maxSeconds,
       recorder: (recorder ?? DeviceVoiceRecorder.new)(),
       pickFile: pickFile,
     ),
@@ -55,8 +57,12 @@ class RecordSheet extends StatefulWidget {
     required this.recorder,
     this.saveLabel,
     this.savedMessage,
+    this.maxSeconds = maxClipSeconds,
     this.pickFile,
   });
+
+  /// Recording stops by itself at this length (2:00 for clips).
+  final int maxSeconds;
 
   final ClipSaver save;
   final String? saveLabel;
@@ -140,7 +146,7 @@ class _RecordSheetState extends State<RecordSheet> {
       setState(() {
         _seconds++;
       });
-      if (_seconds >= maxClipSeconds) _stop(); // the clip limit
+      if (_seconds >= widget.maxSeconds) _stop(); // the length limit
     });
   }
 
@@ -281,7 +287,7 @@ class _RecordSheetState extends State<RecordSheet> {
                   ),
                 ),
                 Text(
-                  '${_clock(_seconds)} / ${_clock(maxClipSeconds)}',
+                  '${_clock(_seconds)} / ${_clock(widget.maxSeconds)}',
                   style: TextStyle(
                     color: colors.onSurfaceVariant,
                     fontFeatures: const [FontFeature.tabularFigures()],
@@ -300,7 +306,7 @@ class _RecordSheetState extends State<RecordSheet> {
               ),
             ),
             Text(
-              t.recordLimit,
+              t.recordLimitAt(_clock(widget.maxSeconds)),
               style: TextStyle(color: colors.onSurfaceVariant),
             ),
             if (_stage == _Stage.recorded || _stage == _Stage.saving) ...[

@@ -371,7 +371,6 @@
   "recordTitle": "New clip",
   "recordStarting": "Starting the microphone…",
   "recordRecording": "Recording",
-  "recordLimit": "Recording stops by itself at 2:00.",
   "recordStop": "Stop",
   "recordDone": "Recorded {length}",
   "@recordDone": {
@@ -1034,5 +1033,171 @@
     }
   },
   "errEditTooLate": "Messages can only be edited for 15 minutes.",
-  "errEdit": "Couldn't edit the message. Try again."
+  "errEdit": "Couldn't edit the message. Try again.",
+  "rehearsalsTitle": "Rehearsals",
+  "rehearsalAdd": "Add",
+  "rehearsalsEmpty": "No rehearsals planned. Add one, and everyone can say if they're coming.",
+  "rehearsalsShowAll": "Show all",
+  "rehearsalsShowLess": "Show less",
+  "rehearsalGoing": "Going",
+  "rehearsalCant": "Can't",
+  "rehearsalNoAnswer": "No answer yet",
+  "rehearsalCounts": "{going} going · {cant} can't",
+  "@rehearsalCounts": {
+    "placeholders": {
+      "going": {
+        "type": "int"
+      },
+      "cant": {
+        "type": "int"
+      }
+    }
+  },
+  "rehearsalCancelledLabel": "Called off",
+  "rehearsalEdit": "Edit rehearsal",
+  "rehearsalCallOff": "Call off this date",
+  "rehearsalRestore": "Put this date back",
+  "rehearsalDelete": "Delete rehearsal",
+  "rehearsalDeleteTitle": "Delete this rehearsal?",
+  "rehearsalDeleteBody": "It disappears for everyone in the band.",
+  "rehearsalDeleteWeeklyBody": "This deletes every week of it, for everyone in the band. To skip one week, call off that date instead.",
+  "rehearsalAdded": "Rehearsal added.",
+  "rehearsalSaved": "Rehearsal saved.",
+  "rehearsalCalledOff": "That date is called off.",
+  "rehearsalDeleted": "Rehearsal deleted.",
+  "rehearsalAddTitle": "Add rehearsal",
+  "rehearsalEditTitle": "Edit rehearsal",
+  "rehearsalDay": "Day",
+  "rehearsalStart": "Starts",
+  "rehearsalLength": "Length",
+  "durationMinutes": "{minutes} min",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{hours, plural, =1{1 hour} other{{hours} hours}}",
+  "@durationHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours} h {minutes} min",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "rehearsalPlace": "Place (optional)",
+  "rehearsalPlaceHint": "e.g. Studio 4, Rustaveli 12",
+  "rehearsalNotes": "Notes (optional)",
+  "rehearsalNotesHint": "What to bring, what to practise…",
+  "rehearsalWeekly": "Repeat every week",
+  "rehearsalWeeklyHint": "Every {weekday}, same time",
+  "@rehearsalWeeklyHint": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "rehearsalUntil": "Until",
+  "rehearsalNoEnd": "No end date",
+  "rehearsalClearEnd": "No end date",
+  "rehearsalReminder": "{band}: rehearsal at {time}",
+  "@rehearsalReminder": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rehearsalReminderBody": "Starts soon. Tap to see who's coming.",
+  "errRehearsalsLoad": "Couldn't load rehearsals. Check your connection.",
+  "errRehearsalSave": "Couldn't save the rehearsal. Try again.",
+  "rehearsalsNoneThisWeek": "Nothing in the next 7 days.",
+  "recordLimitAt": "Recording stops by itself at {time}.",
+  "@recordLimitAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "songsTitle": "Songs",
+  "songsEmpty": "No songs yet. Add the ones you play or want to learn.",
+  "songsShowAll": "All {count} songs",
+  "@songsShowAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "songReady": "Ready",
+  "songLearning": "Learning",
+  "songIdea": "Idea",
+  "songBpm": "{bpm} BPM",
+  "@songBpm": {
+    "placeholders": {
+      "bpm": {
+        "type": "int"
+      }
+    }
+  },
+  "songPlay": "Play the recording",
+  "songAddTitle": "Add a song",
+  "songTitleLabel": "Song title",
+  "songTitleError": "Give the song a title.",
+  "songTempoError": "Tempo should be a number between 20 and 320.",
+  "songPageTitle": "Song",
+  "songKeyLabel": "Key",
+  "songKeyHint": "e.g. E minor",
+  "songTempoLabel": "Tempo (BPM)",
+  "songNotesLabel": "Notes",
+  "songNotesHint": "Structure, capo, who sings what…",
+  "songLinksLabel": "Links",
+  "songLinkHint": "YouTube, Spotify, chords or lyrics link",
+  "songAddLink": "Add link",
+  "songRemoveLink": "Remove link",
+  "songRecordingLabel": "Recording",
+  "songNoRecording": "No recording yet",
+  "songAddRecording": "Record or upload",
+  "songReplaceRecording": "Replace the recording",
+  "songRemoveRecording": "Remove the recording",
+  "songUseRecording": "Use for this song",
+  "songRecordingSaved": "Recording saved.",
+  "songSaved": "Song saved.",
+  "songDelete": "Delete song",
+  "songDeleteTitle": "Delete “{title}”?",
+  "@songDeleteTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "songDeleteBody": "It and its recording disappear for everyone in the band.",
+  "errSongsLoad": "Couldn't load the songs. Check your connection.",
+  "errSongSave": "Couldn't save the song. Try again.",
+  "errSongTooLong": "Song recordings can be up to 10 minutes. This one is {length}.",
+  "@errSongTooLong": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      }
+    }
+  }
 }

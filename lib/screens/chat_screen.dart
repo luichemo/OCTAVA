@@ -362,7 +362,10 @@ class ChatBubble extends StatelessWidget {
         ),
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 3),
-          padding: const EdgeInsets.fromLTRB(14, 9, 14, 7),
+          // Voice messages are one compact row; text gets more room.
+          padding: message.isVoice
+              ? const EdgeInsets.fromLTRB(6, 4, 12, 4)
+              : const EdgeInsets.fromLTRB(12, 7, 12, 7),
           decoration: BoxDecoration(
             color: mine ? OctavaColors.pink : colors.surfaceContainer,
             border: mine
@@ -397,28 +400,41 @@ class ChatBubble extends StatelessWidget {
                     seconds: message.audioSeconds ?? 0,
                     mine: mine,
                     player: player,
+                    time: formatClock(message.sentAt),
                   )
                 else
-                  Text(
-                    message.body,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: mine ? OctavaColors.ink : colors.onSurface,
-                    ),
+                  // Text and time in one row, the time at the bottom
+                  // right: one compact line for short messages, like voice.
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: 8,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          message.body,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: mine ? OctavaColors.ink : colors.onSurface,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 1),
+                        child: Text(
+                          message.editedAt == null
+                              ? formatClock(message.sentAt)
+                              : context.t.editedAt(formatClock(message.sentAt)),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: mine
+                                ? OctavaColors.ink.withValues(alpha: 0.7)
+                                : colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 2),
-                Text(
-                  message.editedAt == null
-                      ? formatClock(message.sentAt)
-                      : context.t.editedAt(formatClock(message.sentAt)),
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: mine
-                        ? OctavaColors.ink.withValues(alpha: 0.7)
-                        : colors.onSurfaceVariant,
-                  ),
-                ),
               ],
             ),
           ),
@@ -519,6 +535,7 @@ class _VoiceRow extends StatelessWidget {
     required this.path,
     required this.seconds,
     required this.mine,
+    required this.time,
     this.player,
   });
 
@@ -526,6 +543,9 @@ class _VoiceRow extends StatelessWidget {
   final int seconds;
   final bool mine;
   final ClipPlayer? player;
+
+  /// When it was sent, at the end of the row.
+  final String time;
 
   @override
   Widget build(BuildContext context) {
@@ -537,9 +557,15 @@ class _VoiceRow extends StatelessWidget {
       tooltip: playing ? t.voiceStop : t.voicePlay,
       onPressed: player == null ? null : () => player.toggle(voiceKey(path)),
       color: ink,
+      // Compact: no padding or 48 px tap-target margin around the icon.
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+      style: IconButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       icon: Icon(
         playing ? Icons.stop_circle_rounded : Icons.play_circle_fill_rounded,
-        size: 34,
+        size: 30,
       ),
     );
     return Row(
@@ -553,13 +579,23 @@ class _VoiceRow extends StatelessWidget {
             valueListenable: player.playing,
             builder: (context, playing, _) => button(playing == voiceKey(path)),
           ),
-        Icon(Icons.graphic_eq_rounded, color: ink),
+        Icon(Icons.graphic_eq_rounded, color: ink, size: 20),
         Text(
           clipLength(seconds),
           style: TextStyle(
             color: ink,
             fontWeight: FontWeight.w600,
             fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          time,
+          style: TextStyle(
+            fontSize: 11,
+            color: mine
+                ? OctavaColors.ink.withValues(alpha: 0.7)
+                : colors.onSurfaceVariant,
           ),
         ),
       ],

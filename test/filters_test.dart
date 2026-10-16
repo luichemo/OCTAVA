@@ -158,11 +158,11 @@ void main() {
     expect(find.widgetWithText(FilledButton, 'Jam'), findsNothing);
     expect(find.textContaining('Swipe right'), findsNothing);
     expect(find.text('Sign out'), findsNothing);
-    await tester.tap(find.text('Profile'));
+    await tester.tap(find.byTooltip('Profile'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Record a clip'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Matches'));
+    await tester.tap(find.byTooltip('Matches'));
     expect(opened, ['profile', 'record', 'matches']);
     opened = [];
   });

@@ -576,9 +576,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordRecording => 'Recording';
 
   @override
-  String get recordLimit => 'Recording stops by itself at 2:00.';
-
-  @override
   String get recordStop => 'Stop';
 
   @override
@@ -1727,4 +1724,277 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errEdit => 'Couldn\'t edit the message. Try again.';
+
+  @override
+  String get rehearsalsTitle => 'Rehearsals';
+
+  @override
+  String get rehearsalAdd => 'Add';
+
+  @override
+  String get rehearsalsEmpty =>
+      'No rehearsals planned. Add one, and everyone can say if they\'re coming.';
+
+  @override
+  String get rehearsalsShowAll => 'Show all';
+
+  @override
+  String get rehearsalsShowLess => 'Show less';
+
+  @override
+  String get rehearsalGoing => 'Going';
+
+  @override
+  String get rehearsalCant => 'Can\'t';
+
+  @override
+  String get rehearsalNoAnswer => 'No answer yet';
+
+  @override
+  String rehearsalCounts(int going, int cant) {
+    return '$going going · $cant can\'t';
+  }
+
+  @override
+  String get rehearsalCancelledLabel => 'Called off';
+
+  @override
+  String get rehearsalEdit => 'Edit rehearsal';
+
+  @override
+  String get rehearsalCallOff => 'Call off this date';
+
+  @override
+  String get rehearsalRestore => 'Put this date back';
+
+  @override
+  String get rehearsalDelete => 'Delete rehearsal';
+
+  @override
+  String get rehearsalDeleteTitle => 'Delete this rehearsal?';
+
+  @override
+  String get rehearsalDeleteBody => 'It disappears for everyone in the band.';
+
+  @override
+  String get rehearsalDeleteWeeklyBody =>
+      'This deletes every week of it, for everyone in the band. To skip one week, call off that date instead.';
+
+  @override
+  String get rehearsalAdded => 'Rehearsal added.';
+
+  @override
+  String get rehearsalSaved => 'Rehearsal saved.';
+
+  @override
+  String get rehearsalCalledOff => 'That date is called off.';
+
+  @override
+  String get rehearsalDeleted => 'Rehearsal deleted.';
+
+  @override
+  String get rehearsalAddTitle => 'Add rehearsal';
+
+  @override
+  String get rehearsalEditTitle => 'Edit rehearsal';
+
+  @override
+  String get rehearsalDay => 'Day';
+
+  @override
+  String get rehearsalStart => 'Starts';
+
+  @override
+  String get rehearsalLength => 'Length';
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String durationHours(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String get rehearsalPlace => 'Place (optional)';
+
+  @override
+  String get rehearsalPlaceHint => 'e.g. Studio 4, Rustaveli 12';
+
+  @override
+  String get rehearsalNotes => 'Notes (optional)';
+
+  @override
+  String get rehearsalNotesHint => 'What to bring, what to practise…';
+
+  @override
+  String get rehearsalWeekly => 'Repeat every week';
+
+  @override
+  String rehearsalWeeklyHint(String weekday) {
+    return 'Every $weekday, same time';
+  }
+
+  @override
+  String get rehearsalUntil => 'Until';
+
+  @override
+  String get rehearsalNoEnd => 'No end date';
+
+  @override
+  String get rehearsalClearEnd => 'No end date';
+
+  @override
+  String rehearsalReminder(String band, String time) {
+    return '$band: rehearsal at $time';
+  }
+
+  @override
+  String get rehearsalReminderBody => 'Starts soon. Tap to see who\'s coming.';
+
+  @override
+  String get errRehearsalsLoad =>
+      'Couldn\'t load rehearsals. Check your connection.';
+
+  @override
+  String get errRehearsalSave => 'Couldn\'t save the rehearsal. Try again.';
+
+  @override
+  String get rehearsalsNoneThisWeek => 'Nothing in the next 7 days.';
+
+  @override
+  String recordLimitAt(String time) {
+    return 'Recording stops by itself at $time.';
+  }
+
+  @override
+  String get songsTitle => 'Songs';
+
+  @override
+  String get songsEmpty =>
+      'No songs yet. Add the ones you play or want to learn.';
+
+  @override
+  String songsShowAll(int count) {
+    return 'All $count songs';
+  }
+
+  @override
+  String get songReady => 'Ready';
+
+  @override
+  String get songLearning => 'Learning';
+
+  @override
+  String get songIdea => 'Idea';
+
+  @override
+  String songBpm(int bpm) {
+    return '$bpm BPM';
+  }
+
+  @override
+  String get songPlay => 'Play the recording';
+
+  @override
+  String get songAddTitle => 'Add a song';
+
+  @override
+  String get songTitleLabel => 'Song title';
+
+  @override
+  String get songTitleError => 'Give the song a title.';
+
+  @override
+  String get songTempoError => 'Tempo should be a number between 20 and 320.';
+
+  @override
+  String get songPageTitle => 'Song';
+
+  @override
+  String get songKeyLabel => 'Key';
+
+  @override
+  String get songKeyHint => 'e.g. E minor';
+
+  @override
+  String get songTempoLabel => 'Tempo (BPM)';
+
+  @override
+  String get songNotesLabel => 'Notes';
+
+  @override
+  String get songNotesHint => 'Structure, capo, who sings what…';
+
+  @override
+  String get songLinksLabel => 'Links';
+
+  @override
+  String get songLinkHint => 'YouTube, Spotify, chords or lyrics link';
+
+  @override
+  String get songAddLink => 'Add link';
+
+  @override
+  String get songRemoveLink => 'Remove link';
+
+  @override
+  String get songRecordingLabel => 'Recording';
+
+  @override
+  String get songNoRecording => 'No recording yet';
+
+  @override
+  String get songAddRecording => 'Record or upload';
+
+  @override
+  String get songReplaceRecording => 'Replace the recording';
+
+  @override
+  String get songRemoveRecording => 'Remove the recording';
+
+  @override
+  String get songUseRecording => 'Use for this song';
+
+  @override
+  String get songRecordingSaved => 'Recording saved.';
+
+  @override
+  String get songSaved => 'Song saved.';
+
+  @override
+  String get songDelete => 'Delete song';
+
+  @override
+  String songDeleteTitle(String title) {
+    return 'Delete “$title”?';
+  }
+
+  @override
+  String get songDeleteBody =>
+      'It and its recording disappear for everyone in the band.';
+
+  @override
+  String get errSongsLoad => 'Couldn\'t load the songs. Check your connection.';
+
+  @override
+  String get errSongSave => 'Couldn\'t save the song. Try again.';
+
+  @override
+  String errSongTooLong(String length) {
+    return 'Song recordings can be up to 10 minutes. This one is $length.';
+  }
 }

@@ -556,7 +556,7 @@ class _SwipeScreenState extends State<SwipeScreen>
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 13),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -658,7 +658,11 @@ class _SwipeScreenState extends State<SwipeScreen>
                       if (widget.onOpenProfile != null ||
                           widget.onOpenMatches != null ||
                           widget.onRecord != null) ...[
-                        const SizedBox(height: 6),
+                        // The bar floats in the middle of the space between
+                        // the card and the screen's bottom: 10 px of clear
+                        // space each side (the card's shadow is 4 px, the
+                        // bar's 3 px; the bottom gap is the screen padding).
+                        const SizedBox(height: 14),
                         _BottomBar(
                           onProfile: widget.onOpenProfile == null
                               ? null
@@ -891,8 +895,9 @@ class _LocationPrompt extends StatelessWidget {
   }
 }
 
-/// Bottom navigation: Profile, Matches and Sign out, with labels.
-/// Bottom navigation: Profile, a round ➕ (record a clip) and Matches.
+/// Bottom navigation as a floating pill, like Instagram's: Profile, a pink
+/// ➕ (record a clip) and Matches, icons only. Their names are tooltips
+/// (long-press) and what screen readers say.
 class _BottomBar extends StatelessWidget {
   const _BottomBar({
     this.onProfile,
@@ -913,15 +918,12 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    // As wide as the card above it, with room around it so it floats.
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: colors.outlineVariant, width: 1.5),
-        ),
-      ),
-      padding: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: printBox(context, radius: 999, shadow: 3),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (onProfile != null)
             _BarButton(
@@ -930,28 +932,24 @@ class _BottomBar extends StatelessWidget {
               onTap: onProfile!,
             ),
           if (onRecord != null)
-            Expanded(
-              child: Center(
-                // Pink on a yellow hard shadow, like the design's main key.
-                // No label under it, to keep the bar short; the tooltip and
-                // screen readers say "Add".
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: hardShadow(OctavaColors.yellow, offset: 2),
+            // Pink on a yellow hard shadow, like the design's main key.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: hardShadow(OctavaColors.yellow, offset: 2),
+              ),
+              child: Tooltip(
+                message: context.t.navAdd,
+                child: FilledButton(
+                  onPressed: onRecord,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: OctavaColors.pink,
+                    foregroundColor: OctavaColors.ink,
+                    minimumSize: const Size(60, 36),
+                    padding: EdgeInsets.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: IconButton.filled(
-                    tooltip: context.t.navAdd,
-                    onPressed: onRecord,
-                    style: IconButton.styleFrom(
-                      backgroundColor: OctavaColors.pink,
-                      foregroundColor: OctavaColors.ink,
-                      minimumSize: const Size(46, 46),
-                      padding: EdgeInsets.zero,
-                      side: const BorderSide(color: OctavaColors.ink, width: 2),
-                    ),
-                    icon: const Icon(Icons.add_rounded, size: 28),
-                  ),
+                  child: const Icon(Icons.mic_rounded, size: 24),
                 ),
               ),
             ),
@@ -959,7 +957,7 @@ class _BottomBar extends StatelessWidget {
             ListenableBuilder(
               listenable: Listenable.merge([?live, ?bands]),
               builder: (context, _) => _BarButton(
-                icon: Icons.chat_bubble_outline_rounded,
+                icon: Icons.headphones_outlined,
                 label: context.t.navMatches,
                 onTap: onMatches!,
                 badge: (live?.unreadTotal ?? 0) + (bands?.badgeCount ?? 0),
@@ -1061,6 +1059,8 @@ class _BarButton extends StatelessWidget {
   });
 
   final IconData icon;
+
+  /// Shown as a tooltip and read by screen readers.
   final String label;
   final VoidCallback onTap;
 
@@ -1070,34 +1070,18 @@ class _BarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Badge(
-                isLabelVisible: badge > 0,
-                label: Text(badge > 99 ? '99+' : '$badge'),
-                backgroundColor: OctavaColors.pink,
-                textColor: OctavaColors.ink,
-                child: Icon(icon, color: colors.onSurface),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: colors.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
+    return IconButton(
+      tooltip: label,
+      onPressed: onTap,
+      visualDensity: VisualDensity.compact,
+      iconSize: 25,
+      color: colors.onSurface,
+      icon: Badge(
+        isLabelVisible: badge > 0,
+        label: Text(badge > 99 ? '99+' : '$badge'),
+        backgroundColor: OctavaColors.pink,
+        textColor: OctavaColors.ink,
+        child: Icon(icon),
       ),
     );
   }
