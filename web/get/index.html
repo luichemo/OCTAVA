@@ -1,0 +1,377 @@
+<!doctype html>
+<!--
+  OCTAVA landing page for the QR code: https://luichemo.github.io/OCTAVA/get/
+  It's copied into the web build from web/get/, so it ships with the tester
+  preview. The logo, Bebas Neue and Noto Sans Georgian sit next to it, so
+  it works on its own; Inter comes from the built app (../assets/...) and
+  falls back to the system font when the page is opened by itself.
+
+  When the app is in the stores, put the links in STORES below; until then
+  the store buttons say "Coming soon" and the page offers the web preview.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OCTAVA · Find your band</title>
+  <meta name="description" content="OCTAVA is a swipe app for musicians: hear people play, match, chat and form a band.">
+  <meta name="theme-color" content="#FF4FA3">
+  <meta property="og:title" content="OCTAVA · Swipe. Jam. Form a band.">
+  <meta property="og:description" content="A swipe app for musicians: hear people play, match, chat and form a band.">
+  <meta property="og:image" content="https://luichemo.github.io/OCTAVA/icons/Icon-512.png">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../icons/Icon-192.png">
+  <style>
+    @font-face { font-family: "Bebas"; src: url("fonts/BebasNeue-Regular.ttf") format("truetype"); font-display: swap; }
+    @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+    @font-face { font-family: "Noto Georgian"; src: url("fonts/NotoSansGeorgian-400.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Noto Georgian"; src: url("fonts/NotoSansGeorgian-700.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
+    :root {
+      --ink: #22328C;
+      --ink-soft: #56619E;
+      --paper: #EEF0EC;
+      --card: #FAFBF8;
+      --shadow: #22328C;
+      --pink: #FF4FA3;
+      --pink-tint: #FFC9E2;
+      --yellow: #FFE14D;
+      --aqua: #74D3EA;
+      --on-fill: #22328C; /* text on pink, yellow and aqua, in both modes */
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --ink: #E8EBF8;
+        --ink-soft: #A7B0DA;
+        --paper: #10173A;
+        --card: #18214D;
+        --shadow: #05081C;
+        --pink-tint: #5A2A57;
+      }
+    }
+    :root[data-theme="dark"] {
+      --ink: #E8EBF8; --ink-soft: #A7B0DA; --paper: #10173A; --card: #18214D;
+      --shadow: #05081C; --pink-tint: #5A2A57;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 400 16px/1.5 "Inter", "Noto Georgian", system-ui, sans-serif;
+    }
+    :lang(ka) body, html[lang="ka"] body { font-size: 15px; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 16px 16px 40px; }
+
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    header img { height: 40px; width: auto; display: block; }
+    .lang {
+      font: 600 14px "Inter", "Noto Georgian", sans-serif;
+      color: var(--ink); background: var(--card);
+      border: 2px solid var(--ink); border-radius: 999px; padding: 6px 14px;
+      box-shadow: 2px 2px 0 var(--shadow); cursor: pointer;
+    }
+
+    .box {
+      background: var(--card);
+      border: 2px solid var(--ink);
+      border-radius: 24px;
+      box-shadow: 5px 5px 0 var(--shadow);
+    }
+    h1, h2, h3 {
+      font-family: "Bebas", "Noto Georgian", sans-serif;
+      font-weight: 400; letter-spacing: 0.03em; line-height: 0.95; margin: 0;
+    }
+    html[lang="ka"] h1, html[lang="ka"] h2, html[lang="ka"] h3 { font-weight: 700; letter-spacing: 0; line-height: 1.15; }
+
+    .hero {
+      margin-top: 18px; padding: 28px 22px; background: var(--aqua); color: var(--on-fill);
+      position: relative; overflow: hidden;
+    }
+    .hero::after { /* riso halftone dots */
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.18;
+      background-image: radial-gradient(#22328C 1.6px, transparent 1.8px);
+      background-size: 12px 12px;
+      -webkit-mask-image: linear-gradient(120deg, transparent 35%, #000 100%);
+      mask-image: linear-gradient(120deg, transparent 35%, #000 100%);
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero h1 { font-size: clamp(48px, 12vw, 96px); }
+    html[lang="ka"] .hero h1 { font-size: clamp(32px, 8vw, 64px); }
+    .hero p { font-size: 18px; max-width: 34em; margin: 14px 0 0; }
+
+    .get { margin-top: 22px; display: grid; gap: 12px; }
+    .stores { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      min-height: 56px; padding: 10px 22px; border-radius: 999px;
+      border: 2px solid #22328C; color: var(--on-fill); text-decoration: none;
+      font: 700 17px "Inter", "Noto Georgian", sans-serif;
+      background: var(--pink); box-shadow: 4px 4px 0 var(--yellow);
+      transition: transform .08s, box-shadow .08s;
+    }
+    .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--yellow); }
+    .btn.store { background: #FFFFFF; box-shadow: 4px 4px 0 #22328C; }
+    .btn.store.big { flex: 1 1 100%; min-height: 64px; font-size: 19px; }
+    .btn[aria-disabled="true"] { cursor: default; }
+    .btn[aria-disabled="true"]:active { transform: none; box-shadow: 4px 4px 0 #22328C; }
+    .btn svg { width: 22px; height: 22px; flex: none; }
+    .soon {
+      font: 700 12px "Inter", "Noto Georgian", sans-serif; text-transform: uppercase; letter-spacing: .04em;
+      background: var(--yellow); border: 2px solid #22328C; border-radius: 999px; padding: 1px 8px;
+    }
+    .note { font-size: 13px; color: var(--on-fill); opacity: .85; margin: 0; }
+
+    section { margin-top: 34px; }
+    section > h2 { font-size: clamp(34px, 6vw, 48px); margin-bottom: 14px; }
+    html[lang="ka"] section > h2 { font-size: clamp(24px, 4.4vw, 34px); }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .feature { padding: 18px; }
+    .feature h3 { font-size: 28px; margin: 10px 0 6px; }
+    html[lang="ka"] .feature h3 { font-size: 20px; }
+    .feature p { margin: 0; color: var(--ink-soft); }
+    .chip {
+      width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+      border: 2px solid #22328C; color: #22328C; box-shadow: 2px 2px 0 var(--shadow);
+    }
+    .chip svg { width: 22px; height: 22px; }
+
+    .who { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 0; list-style: none; }
+    .who li {
+      background: var(--card); border: 2px solid var(--ink); border-radius: 999px;
+      padding: 8px 16px; font-weight: 600; box-shadow: 2px 2px 0 var(--shadow);
+    }
+    .split { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .panel { padding: 20px; }
+    .panel h2 { font-size: 34px; margin-bottom: 8px; }
+    html[lang="ka"] .panel h2 { font-size: 24px; }
+    .panel p { margin: 0; }
+    .panel.pink { background: var(--pink-tint); }
+    .panel.yellow { background: var(--yellow); color: var(--on-fill); }
+
+    .scan { display: none; align-items: center; gap: 20px; padding: 20px; }
+    .scan img { width: 150px; height: 150px; border-radius: 12px; border: 2px solid #22328C; background: #fff; flex: none; }
+    .scan h2 { font-size: 34px; margin-bottom: 6px; }
+    html[lang="ka"] .scan h2 { font-size: 24px; }
+    .scan p { margin: 0; color: var(--ink-soft); }
+    body.desktop .scan { display: flex; }
+
+    footer { margin-top: 36px; font-size: 13px; color: var(--ink-soft); text-align: center; }
+    @media (max-width: 480px) { .btn { width: 100%; } .scan img { width: 120px; height: 120px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="logo.png" alt="OCTAVA">
+      <button class="lang" id="lang" type="button"></button>
+    </header>
+
+    <main>
+      <div class="box hero">
+        <h1 data-t="headline"></h1>
+        <p data-t="lead"></p>
+
+        <div class="get">
+          <div class="stores" id="stores"></div>
+          <a class="btn" id="web" href="../"><span data-t="tryWeb"></span></a>
+          <p class="note" data-t="tryWebNote"></p>
+        </div>
+      </div>
+
+      <section>
+        <h2 data-t="howTitle"></h2>
+        <div class="grid">
+          <div class="box feature">
+            <div class="chip" style="background:#FF4FA3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 7v10M21 12h0"/></svg></div>
+            <h3 data-t="f1t"></h3><p data-t="f1"></p>
+          </div>
+          <div class="box feature">
+            <div class="chip" style="background:#FFE14D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M2 12h3M19 12h3M1 10l2 2-2 2M23 10l-2 2 2 2"/></svg></div>
+            <h3 data-t="f2t"></h3><p data-t="f2"></p>
+          </div>
+          <div class="box feature">
+            <div class="chip" style="background:#74D3EA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 9v3M12 8v5M15 9v3"/></svg></div>
+            <h3 data-t="f3t"></h3><p data-t="f3"></p>
+          </div>
+          <div class="box feature">
+            <div class="chip" style="background:#FF4FA3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3 3-5 6-5s6 2 6 5M14 15.5c.6-.3 1.3-.5 2-.5 3 0 6 2 6 5"/></svg></div>
+            <h3 data-t="f4t"></h3><p data-t="f4"></p>
+          </div>
+          <div class="box feature">
+            <div class="chip" style="background:#FFE14D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15h3"/></svg></div>
+            <h3 data-t="f5t"></h3><p data-t="f5"></p>
+          </div>
+          <div class="box feature">
+            <div class="chip" style="background:#74D3EA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></div>
+            <h3 data-t="f6t"></h3><p data-t="f6"></p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-t="whoTitle"></h2>
+        <ul class="who">
+          <li data-t="who1"></li><li data-t="who2"></li><li data-t="who3"></li><li data-t="who4"></li>
+        </ul>
+      </section>
+
+      <section class="split">
+        <div class="box panel pink"><h2 data-t="safeTitle"></h2><p data-t="safe"></p></div>
+        <div class="box panel yellow"><h2 data-t="freeTitle"></h2><p data-t="free"></p></div>
+      </section>
+
+      <section>
+        <div class="box scan">
+          <img src="qr.svg" alt="" width="150" height="150">
+          <div><h2 data-t="scanTitle"></h2><p data-t="scan"></p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer data-t="footer"></footer>
+  </div>
+
+  <script>
+    // Store links. Fill these in once the app is published; null shows
+    // "Coming soon". Android's will be:
+    //   https://play.google.com/store/apps/details?id=com.octava.app
+    const STORES = {
+      ios: null,     // e.g. "https://apps.apple.com/app/id0000000000"
+      android: null,
+    };
+
+    const TEXT = {
+      en: {
+        title: "OCTAVA · Find your band",
+        other: "ქართული",
+        headline: "Swipe. Jam. Form a band.",
+        lead: "OCTAVA is a swipe app for musicians. Hear people play, choose Jam on the ones you like, and when it's mutual, start talking. Then form a band together.",
+        appStore: "App Store",
+        googlePlay: "Google Play",
+        soon: "Coming soon",
+        tryWeb: "Try the preview in your browser",
+        tryWebNote: "The app is coming to iPhone and Android. Until then, the web preview lets you sign up and try it.",
+        howTitle: "How it works",
+        f1t: "Hear before you swipe",
+        f1: "Every profile has short audio clips, so you know how someone plays before you say hi.",
+        f2t: "Jam or pass",
+        f2: "Swipe right on the musicians you'd like to play with. When you both choose Jam, it's a match.",
+        f3t: "Chat with text and voice",
+        f3: "Message your matches, send voice messages and plan your first rehearsal.",
+        f4t: "Build a band",
+        f4: "Create a band and invite your matches; every member approves who joins. Bands appear in the feed too, so musicians can ask to join.",
+        f5t: "Band tools",
+        f5: "A shared rehearsal calendar, your songs with keys and tempos, setlists, and a public band page to share.",
+        f6t: "Filters that fit",
+        f6: "Distance, instrument, genre, skill level, goals and how often you want to rehearse.",
+        whoTitle: "For every kind of musician",
+        who1: "Beginners and hobbyists",
+        who2: "Working musicians",
+        who3: "Bands looking for members",
+        who4: "Session and one-off players",
+        safeTitle: "Safe by design",
+        safe: "OCTAVA is for ages 16 and up. Teens and adults never have private one-on-one chats; they can only meet in bands of three or more. Anyone can be reported or blocked.",
+        freeTitle: "Free",
+        free: "No subscriptions, no ads. Just music.",
+        scanTitle: "Open it on your phone",
+        scan: "Point your phone's camera at this code.",
+        footer: "© 2026 OCTAVA",
+      },
+      ka: {
+        title: "OCTAVA · იპოვე შენი ბენდი",
+        other: "English",
+        headline: "მოუსმინე. დაუკარი. შექმენი ბენდი.",
+        lead: "OCTAVA მუსიკოსების აპია. მოუსმინე, როგორ უკრავენ, მონიშნე ისინი, ვინც მოგეწონა, და როცა მოწონება ორმხრივია, დაიწყე საუბარი. შემდეგ კი ერთად შექმენით ბენდი.",
+        appStore: "App Store",
+        googlePlay: "Google Play",
+        soon: "მალე",
+        tryWeb: "სცადე ვებ-ვერსია ბრაუზერში",
+        tryWebNote: "აპი მალე გამოვა iPhone-სა და Android-ზე. მანამდე ვებ-ვერსიაში შეგიძლია დარეგისტრირდე და სცადო.",
+        howTitle: "როგორ მუშაობს",
+        f1t: "ჯერ მოუსმინე",
+        f1: "ყველა პროფილს აქვს მოკლე აუდიო ჩანაწერები, ასე რომ, სანამ მიესალმები, გეცოდინება, როგორ უკრავს.",
+        f2t: "აირჩიე ან გამოტოვე",
+        f2: "გადაფურცლე მარჯვნივ იმ მუსიკოსებზე, ვისთანაც დაკვრა გინდა. თუ მათაც შენ აგირჩიეს, ეს მეჩია.",
+        f3t: "ტექსტი და ხმოვანი შეტყობინებები",
+        f3: "მიწერე შენს მეჩებს, გაუგზავნე ხმოვანი შეტყობინება და დაგეგმე პირველი რეპეტიცია.",
+        f4t: "შექმენი ბენდი",
+        f4: "შექმენი ბენდი და მოიწვიე შენი მეჩები; ახალ წევრს ბენდის ყველა წევრი ამტკიცებს. ბენდები ლენტაშიც ჩანს, ასე რომ, მუსიკოსებს შეუძლიათ გაწევრიანება ითხოვონ.",
+        f5t: "ბენდის ხელსაწყოები",
+        f5: "საერთო რეპეტიციების კალენდარი, სიმღერები ტონალობითა და ტემპით, სეტლისტები და ბენდის საჯარო გვერდი გასაზიარებლად.",
+        f6t: "ზუსტი ფილტრები",
+        f6: "მანძილი, ინსტრუმენტი, ჟანრი, დონე, მიზნები და რამდენად ხშირად გინდა რეპეტიცია.",
+        whoTitle: "ყველა მუსიკოსისთვის",
+        who1: "დამწყებები და მოყვარულები",
+        who2: "პროფესიონალი მუსიკოსები",
+        who3: "ბენდები, რომლებიც წევრებს ეძებენ",
+        who4: "სესიური და ერთჯერადი მუსიკოსები",
+        safeTitle: "უსაფრთხოება",
+        safe: "OCTAVA 16 წლიდანაა. მოზარდებსა და ზრდასრულებს ერთმანეთთან პირადი მიმოწერა არ აქვთ; ისინი მხოლოდ სამ- ან მეტწევრიან ბენდებში ხვდებიან. ნებისმიერი მომხმარებლის დაბლოკვა ან დარეპორტება შეიძლება.",
+        freeTitle: "უფასოა",
+        free: "გამოწერებისა და რეკლამის გარეშე. მხოლოდ მუსიკა.",
+        scanTitle: "გახსენი ტელეფონზე",
+        scan: "მიუშვირე ტელეფონის კამერა ამ კოდს.",
+        footer: "© 2026 OCTAVA",
+      },
+    };
+
+    const ua = navigator.userAgent || "";
+    const isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(ua);
+    if (!isIOS && !isAndroid) document.body.classList.add("desktop");
+
+    const APPLE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8s-1.8-.8-3-.8C7 7.2 5.5 8.2 4.7 9.6c-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7 0 0-2.9-1.1-2.9-4zM14.1 5.6c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.1 1.8-1 2.9 1.1.1 2.2-.6 2.8-1.3z"/></svg>';
+    const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.8v18.4c0 .5.5.8.9.6l10.5-9.2L4.9 2.2c-.4-.2-.9.1-.9.6z" fill="#22328C"/><path d="M15.4 12.6l3.6 3.1 2.6-1.5c.8-.5.8-1.6 0-2.1l-2.6-1.5-3.6 3.1z" fill="#FF4FA3"/></svg>';
+
+    function storeButton(kind, t, big) {
+      const url = STORES[kind];
+      const a = document.createElement(url ? "a" : "span");
+      a.className = "btn store" + (big ? " big" : "");
+      if (url) { a.href = url; a.rel = "noopener"; } else { a.setAttribute("aria-disabled", "true"); }
+      const name = kind === "ios" ? t.appStore : t.googlePlay;
+      a.innerHTML = (kind === "ios" ? APPLE : PLAY) + "<span></span>";
+      a.querySelector("span").textContent = name;
+      if (!url) {
+        const soon = document.createElement("span");
+        soon.className = "soon";
+        soon.textContent = t.soon;
+        a.appendChild(soon);
+      }
+      return a;
+    }
+
+    function render(lang) {
+      const t = TEXT[lang];
+      document.documentElement.lang = lang;
+      document.title = t.title;
+      document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = t[el.dataset.t]; });
+      document.getElementById("lang").textContent = t.other;
+      const stores = document.getElementById("stores");
+      stores.replaceChildren();
+      // Phones get one big button for their own store; computers get both.
+      if (isIOS) stores.append(storeButton("ios", t, true));
+      else if (isAndroid) stores.append(storeButton("android", t, true));
+      else stores.append(storeButton("ios", t, false), storeButton("android", t, false));
+      // Once the phone's store link exists, the web preview steps back.
+      const own = isIOS ? STORES.ios : isAndroid ? STORES.android : STORES.ios && STORES.android;
+      document.getElementById("web").hidden = Boolean(own);
+      document.querySelector('[data-t="tryWebNote"]').hidden = Boolean(own);
+    }
+
+    let lang = "en";
+    try { lang = localStorage.getItem("octava-get-lang") || ""; } catch (e) { lang = ""; }
+    if (!TEXT[lang]) lang = (navigator.languages || [navigator.language || "en"]).some((l) => /^ka/i.test(l)) ? "ka" : "en";
+    render(lang);
+    document.getElementById("lang").addEventListener("click", () => {
+      lang = lang === "en" ? "ka" : "en";
+      try { localStorage.setItem("octava-get-lang", lang); } catch (e) {}
+      render(lang);
+    });
+  </script>
+</body>
+</html>
