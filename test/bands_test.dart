@@ -28,9 +28,16 @@ const dato = BandPerson(id: 'dato', name: 'Dato', instrumentId: 'bass');
 
 /// Bands in memory, following the same rules as the database functions.
 class FakeBandsRepository implements BandsRepository {
-  FakeBandsRepository({List<MyBand>? bands, List<BandInvite>? invites})
-    : bands = [...?bands],
-      invites = [...?invites];
+  FakeBandsRepository({
+    List<MyBand>? bands,
+    List<BandInvite>? invites,
+    List<MyBandRequest>? requests,
+  }) : bands = [...?bands],
+       invites = [...?invites],
+       requests = [...?requests];
+
+  /// Bands you asked to join, still voting.
+  final List<MyBandRequest> requests;
 
   final List<MyBand> bands;
   final List<BandInvite> invites;
@@ -82,6 +89,7 @@ class FakeBandsRepository implements BandsRepository {
         ),
     ],
     invites: List.of(invites),
+    requests: List.of(requests),
   );
 
   void _check() {
@@ -136,6 +144,25 @@ class FakeBandsRepository implements BandsRepository {
     final band = bands.firstWhere(
       (b) => b.proposals.any((p) => p.id == proposalId),
     );
+    final voted = band.proposals.firstWhere((p) => p.id == proposalId);
+    final everyone = band.members.every(
+      (m) => {...voted.approvedBy, me.id}.contains(m.id),
+    );
+    if (approve && voted.requested && everyone) {
+      // They asked, so they're in as soon as the last member approves.
+      _replace(
+        MyBand(
+          id: band.id,
+          name: band.name,
+          members: [...band.members, voted.candidate],
+          proposals: [
+            for (final p in band.proposals)
+              if (p.id != proposalId) p,
+          ],
+        ),
+      );
+      return;
+    }
     _replace(
       MyBand(
         id: band.id,
@@ -178,6 +205,13 @@ class FakeBandsRepository implements BandsRepository {
   }
 
   final cancelled = <String>[];
+
+  @override
+  Future<void> withdrawRequest(String proposalId) async {
+    _check();
+    requests.removeWhere((r) => r.proposalId == proposalId);
+    _changes.add(const BandsChanged());
+  }
 
   @override
   Future<void> cancel(String proposalId) async {
@@ -584,6 +618,32 @@ void main() {
     expect(find.text('3 members'), findsOneWidget);
   });
 
+  testWidgets('your pending request shows, and can be withdrawn', (
+    tester,
+  ) async {
+    final repo = FakeBandsRepository(
+      requests: [
+        const MyBandRequest(proposalId: 'req', bandId: 'b9', bandName: 'Riot'),
+      ],
+    );
+    final live = LiveBands(repo)..start();
+    final chat = FakeChatRepository(matches: [nikaMatch]);
+    final matches = LiveUpdates(chat)..start();
+    addTearDown(live.dispose);
+    addTearDown(matches.dispose);
+    await pump(
+      tester,
+      MatchesScreen(repository: chat, live: matches, bands: live),
+    );
+    expect(find.text('Riot'), findsOneWidget);
+    expect(find.textContaining('waiting for the band'), findsOneWidget);
+
+    await tester.tap(find.text('Withdraw'));
+    await tester.pumpAndSettle();
+    expect(repo.requests, isEmpty);
+    expect(find.text('Request withdrawn.'), findsOneWidget);
+  });
+
   testWidgets('a band with a vote waiting shows it in the list', (
     tester,
   ) async {
@@ -934,6 +994,41 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Nika was removed from the band.'), findsOneWidget);
       expect(repo.bands.single.members.single.id, 'me');
+    });
+
+    testWidgets('a request to join is voted on, and joins when all agree', (
+      tester,
+    ) async {
+      final repo = await pumpBand(
+        tester,
+        const MyBand(
+          id: 'b1',
+          name: 'Riot',
+          members: [me, nika],
+          proposals: [
+            BandProposal(
+              id: 'req',
+              candidate: dato,
+              invited: false,
+              requested: true,
+              approvedBy: {'nika'},
+            ),
+          ],
+        ),
+      );
+      expect(find.text('Asked to join'), findsOneWidget);
+      expect(find.textContaining('1 of 2 approved'), findsOneWidget);
+      final approve = find.text('Approve');
+      await tester.ensureVisible(approve);
+      await tester.pumpAndSettle();
+      await tester.tap(approve);
+      await tester.pumpAndSettle();
+      expect(repo.bands.single.members.map((m) => m.id), [
+        'me',
+        'nika',
+        'dato',
+      ]);
+      expect(find.text('Dato joined the band!'), findsOneWidget);
     });
 
     testWidgets('leaving asks first and goes back', (tester) async {

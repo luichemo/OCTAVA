@@ -465,5 +465,14 @@
   "bandAskedToJoin": "მოთხოვნა გაეგზავნა ბენდს {band}. წევრები ხმას მისცემენ.",
   "bandPassedOn": "გამოტოვე ბენდი {band}.",
   "bandNoOpenRoles": "კონკრეტულ როლებს ჯერ არ ეძებენ",
-  "bandSlotFilled": "ბენდშია"
+  "bandSlotFilled": "ბენდშია",
+  "bandRequestsHeading": "გაწევრიანება სურთ",
+  "bandAskedToJoinLabel": "გაწევრიანება სურს",
+  "bandMemberJoined": "{name} შემოუერთდა ბენდს!",
+  "bandRequestWaiting": "მოთხოვნა გაგზავნილია · ველოდებით ბენდის კენჭისყრას",
+  "bandWithdraw": "გაუქმება",
+  "bandWithdrawn": "მოთხოვნა გაუქმდა.",
+  "resetSwipesTitle": "განვაახლოთ ყველა სვაიპი?",
+  "resetSwipesBody": "ყველა, ვინც გამოტოვე ან ვისაც ჯემი აურჩიე, ისევ გამოჩნდება, ბენდებიც. მეჩები და ჩატები რჩება. ეს სატესტო ფუნქციაა.",
+  "resetSwipesConfirm": "სვაიპების განულება"
 }

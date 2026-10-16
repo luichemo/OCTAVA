@@ -110,6 +110,19 @@ class _MatchesScreenState extends State<MatchesScreen> {
     }
   }
 
+  Future<void> _withdraw(MyBandRequest request) async {
+    final bands = widget.bands!;
+    final messenger = ScaffoldMessenger.of(context);
+    final t = context.t;
+    try {
+      await bands.repository.withdrawRequest(request.proposalId);
+      await bands.refresh();
+      messenger.showSnackBar(SnackBar(content: Text(t.bandWithdrawn)));
+    } on UserFacingException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   Future<void> _answer(BandInvite invite, {required bool accept}) async {
     final bands = widget.bands!;
     final messenger = ScaffoldMessenger.of(context);
@@ -145,6 +158,27 @@ class _MatchesScreenState extends State<MatchesScreen> {
         _InviteCard(
           invite: invite,
           onAnswer: (accept) => _answer(invite, accept: accept),
+        ),
+      for (final request in bands.requests)
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          leading: const CircleAvatar(
+            radius: 24,
+            backgroundColor: OctavaColors.yellow,
+            foregroundColor: OctavaColors.ink,
+            child: Icon(Icons.hourglass_top_rounded),
+          ),
+          title: Text(
+            request.bandName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(t.bandRequestWaiting),
+          trailing: TextButton(
+            onPressed: () => _withdraw(request),
+            child: Text(t.bandWithdraw),
+          ),
         ),
       for (final band in bands.bands ?? const <MyBand>[])
         _BandTile(

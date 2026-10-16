@@ -111,6 +111,16 @@ void main() {
 
     await tester.tap(find.text('Reset my swipes (test)'));
     await tester.pumpAndSettle();
+    // It asks first; Cancel changes nothing.
+    expect(find.text('Reset all your swipes?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(deck.resets, 0);
+
+    await tester.tap(find.text('Reset my swipes (test)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset swipes'));
+    await tester.pumpAndSettle();
     expect(deck.resets, 1);
     expect(
       find.text("Your swipes are cleared. Everyone's back."),

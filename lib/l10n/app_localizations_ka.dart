@@ -1641,4 +1641,35 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get bandSlotFilled => 'ბენდშია';
+
+  @override
+  String get bandRequestsHeading => 'გაწევრიანება სურთ';
+
+  @override
+  String get bandAskedToJoinLabel => 'გაწევრიანება სურს';
+
+  @override
+  String bandMemberJoined(String name) {
+    return '$name შემოუერთდა ბენდს!';
+  }
+
+  @override
+  String get bandRequestWaiting =>
+      'მოთხოვნა გაგზავნილია · ველოდებით ბენდის კენჭისყრას';
+
+  @override
+  String get bandWithdraw => 'გაუქმება';
+
+  @override
+  String get bandWithdrawn => 'მოთხოვნა გაუქმდა.';
+
+  @override
+  String get resetSwipesTitle => 'განვაახლოთ ყველა სვაიპი?';
+
+  @override
+  String get resetSwipesBody =>
+      'ყველა, ვინც გამოტოვე ან ვისაც ჯემი აურჩიე, ისევ გამოჩნდება, ბენდებიც. მეჩები და ჩატები რჩება. ეს სატესტო ფუნქციაა.';
+
+  @override
+  String get resetSwipesConfirm => 'სვაიპების განულება';
 }

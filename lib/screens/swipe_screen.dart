@@ -205,6 +205,26 @@ class _SwipeScreenState extends State<SwipeScreen>
   Future<void> _resetSwipes() async {
     final messenger = ScaffoldMessenger.of(context);
     final t = context.t;
+    // It deletes your swipes, so ask: it sits right under "Check again"
+    // and was being tapped by mistake.
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.resetSwipesTitle),
+        content: Text(t.resetSwipesBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(t.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(t.resetSwipesConfirm),
+          ),
+        ],
+      ),
+    );
+    if (sure != true || !mounted) return;
     try {
       await widget.source.resetSwipes();
       // Replaces the last swipe's toast instead of queueing behind it.
@@ -824,7 +844,7 @@ class _DeckMessage extends StatelessWidget {
           if (extraAction != null)
             TextButton.icon(
               onPressed: onExtraAction,
-              icon: const Icon(Icons.restart_alt_rounded),
+              icon: const Icon(Icons.delete_sweep_outlined),
               label: Text(extraAction!),
             ),
         ],

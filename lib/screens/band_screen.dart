@@ -173,7 +173,16 @@ class _BandScreenState extends State<BandScreen> {
       );
       if (sure != true || !mounted) return;
     }
+    final t = context.t;
+    final messenger = ScaffoldMessenger.of(context);
     await _run(() => widget.bands.repository.vote(p.id, approve: approve));
+    // A request joins as soon as the last member approves.
+    final band = widget.bands.bandById(widget.bandId);
+    if (approve && p.requested && (band?.hasMember(p.candidate.id) ?? false)) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(t.bandMemberJoined(p.candidate.name))),
+      );
+    }
   }
 
   Future<void> _cancel(BandProposal p) async {
@@ -379,10 +388,27 @@ class _BandScreenState extends State<BandScreen> {
                                     : null,
                               ),
                           ],
-                          if (band.proposals.isNotEmpty) ...[
+                          // People who asked to join (Jam on the band card).
+                          if (band.proposals.any((p) => p.requested)) ...[
+                            const SizedBox(height: 16),
+                            _Heading(t.bandRequestsHeading),
+                            for (final p in band.proposals.where(
+                              (p) => p.requested,
+                            ))
+                              _ProposalCard(
+                                proposal: p,
+                                memberCount: band.members.length,
+                                me: _me,
+                                avatars: widget.avatars,
+                                onVote: (approve) => _vote(p, approve: approve),
+                              ),
+                          ],
+                          if (band.proposals.any((p) => !p.requested)) ...[
                             const SizedBox(height: 16),
                             _Heading(t.bandWaiting),
-                            for (final p in band.proposals)
+                            for (final p in band.proposals.where(
+                              (p) => !p.requested,
+                            ))
                               _ProposalCard(
                                 proposal: p,
                                 memberCount: band.members.length,
@@ -492,7 +518,10 @@ class _ProposalCard extends StatelessWidget {
             padding: const EdgeInsets.only(left: 12),
             child: Text(
               [
-                if (p.proposedBy case final by?) t.bandProposedBy(by.name),
+                if (p.requested)
+                  t.bandAskedToJoinLabel
+                else if (p.proposedBy case final by?)
+                  t.bandProposedBy(by.name),
                 status,
               ].join(' · '),
               style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),

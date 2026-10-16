@@ -991,5 +991,21 @@
     }
   },
   "bandNoOpenRoles": "Not looking for specific roles yet",
-  "bandSlotFilled": "In the band"
+  "bandSlotFilled": "In the band",
+  "bandRequestsHeading": "Asked to join",
+  "bandAskedToJoinLabel": "Asked to join",
+  "bandMemberJoined": "{name} joined the band!",
+  "@bandMemberJoined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandRequestWaiting": "Asked to join · waiting for the band's vote",
+  "bandWithdraw": "Withdraw",
+  "bandWithdrawn": "Request withdrawn.",
+  "resetSwipesTitle": "Reset all your swipes?",
+  "resetSwipesBody": "Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.",
+  "resetSwipesConfirm": "Reset swipes"
 }

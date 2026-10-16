@@ -32,6 +32,9 @@ abstract interface class BandsRepository {
   /// Withdraws a proposal or invite you made.
   Future<void> cancel(String proposalId);
 
+  /// Withdraws your own request to join a band.
+  Future<void> withdrawRequest(String proposalId);
+
   /// Starts a vote on removing [targetId]. True when they were removed at
   /// once (in a band of two, your yes is the majority).
   Future<bool> proposeRemoval(String bandId, String targetId);
@@ -89,12 +92,25 @@ class SupabaseBandsRepository implements BandsRepository {
   Future<BandsState> load() async {
     try {
       // Row-level security returns only bands you're in or invited to.
+      // Bands you asked to join (only their names; you can't see them yet).
+      final requestRows = await _client.rpc('my_band_requests') as List;
+      final requests = [
+        for (final r in requestRows.cast<Map<String, dynamic>>())
+          MyBandRequest(
+            proposalId: r['proposal_id'] as String,
+            bandId: r['band_id'] as String,
+            bandName: r['band_name'] as String,
+          ),
+      ];
+
       final bands = await _client
           .from('bands')
           .select(
             'id, name, description, genres, open_roles, clip_path, clip_seconds',
           );
-      if (bands.isEmpty) return (bands: <MyBand>[], invites: <BandInvite>[]);
+      if (bands.isEmpty) {
+        return (bands: <MyBand>[], invites: <BandInvite>[], requests: requests);
+      }
       final bandIds = [for (final b in bands) b['id'] as String];
 
       final members = await _client
@@ -104,7 +120,7 @@ class SupabaseBandsRepository implements BandsRepository {
           .order('joined_at');
       final proposals = await _client
           .from('band_proposals')
-          .select('id, band_id, candidate_id, proposed_by, status')
+          .select('id, band_id, candidate_id, proposed_by, status, requested')
           .inFilter('band_id', bandIds)
           .inFilter('status', ['voting', 'invited'])
           .order('created_at');
@@ -264,6 +280,7 @@ class SupabaseBandsRepository implements BandsRepository {
                         candidate: c,
                         proposedBy: person(p['proposed_by'] as String?),
                         invited: p['status'] == 'invited',
+                        requested: p['requested'] == true,
                         approvedBy: {
                           for (final v in votes)
                             if (v['proposal_id'] == p['id'] &&
@@ -289,7 +306,7 @@ class SupabaseBandsRepository implements BandsRepository {
           );
         }
       }
-      return (bands: myBands, invites: invites);
+      return (bands: myBands, invites: invites, requests: requests);
     } catch (_) {
       throw UserFacingException(L10n.current.errBandLoad);
     }
@@ -350,6 +367,10 @@ class SupabaseBandsRepository implements BandsRepository {
   @override
   Future<void> cancelRemoval(String removalId) =>
       _call('cancel_band_removal', {'removal': removalId});
+
+  @override
+  Future<void> withdrawRequest(String proposalId) =>
+      _call('withdraw_band_request', {'proposal': proposalId});
 
   @override
   Future<void> cancel(String proposalId) =>
@@ -591,7 +612,9 @@ String bandErrorMessage(String serverMessage) {
   if (m.contains('another age group')) return t.errBandAgeRule;
   if (m.contains('isn\'t available')) return t.errBandUnavailable;
   if (m.contains('vote on this person is over')) return t.errBandVoteOver;
-  if (m.contains('invite isn\'t open')) return t.errBandInviteClosed;
+  if (m.contains('invite isn\'t open') || m.contains('request isn\'t open')) {
+    return t.errBandInviteClosed;
+  }
   if (m.contains('not in this band')) return t.errBandNotMember;
   if (m.contains('use leave band')) return t.errBandRemoveSelf;
   if (m.contains('not in the band')) return t.errBandNotInBand;

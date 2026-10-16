@@ -28,6 +28,9 @@ class LiveBands extends ChangeNotifier {
   List<MyBand>? bands;
   List<BandInvite> invites = const [];
 
+  /// Bands you asked to join that are still voting.
+  List<MyBandRequest> requests = const [];
+
   /// The last loading error, shown until a load works again.
   Object? error;
 
@@ -109,6 +112,7 @@ class LiveBands extends ChangeNotifier {
               b.id == _openChat ? b.copyWith(unreadCount: 0) : b,
           ];
           invites = next.invites;
+          requests = next.requests;
           error = null;
         } catch (e) {
           if (_disposed) return;

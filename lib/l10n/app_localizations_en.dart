@@ -1652,4 +1652,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bandSlotFilled => 'In the band';
+
+  @override
+  String get bandRequestsHeading => 'Asked to join';
+
+  @override
+  String get bandAskedToJoinLabel => 'Asked to join';
+
+  @override
+  String bandMemberJoined(String name) {
+    return '$name joined the band!';
+  }
+
+  @override
+  String get bandRequestWaiting =>
+      'Asked to join · waiting for the band\'s vote';
+
+  @override
+  String get bandWithdraw => 'Withdraw';
+
+  @override
+  String get bandWithdrawn => 'Request withdrawn.';
+
+  @override
+  String get resetSwipesTitle => 'Reset all your swipes?';
+
+  @override
+  String get resetSwipesBody =>
+      'Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.';
+
+  @override
+  String get resetSwipesConfirm => 'Reset swipes';
 }

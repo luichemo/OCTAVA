@@ -2893,6 +2893,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In the band'**
   String get bandSlotFilled;
+
+  /// No description provided for @bandRequestsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked to join'**
+  String get bandRequestsHeading;
+
+  /// No description provided for @bandAskedToJoinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked to join'**
+  String get bandAskedToJoinLabel;
+
+  /// No description provided for @bandMemberJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} joined the band!'**
+  String bandMemberJoined(String name);
+
+  /// No description provided for @bandRequestWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked to join · waiting for the band\'s vote'**
+  String get bandRequestWaiting;
+
+  /// No description provided for @bandWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get bandWithdraw;
+
+  /// No description provided for @bandWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Request withdrawn.'**
+  String get bandWithdrawn;
+
+  /// No description provided for @resetSwipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all your swipes?'**
+  String get resetSwipesTitle;
+
+  /// No description provided for @resetSwipesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.'**
+  String get resetSwipesBody;
+
+  /// No description provided for @resetSwipesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset swipes'**
+  String get resetSwipesConfirm;
 }
 
 class _AppLocalizationsDelegate

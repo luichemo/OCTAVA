@@ -28,7 +28,12 @@ class BandProposal {
     required this.invited,
     this.proposedBy,
     this.approvedBy = const {},
+    this.requested = false,
   });
+
+  /// They asked to join themselves (a Jam on the band's card), so nobody
+  /// proposed them, and they join as soon as everyone approves.
+  final bool requested;
 
   final String id;
   final BandPerson candidate;
@@ -177,8 +182,25 @@ class BandInvite {
   final List<BandPerson> members;
 }
 
+/// A band you asked to join (a Jam on its card), still being voted on.
+class MyBandRequest {
+  const MyBandRequest({
+    required this.proposalId,
+    required this.bandId,
+    required this.bandName,
+  });
+
+  final String proposalId;
+  final String bandId;
+  final String bandName;
+}
+
 /// Everything band-related for the signed-in person.
-typedef BandsState = ({List<MyBand> bands, List<BandInvite> invites});
+typedef BandsState = ({
+  List<MyBand> bands,
+  List<BandInvite> invites,
+  List<MyBandRequest> requests,
+});
 
 /// Something that changed in your bands, pushed live by the server.
 sealed class BandChange {
