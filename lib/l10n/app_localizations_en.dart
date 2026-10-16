@@ -1706,4 +1706,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceStop => 'Stop voice message';
+
+  @override
+  String get editMessage => 'Edit message';
+
+  @override
+  String get editMessageHint =>
+      'You can edit a message for 15 minutes after sending it.';
+
+  @override
+  String get editSave => 'Save';
+
+  @override
+  String editedAt(String time) {
+    return 'edited · $time';
+  }
+
+  @override
+  String get errEditTooLate => 'Messages can only be edited for 15 minutes.';
+
+  @override
+  String get errEdit => 'Couldn\'t edit the message. Try again.';
 }

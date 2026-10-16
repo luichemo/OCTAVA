@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
-import 'chat_repository.dart' show uploadVoice;
+import 'chat_repository.dart' show editMessageRpc, uploadVoice;
 import 'clip_repository.dart';
 import 'repositories.dart';
 
@@ -74,6 +74,9 @@ abstract interface class BandsRepository {
   Stream<List<ChatMessage>> messages(String bandId);
 
   Future<void> send(String bandId, String body);
+
+  /// Changes the text of your own band message (within 15 minutes).
+  Future<void> editMessage(String messageId, String body);
 
   /// Uploads a voice recording and posts it in the band chat.
   Future<void> sendVoice(
@@ -550,6 +553,10 @@ class SupabaseBandsRepository implements BandsRepository {
   );
 
   @override
+  Future<void> editMessage(String messageId, String body) =>
+      editMessageRpc(_client, 'edit_band_message', messageId, body);
+
+  @override
   Future<void> markRead(String bandId) async {
     try {
       await _client.from('band_reads').upsert({
@@ -588,6 +595,13 @@ class SupabaseBandsRepository implements BandsRepository {
         callback: (_) => add(const BandsChanged()),
       );
     }
+    // An edited message: reload, so the band row's preview shows it.
+    channel.onPostgresChanges(
+      event: PostgresChangeEvent.update,
+      schema: 'public',
+      table: 'band_messages',
+      callback: (_) => add(const BandsChanged()),
+    );
     channel.onPostgresChanges(
       event: PostgresChangeEvent.insert,
       schema: 'public',

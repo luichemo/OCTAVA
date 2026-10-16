@@ -154,6 +154,37 @@ class FakeChatRepository implements ChatRepository {
   @override
   Future<String> voiceUrl(String path) async => 'https://example.invalid/$path';
 
+  final edits = <String>[];
+
+  @override
+  Future<void> edit(String messageId, String body) async {
+    edits.add('$messageId:$body');
+    _editIn(_messages, messageId, body);
+  }
+
+  /// Replaces a message's text, marking it edited (like the database).
+  void _editIn(
+    Map<String, List<ChatMessage>> all,
+    String messageId,
+    String body,
+  ) {
+    for (final entry in all.entries) {
+      final list = entry.value;
+      final i = list.indexWhere((m) => m.id == messageId);
+      if (i < 0) continue;
+      final m = list[i];
+      list[i] = ChatMessage(
+        id: m.id,
+        senderId: m.senderId,
+        body: body.trim(),
+        sentAt: m.sentAt,
+        editedAt: DateTime.now(),
+      );
+      _streams[entry.key]?.add(List.of(list));
+      return;
+    }
+  }
+
   /// Someone else's swipe completes a match with you.
   void matchWith(MatchSummary match, {String createdBy = 'them'}) {
     matches.add(match);
@@ -232,6 +263,58 @@ void main() {
       findsOneWidget,
     );
     expect(find.widgetWithText(TextField, 'Hello?'), findsOneWidget);
+  });
+
+  test('messages can be edited by their sender for 15 minutes', () {
+    final sent = DateTime(2026, 10, 16, 12);
+    final msg = ChatMessage(id: '1', senderId: 'me', body: 'hi', sentAt: sent);
+    expect(
+      msg.canEdit('me', now: sent.add(const Duration(minutes: 14))),
+      isTrue,
+    );
+    expect(
+      msg.canEdit('me', now: sent.add(const Duration(minutes: 16))),
+      isFalse,
+    );
+    expect(msg.canEdit('you', now: sent), isFalse);
+  });
+
+  testWidgets('long-press your own message to edit it', (tester) async {
+    final chat = FakeChatRepository(matches: [nika]);
+    chat.receive(nika.matchId, 'me', 'see you at 7');
+    chat.receive(nika.matchId, 'nika', 'cool');
+    await pump(
+      tester,
+      ChatScreen(
+        repository: chat,
+        matchId: nika.matchId,
+        otherUserId: nika.otherUserId,
+        name: nika.name,
+        instrument: nika.instrument,
+      ),
+    );
+    // Someone else's message: nothing to edit.
+    await tester.longPress(find.text('cool'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit message'), findsNothing);
+
+    await tester.longPress(find.text('see you at 7'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit message'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      ),
+      'see you at 8',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(chat.edits, ['0:see you at 8']);
+    expect(find.text('see you at 8'), findsOneWidget);
+    expect(find.textContaining('edited ·'), findsOneWidget);
   });
 
   testWidgets('send a voice message in a one-on-one chat', (tester) async {

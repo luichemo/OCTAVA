@@ -1695,4 +1695,26 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get voiceStop => 'ხმოვანის გაჩერება';
+
+  @override
+  String get editMessage => 'შეტყობინების რედაქტირება';
+
+  @override
+  String get editMessageHint =>
+      'შეტყობინების შეცვლა გაგზავნიდან 15 წუთის განმავლობაში შეგიძლია.';
+
+  @override
+  String get editSave => 'შენახვა';
+
+  @override
+  String editedAt(String time) {
+    return 'შეცვლილია · $time';
+  }
+
+  @override
+  String get errEditTooLate =>
+      'შეტყობინების შეცვლა მხოლოდ 15 წუთის განმავლობაში შეიძლება.';
+
+  @override
+  String get errEdit => 'შეტყობინება ვერ შეიცვალა. სცადე თავიდან.';
 }

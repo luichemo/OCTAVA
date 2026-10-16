@@ -209,22 +209,33 @@ class _ChatScreenState extends State<ChatScreen> {
                           final newDay =
                               older == null ||
                               !sameDay(older.sentAt, message.sentAt);
+                          // Long-press your own message to edit it.
+                          final tappable = GestureDetector(
+                            onLongPress: mine
+                                ? () => showEditMessage(
+                                    context,
+                                    message: message,
+                                    me: widget.repository.myId,
+                                    save: (body) => widget.repository.edit(
+                                      message.id,
+                                      body,
+                                    ),
+                                  )
+                                : null,
+                            child: ChatBubble(
+                              message: message,
+                              mine: mine,
+                              player: widget.player,
+                            ),
+                          );
                           final bubble = newDay
                               ? Column(
                                   children: [
                                     DayChip(day: message.sentAt),
-                                    ChatBubble(
-                                      message: message,
-                                      mine: mine,
-                                      player: widget.player,
-                                    ),
+                                    tappable,
                                   ],
                                 )
-                              : ChatBubble(
-                                  message: message,
-                                  mine: mine,
-                                  player: widget.player,
-                                );
+                              : tappable;
                           // "Seen" goes under your newest message only.
                           if (i != 0 || !mine || widget.live == null) {
                             return bubble;
@@ -397,7 +408,9 @@ class ChatBubble extends StatelessWidget {
                   ),
                 const SizedBox(height: 2),
                 Text(
-                  formatClock(message.sentAt),
+                  message.editedAt == null
+                      ? formatClock(message.sentAt)
+                      : context.t.editedAt(formatClock(message.sentAt)),
                   textAlign: TextAlign.end,
                   style: TextStyle(
                     fontSize: 11,
@@ -411,6 +424,91 @@ class ChatBubble extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Long-press on your own message: Edit (while it can still be edited).
+/// [save] sends the new text. Does nothing for messages you can't edit.
+Future<void> showEditMessage(
+  BuildContext context, {
+  required ChatMessage message,
+  required String me,
+  required Future<void> Function(String body) save,
+}) async {
+  if (!message.canEdit(me)) return;
+  final t = context.t;
+  final messenger = ScaffoldMessenger.of(context);
+  final choice = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) => SafeArea(
+      child: ListTile(
+        leading: const Icon(Icons.edit_outlined),
+        title: Text(t.editMessage),
+        subtitle: Text(t.editMessageHint),
+        onTap: () => Navigator.pop(context, true),
+      ),
+    ),
+  );
+  if (choice != true || !context.mounted) return;
+  final body = await showDialog<String>(
+    context: context,
+    builder: (_) => _EditDialog(initial: message.body),
+  );
+  if (body == null || body.trim() == message.body) return;
+  try {
+    await save(body);
+  } on UserFacingException catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text(e.message)));
+  }
+}
+
+class _EditDialog extends StatefulWidget {
+  const _EditDialog({required this.initial});
+  final String initial;
+
+  @override
+  State<_EditDialog> createState() => _EditDialogState();
+}
+
+class _EditDialogState extends State<_EditDialog> {
+  late final _text = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    return AlertDialog(
+      title: Text(t.editMessage),
+      content: TextField(
+        controller: _text,
+        autofocus: true,
+        minLines: 1,
+        maxLines: 6,
+        maxLength: 2000,
+        textCapitalization: TextCapitalization.sentences,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(t.cancel),
+        ),
+        ValueListenableBuilder(
+          valueListenable: _text,
+          builder: (context, value, _) => FilledButton(
+            onPressed: value.text.trim().isEmpty
+                ? null
+                : () => Navigator.pop(context, value.text),
+            child: Text(t.editSave),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -2989,6 +2989,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop voice message'**
   String get voiceStop;
+
+  /// No description provided for @editMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit message'**
+  String get editMessage;
+
+  /// No description provided for @editMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit a message for 15 minutes after sending it.'**
+  String get editMessageHint;
+
+  /// No description provided for @editSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get editSave;
+
+  /// No description provided for @editedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'edited · {time}'**
+  String editedAt(String time);
+
+  /// No description provided for @errEditTooLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages can only be edited for 15 minutes.'**
+  String get errEditTooLate;
+
+  /// No description provided for @errEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t edit the message. Try again.'**
+  String get errEdit;
 }
 
 class _AppLocalizationsDelegate

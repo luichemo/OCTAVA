@@ -1021,5 +1021,18 @@
     }
   },
   "voicePlay": "Play voice message",
-  "voiceStop": "Stop voice message"
+  "voiceStop": "Stop voice message",
+  "editMessage": "Edit message",
+  "editMessageHint": "You can edit a message for 15 minutes after sending it.",
+  "editSave": "Save",
+  "editedAt": "edited · {time}",
+  "@editedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "errEditTooLate": "Messages can only be edited for 15 minutes.",
+  "errEdit": "Couldn't edit the message. Try again."
 }

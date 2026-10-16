@@ -16,7 +16,7 @@ import '../widgets/chat_composer.dart';
 import '../widgets/person_avatar.dart';
 import '../widgets/safety_sheet.dart';
 import 'band_screen.dart';
-import 'chat_screen.dart' show ChatBubble, DayChip, sameDay;
+import 'chat_screen.dart' show ChatBubble, DayChip, sameDay, showEditMessage;
 
 /// A band's group chat. Messages arrive live; each shows who sent it, and
 /// your newest one says how many bandmates have seen it. While the chat is
@@ -219,6 +219,19 @@ class _BandChatScreenState extends State<BandChatScreen> {
               mine: mine,
               player: widget.player,
             );
+            // Long-press your own message to edit it.
+            if (mine) {
+              bubble = GestureDetector(
+                onLongPress: () => showEditMessage(
+                  context,
+                  message: message,
+                  me: _me,
+                  save: (body) =>
+                      widget.bands.repository.editMessage(message.id, body),
+                ),
+                child: bubble,
+              );
+            }
             // Long-press someone's text message to report it.
             if (!mine && !message.isVoice && widget.safety != null) {
               // Long-press someone's message to report it.

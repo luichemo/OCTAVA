@@ -479,6 +479,38 @@ class FakeBandsRepository implements BandsRepository {
     );
   }
 
+  final edits = <String>[];
+
+  @override
+  Future<void> editMessage(String messageId, String body) async {
+    _check();
+    edits.add('$messageId:$body');
+    _editIn(_messages, messageId, body);
+  }
+
+  /// Replaces a message's text, marking it edited (like the database).
+  void _editIn(
+    Map<String, List<ChatMessage>> all,
+    String messageId,
+    String body,
+  ) {
+    for (final entry in all.entries) {
+      final list = entry.value;
+      final i = list.indexWhere((m) => m.id == messageId);
+      if (i < 0) continue;
+      final m = list[i];
+      list[i] = ChatMessage(
+        id: m.id,
+        senderId: m.senderId,
+        body: body.trim(),
+        sentAt: m.sentAt,
+        editedAt: DateTime.now(),
+      );
+      _streams[entry.key]?.add(List.of(list));
+      return;
+    }
+  }
+
   /// A bandmate sends a voice message.
   void receiveVoice(String bandId, String senderId, int seconds) => _post(
     bandId,
@@ -1193,6 +1225,31 @@ void main() {
       await tester.tap(find.byTooltip('Play voice message'));
       await tester.pump();
       expect(player.toggled, ['voice:b/b1/Recording.wav']);
+    });
+
+    testWidgets('edit your own band message', (tester) async {
+      final repo = FakeBandsRepository(bands: [riot]);
+      final live = LiveBands(repo)..start();
+      addTearDown(live.dispose);
+      await live.refresh();
+      await repo.send('b1', 'rehearsal at 6');
+      await pump(tester, BandChatScreen(bands: live, bandId: 'b1'));
+      await tester.longPress(find.text('rehearsal at 6'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit message'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'rehearsal at 7',
+      );
+      await tester.pump();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(repo.edits, ['msg0:rehearsal at 7']);
+      expect(find.text('rehearsal at 7'), findsOneWidget);
     });
 
     testWidgets('a cancelled recording sends nothing', (tester) async {

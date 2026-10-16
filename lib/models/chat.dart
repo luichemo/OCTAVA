@@ -107,6 +107,7 @@ class ChatMessage {
     required this.sentAt,
     this.audioPath,
     this.audioSeconds,
+    this.editedAt,
   });
 
   factory ChatMessage.fromRow(Map<String, dynamic> row) => ChatMessage(
@@ -116,6 +117,10 @@ class ChatMessage {
     sentAt: DateTime.parse(row['created_at'] as String).toLocal(),
     audioPath: row['audio_path'] as String?,
     audioSeconds: row['audio_seconds'] as int?,
+    editedAt: switch (row['edited_at']) {
+      final String at => DateTime.parse(at).toLocal(),
+      _ => null,
+    },
   );
 
   final String id;
@@ -130,6 +135,18 @@ class ChatMessage {
   final int? audioSeconds;
 
   bool get isVoice => audioPath != null;
+
+  /// When the text was last changed; null if never.
+  final DateTime? editedAt;
+
+  /// How long after sending a message can be edited (the database's limit).
+  static const editWindow = Duration(minutes: 15);
+
+  /// Whether [me] can still edit it: your own text, within [editWindow].
+  bool canEdit(String me, {DateTime? now}) =>
+      senderId == me &&
+      !isVoice &&
+      (now ?? DateTime.now()).difference(sentAt) < editWindow;
 }
 
 /// What a message reads as in previews and banners: its text, or

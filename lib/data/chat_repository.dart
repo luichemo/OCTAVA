@@ -30,6 +30,9 @@ abstract interface class ChatRepository {
     required int seconds,
   });
 
+  /// Changes the text of your own message (within 15 minutes).
+  Future<void> edit(String messageId, String body);
+
   /// A temporary link for playing a voice message (one-on-one or band).
   Future<String> voiceUrl(String path);
 
@@ -185,6 +188,10 @@ class SupabaseChatRepository implements ChatRepository {
   );
 
   @override
+  Future<void> edit(String messageId, String body) =>
+      editMessageRpc(_client, 'edit_message', messageId, body);
+
+  @override
   Future<String> voiceUrl(String path) async {
     try {
       return await _client.storage.from('voice').createSignedUrl(path, 3600);
@@ -261,6 +268,8 @@ class SupabaseChatRepository implements ChatRepository {
     );
     on('matches', PostgresChangeEvent.delete, (_) => const MatchRemoved());
     on('match_reads', PostgresChangeEvent.all, (_) => const ReadMarked());
+    // An edited message: reload, so the Matches preview shows the new text.
+    on('messages', PostgresChangeEvent.update, (_) => const ReadMarked());
     channel.subscribe();
     return out.stream;
   }
@@ -323,6 +332,29 @@ Future<void> uploadVoice(
       throw UserFacingException(L10n.current.errSendBlocked);
     }
     throw UserFacingException(L10n.current.errSend);
+  }
+}
+
+/// Calls an edit function and explains its refusals.
+Future<void> editMessageRpc(
+  SupabaseClient client,
+  String fn,
+  String messageId,
+  String body,
+) async {
+  try {
+    await client.rpc(fn, params: {'message': messageId, 'body': body.trim()});
+  } on PostgrestException catch (e) {
+    final m = e.message.toLowerCase();
+    throw UserFacingException(
+      m.contains('15 minutes')
+          ? L10n.current.errEditTooLate
+          : m.contains('send messages in this chat')
+          ? L10n.current.errSendBlocked
+          : L10n.current.errEdit,
+    );
+  } catch (_) {
+    throw UserFacingException(L10n.current.errSendOffline);
   }
 }
 
