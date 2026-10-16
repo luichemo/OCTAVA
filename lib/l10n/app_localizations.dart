@@ -2851,6 +2851,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vote cancelled.'**
   String get bandRemovalCancelled;
+
+  /// No description provided for @bandCardSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Band: {name}'**
+  String bandCardSemantics(String name);
+
+  /// No description provided for @bandCardStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Band'**
+  String get bandCardStamp;
+
+  /// No description provided for @bandCardNeedsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs your instrument'**
+  String get bandCardNeedsYou;
+
+  /// No description provided for @bandAskedToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked to join {band}. Its members will vote.'**
+  String bandAskedToJoin(String band);
+
+  /// No description provided for @bandPassedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed on {band}.'**
+  String bandPassedOn(String band);
+
+  /// No description provided for @bandNoOpenRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Not looking for specific roles yet'**
+  String get bandNoOpenRoles;
+
+  /// No description provided for @bandSlotFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'In the band'**
+  String get bandSlotFilled;
 }
 
 class _AppLocalizationsDelegate

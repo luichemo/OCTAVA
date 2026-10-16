@@ -1625,4 +1625,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bandRemovalCancelled => 'Vote cancelled.';
+
+  @override
+  String bandCardSemantics(String name) {
+    return 'Band: $name';
+  }
+
+  @override
+  String get bandCardStamp => 'Band';
+
+  @override
+  String get bandCardNeedsYou => 'Needs your instrument';
+
+  @override
+  String bandAskedToJoin(String band) {
+    return 'Asked to join $band. Its members will vote.';
+  }
+
+  @override
+  String bandPassedOn(String band) {
+    return 'Passed on $band.';
+  }
+
+  @override
+  String get bandNoOpenRoles => 'Not looking for specific roles yet';
+
+  @override
+  String get bandSlotFilled => 'In the band';
 }

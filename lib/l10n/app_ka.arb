@@ -458,5 +458,12 @@
   "bandYouAgreed": "შენ დაეთანხმე",
   "bandYouDisagreed": "შენ დატოვება აირჩიე",
   "bandRemovalCancel": "კენჭისყრის გაუქმება",
-  "bandRemovalCancelled": "კენჭისყრა გაუქმდა."
+  "bandRemovalCancelled": "კენჭისყრა გაუქმდა.",
+  "bandCardSemantics": "ბენდი: {name}",
+  "bandCardStamp": "ბენდი",
+  "bandCardNeedsYou": "შენი ინსტრუმენტი სჭირდებათ",
+  "bandAskedToJoin": "მოთხოვნა გაეგზავნა ბენდს {band}. წევრები ხმას მისცემენ.",
+  "bandPassedOn": "გამოტოვე ბენდი {band}.",
+  "bandNoOpenRoles": "კონკრეტულ როლებს ჯერ არ ეძებენ",
+  "bandSlotFilled": "ბენდშია"
 }

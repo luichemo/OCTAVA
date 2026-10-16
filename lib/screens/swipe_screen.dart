@@ -18,9 +18,11 @@ import '../data/repositories.dart';
 import '../data/safety_repository.dart';
 import '../data/theme_setting.dart';
 import '../models/band.dart';
+import '../models/band_card.dart';
 import '../models/deck_filters.dart';
 import '../models/musician.dart';
 import '../theme.dart';
+import '../widgets/band_card.dart';
 import '../widgets/band_lineup.dart';
 import '../widgets/band_roles_sheet.dart';
 import '../widgets/musician_card.dart';
@@ -102,7 +104,9 @@ class _SwipeScreenState extends State<SwipeScreen>
   Map<String, int>? _needs; // null until chosen: the default roles
   List<BandMember> _members = [];
   List<BandSlot> _band = [];
-  List<Musician> _queue = [];
+
+  /// People, with a band card mixed in every few (see mixDeck).
+  List<DeckItem> _queue = [];
   int? _justFilled; // index in _band
   late final BandNeedsRepository _bandNeeds =
       widget.bandNeeds ?? MemoryBandNeeds();
@@ -166,10 +170,11 @@ class _SwipeScreenState extends State<SwipeScreen>
     _hasLocation = await widget.location?.hasLocation() ?? false;
     try {
       // The requests run at the same time, like Promise.all.
-      final (band, needs, deck) = await (
+      final (band, needs, deck, bandCards) = await (
         widget.source.loadBand(),
         _bandNeeds.load(),
         widget.source.loadDeck(_filters, hasLocation: _hasLocation),
+        widget.source.loadBandCards(),
       ).wait;
       if (!mounted) return;
       setState(() {
@@ -177,7 +182,7 @@ class _SwipeScreenState extends State<SwipeScreen>
         _members = band.members;
         _needs = needs;
         _rebuildBand();
-        _queue = deck;
+        _queue = mixDeck(deck, bandCards);
         _loading = false;
         _loadError = null;
       });
@@ -186,6 +191,7 @@ class _SwipeScreenState extends State<SwipeScreen>
         e.errors.$1,
         e.errors.$2,
         e.errors.$3,
+        e.errors.$4,
       ].whereType<UserFacingException>().firstOrNull;
       if (!mounted) return;
       setState(() {
@@ -334,11 +340,14 @@ class _SwipeScreenState extends State<SwipeScreen>
     if (_busy || _queue.isEmpty) return;
     _busy = true;
     widget.player?.stop();
-    final musician = _queue.first;
+    final item = _queue.first;
     final direction = decision == Decision.jam ? 1.0 : -1.0;
     // Save while the card flies away. _attempt never throws, so a failure
     // can't go unhandled while the animation runs.
-    final saving = _attempt(widget.source.swipe(musician, decision));
+    final saving = _attempt(switch (item) {
+      PersonItem(:final musician) => widget.source.swipe(musician, decision),
+      BandItem(:final band) => widget.source.swipeBand(band, decision),
+    });
     await _animateTo(
       Offset(direction * _deckWidth * 1.4, 30),
       const Duration(milliseconds: 350),
@@ -356,10 +365,20 @@ class _SwipeScreenState extends State<SwipeScreen>
     if (!mounted) return;
     if (outcome is UserFacingException) {
       // Not saved: put the card back so the person can try again.
-      setState(() => _queue = [musician, ..._queue]);
+      setState(() => _queue = [item, ..._queue]);
       _toast(outcome.message);
       return;
     }
+    if (item case BandItem(:final band)) {
+      // A Jam asked to join; there's no undo for band swipes yet.
+      _toast(
+        decision == Decision.jam
+            ? context.t.bandAskedToJoin(band.name)
+            : context.t.bandPassedOn(band.name),
+      );
+      return;
+    }
+    final musician = (item as PersonItem).musician;
     final matchId = outcome is String ? outcome : null;
 
     if (matchId != null) {
@@ -384,7 +403,12 @@ class _SwipeScreenState extends State<SwipeScreen>
     }
     if (!mounted) return;
     setState(() {
-      _queue = [musician, ..._queue.where((m) => m != musician)];
+      _queue = [
+        PersonItem(musician),
+        ..._queue.where(
+          (q) => !(q is PersonItem && q.musician.key == musician.key),
+        ),
+      ];
       _drag = Offset.zero;
     });
   }
@@ -472,14 +496,16 @@ class _SwipeScreenState extends State<SwipeScreen>
     );
     if (blocked && mounted) {
       setState(() {
-        _queue = _queue.where((q) => q.key != m.key).toList();
+        _queue = _queue
+            .where((q) => !(q is PersonItem && q.musician.key == m.key))
+            .toList();
         _drag = Offset.zero;
       });
     }
   }
 
   /// The swipe's result (a match id, or null), or the error to show.
-  Future<Object?> _attempt(Future<String?> swipe) async {
+  Future<Object?> _attempt(Future<Object?> swipe) async {
     try {
       return await swipe;
     } on UserFacingException catch (e) {
@@ -643,6 +669,30 @@ class _SwipeScreenState extends State<SwipeScreen>
     );
   }
 
+  /// A deck card: a musician or a band, with drag stamps on the top one.
+  Widget _card(DeckItem item, {bool top = false}) => switch (item) {
+    PersonItem(:final musician) => MusicianCard(
+      key: ValueKey(item.key),
+      musician: musician,
+      tone: _toneFor(musician),
+      fitsOpenSlot: _fitsOpenSlot(musician),
+      jamStamp: top ? _drag.dx / 90 : 0,
+      passStamp: top ? -_drag.dx / 90 : 0,
+      onSafety: !top || widget.safety == null
+          ? null
+          : () => _openSafety(musician),
+      player: top ? widget.player : null,
+      avatars: widget.avatars,
+    ),
+    BandItem(:final band) => BandCard(
+      key: ValueKey(item.key),
+      band: band,
+      jamStamp: top ? _drag.dx / 90 : 0,
+      passStamp: top ? -_drag.dx / 90 : 0,
+      player: top ? widget.player : null,
+    ),
+  };
+
   Widget _buildDeck() {
     final top = _queue.first;
     final next = _queue.length > 1 ? _queue[1] : null;
@@ -655,16 +705,7 @@ class _SwipeScreenState extends State<SwipeScreen>
               child: IgnorePointer(
                 child: Transform.translate(
                   offset: const Offset(0, 10),
-                  child: Transform.scale(
-                    scale: 0.96,
-                    child: MusicianCard(
-                      key: ValueKey(next.key),
-                      musician: next,
-                      tone: _toneFor(next),
-                      fitsOpenSlot: _fitsOpenSlot(next),
-                      avatars: widget.avatars,
-                    ),
-                  ),
+                  child: Transform.scale(scale: 0.96, child: _card(next)),
                 ),
               ),
             ),
@@ -685,19 +726,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                 offset: _drag,
                 child: Transform.rotate(
                   angle: _drag.dx / 18 * pi / 180,
-                  child: MusicianCard(
-                    key: ValueKey(top.key),
-                    musician: top,
-                    tone: _toneFor(top),
-                    fitsOpenSlot: _fitsOpenSlot(top),
-                    jamStamp: _drag.dx / 90,
-                    passStamp: -_drag.dx / 90,
-                    onSafety: widget.safety == null
-                        ? null
-                        : () => _openSafety(top),
-                    player: widget.player,
-                    avatars: widget.avatars,
-                  ),
+                  child: _card(top, top: true),
                 ),
               ),
             ),

@@ -6,6 +6,8 @@ import 'repositories.dart';
 import 'sample_musicians.dart';
 import '../l10n/l10n.dart';
 import '../models/band.dart';
+import '../models/band_card.dart';
+import 'bands_repository.dart' show bandErrorMessage;
 
 enum Decision { pass, jam }
 
@@ -23,6 +25,13 @@ abstract interface class DeckSource {
   /// Takes back a swipe that didn't make a match, so the person can be
   /// shown again.
   Future<void> undo(Musician musician);
+
+  /// Band cards for your feed (bands you could join). Empty if they can't
+  /// load, so the people deck still works.
+  Future<List<BandCardData>> loadBandCards();
+
+  /// Pass or Jam on a band. True when a Jam sent a join request.
+  Future<bool> swipeBand(BandCardData band, Decision decision);
 
   /// TEMPORARY, for testers: clears your swipes that didn't make a match,
   /// so everyone shows up again. Remove before launch.
@@ -71,6 +80,13 @@ class SampleDeck implements DeckSource {
 
   @override
   Future<void> resetSwipes() async {}
+
+  @override
+  Future<List<BandCardData>> loadBandCards() async => const [];
+
+  @override
+  Future<bool> swipeBand(BandCardData band, Decision decision) async =>
+      decision == Decision.jam;
 }
 
 /// Real people and swipes, through the database functions get_deck and
@@ -116,6 +132,36 @@ class SupabaseDeck implements DeckSource {
       await _client.rpc('undo_swipe', params: {'target': musician.id});
     } catch (_) {
       throw UserFacingException(L10n.current.errUndo);
+    }
+  }
+
+  @override
+  Future<List<BandCardData>> loadBandCards() async {
+    try {
+      final rows = await _client.rpc(
+        'get_band_deck',
+        params: {'max_results': 10},
+      ) as List;
+      return [
+        for (final r in rows) BandCardData.fromRow(r as Map<String, dynamic>),
+      ];
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  @override
+  Future<bool> swipeBand(BandCardData band, Decision decision) async {
+    try {
+      return await _client.rpc(
+            'record_band_swipe',
+            params: {'band': band.id, 'decision': decision.name},
+          ) as bool? ??
+          false;
+    } on PostgrestException catch (e) {
+      throw UserFacingException(bandErrorMessage(e.message));
+    } catch (_) {
+      throw UserFacingException(L10n.current.errSaveSwipe);
     }
   }
 

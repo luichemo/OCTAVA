@@ -1614,4 +1614,31 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get bandRemovalCancelled => 'კენჭისყრა გაუქმდა.';
+
+  @override
+  String bandCardSemantics(String name) {
+    return 'ბენდი: $name';
+  }
+
+  @override
+  String get bandCardStamp => 'ბენდი';
+
+  @override
+  String get bandCardNeedsYou => 'შენი ინსტრუმენტი სჭირდებათ';
+
+  @override
+  String bandAskedToJoin(String band) {
+    return 'მოთხოვნა გაეგზავნა ბენდს $band. წევრები ხმას მისცემენ.';
+  }
+
+  @override
+  String bandPassedOn(String band) {
+    return 'გამოტოვე ბენდი $band.';
+  }
+
+  @override
+  String get bandNoOpenRoles => 'კონკრეტულ როლებს ჯერ არ ეძებენ';
+
+  @override
+  String get bandSlotFilled => 'ბენდშია';
 }

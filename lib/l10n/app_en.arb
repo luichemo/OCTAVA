@@ -963,5 +963,33 @@
   "bandYouAgreed": "You agreed",
   "bandYouDisagreed": "You said keep",
   "bandRemovalCancel": "Cancel vote",
-  "bandRemovalCancelled": "Vote cancelled."
+  "bandRemovalCancelled": "Vote cancelled.",
+  "bandCardSemantics": "Band: {name}",
+  "@bandCardSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bandCardStamp": "Band",
+  "bandCardNeedsYou": "Needs your instrument",
+  "bandAskedToJoin": "Asked to join {band}. Its members will vote.",
+  "@bandAskedToJoin": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "bandPassedOn": "Passed on {band}.",
+  "@bandPassedOn": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "bandNoOpenRoles": "Not looking for specific roles yet",
+  "bandSlotFilled": "In the band"
 }
