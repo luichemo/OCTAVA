@@ -3499,6 +3499,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Song recordings can be up to 10 minutes. This one is {length}.'**
   String errSongTooLong(String length);
+
+  /// No description provided for @setlistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setlists'**
+  String get setlistsTitle;
+
+  /// No description provided for @setlistsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No setlists yet. Make one for your next gig or rehearsal.'**
+  String get setlistsEmpty;
+
+  /// No description provided for @setlistAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New setlist'**
+  String get setlistAddTitle;
+
+  /// No description provided for @setlistNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist name'**
+  String get setlistNameLabel;
+
+  /// No description provided for @setlistNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Friday gig'**
+  String get setlistNameHint;
+
+  /// No description provided for @setlistPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist'**
+  String get setlistPageTitle;
+
+  /// No description provided for @setlistSongCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No songs} =1{1 song} other{{count} songs}}'**
+  String setlistSongCount(int count);
+
+  /// No description provided for @setlistNoLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} without a recording'**
+  String setlistNoLength(int count);
+
+  /// No description provided for @setlistEmptySongs.
+  ///
+  /// In en, this message translates to:
+  /// **'No songs in this setlist yet. Add some from the band\'s songs.'**
+  String get setlistEmptySongs;
+
+  /// No description provided for @setlistAddSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'Add songs'**
+  String get setlistAddSongs;
+
+  /// No description provided for @setlistAddSongsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String setlistAddSongsButton(int count);
+
+  /// No description provided for @setlistAllAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Every song is already in this setlist.'**
+  String get setlistAllAdded;
+
+  /// No description provided for @setlistNoBandSongs.
+  ///
+  /// In en, this message translates to:
+  /// **'The band has no songs yet. Add them under Songs first.'**
+  String get setlistNoBandSongs;
+
+  /// No description provided for @setlistRemoveSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from setlist'**
+  String get setlistRemoveSong;
+
+  /// No description provided for @setlistDragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold a song and drag it to change the order.'**
+  String get setlistDragHint;
+
+  /// No description provided for @setlistRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get setlistRename;
+
+  /// No description provided for @setlistDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete setlist'**
+  String get setlistDelete;
+
+  /// No description provided for @setlistDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String setlistDeleteTitle(String name);
+
+  /// No description provided for @setlistDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The songs stay in the band; only this list goes. Rehearsals that used it keep their other details.'**
+  String get setlistDeleteBody;
+
+  /// No description provided for @setlistDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist deleted.'**
+  String get setlistDeleted;
+
+  /// No description provided for @errSetlistsLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the setlists. Check your connection.'**
+  String get errSetlistsLoad;
+
+  /// No description provided for @errSetlistSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the setlist. Try again.'**
+  String get errSetlistSave;
+
+  /// No description provided for @rehearsalSetlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Setlist to practise'**
+  String get rehearsalSetlist;
+
+  /// No description provided for @rehearsalNoSetlist.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get rehearsalNoSetlist;
+
+  /// No description provided for @rehearsalPractise.
+  ///
+  /// In en, this message translates to:
+  /// **'Practise: {name}'**
+  String rehearsalPractise(String name);
 }
 
 class _AppLocalizationsDelegate

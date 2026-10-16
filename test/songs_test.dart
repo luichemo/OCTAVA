@@ -6,16 +6,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:octava/data/song_repository.dart';
 import 'package:octava/main.dart';
+import 'package:octava/models/setlist.dart';
 import 'package:octava/models/song.dart';
 import 'package:octava/widgets/songs_section.dart';
 
 import 'profile_edit_test.dart' show FakeClipPlayer;
 
-/// Songs in memory.
+/// Songs and setlists in memory.
 class FakeSongRepository implements SongRepository {
-  FakeSongRepository([List<Song>? songs]) : songs = [...?songs];
+  FakeSongRepository([List<Song>? songs, List<Setlist>? setlists])
+    : songs = [...?songs],
+      setlistRows = [...?setlists];
 
   final List<Song> songs;
+  final List<Setlist> setlistRows;
   final _changes = StreamController<void>.broadcast();
 
   Song _with(
@@ -80,6 +84,53 @@ class FakeSongRepository implements SongRepository {
   @override
   Future<void> delete(Song song) async {
     songs.removeWhere((s) => s.id == song.id);
+    // Like the database: the song leaves every setlist.
+    for (var i = 0; i < setlistRows.length; i++) {
+      setlistRows[i] = setlistRows[i].copyWith(
+        songIds: [...setlistRows[i].songIds]..remove(song.id),
+      );
+    }
+    _changes.add(null);
+  }
+
+  @override
+  Future<List<Setlist>> setlists(String bandId) async => [
+    for (final s in setlistRows)
+      if (s.bandId == bandId) s,
+  ]..sort((a, b) => a.name.compareTo(b.name));
+
+  @override
+  Future<Setlist> addSetlist(String bandId, String name) async {
+    final s = Setlist(
+      id: 'l${setlistRows.length + 1}',
+      bandId: bandId,
+      name: name,
+    );
+    setlistRows.add(s);
+    _changes.add(null);
+    return s;
+  }
+
+  int _setlistAt(String id) => setlistRows.indexWhere((s) => s.id == id);
+
+  @override
+  Future<void> renameSetlist(String setlistId, String name) async {
+    final i = _setlistAt(setlistId);
+    setlistRows[i] = setlistRows[i].copyWith(name: name);
+    _changes.add(null);
+  }
+
+  @override
+  Future<void> deleteSetlist(String setlistId) async {
+    setlistRows.removeAt(_setlistAt(setlistId));
+    _changes.add(null);
+  }
+
+  @override
+  Future<void> setSetlistSongs(String setlistId, List<String> songIds) async {
+    final i = _setlistAt(setlistId);
+    // Like set_setlist_songs: repeats dropped, the first one stays.
+    setlistRows[i] = setlistRows[i].copyWith(songIds: [...songIds.toSet()]);
     _changes.add(null);
   }
 

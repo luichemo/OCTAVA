@@ -1981,4 +1981,101 @@ class AppLocalizationsKa extends AppLocalizations {
   String errSongTooLong(String length) {
     return 'სიმღერის ჩანაწერი მაქსიმუმ 10 წუთი შეიძლება იყოს. ეს არის $length.';
   }
+
+  @override
+  String get setlistsTitle => 'სეტლისტები';
+
+  @override
+  String get setlistsEmpty =>
+      'სეტლისტი ჯერ არ არის. შექმენი შემდეგი კონცერტისთვის ან რეპეტიციისთვის.';
+
+  @override
+  String get setlistAddTitle => 'ახალი სეტლისტი';
+
+  @override
+  String get setlistNameLabel => 'სეტლისტის სახელი';
+
+  @override
+  String get setlistNameHint => 'მაგ. პარასკევის კონცერტი';
+
+  @override
+  String get setlistPageTitle => 'სეტლისტი';
+
+  @override
+  String setlistSongCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count სიმღერა',
+      one: '1 სიმღერა',
+      zero: 'სიმღერების გარეშე',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String setlistNoLength(int count) {
+    return '$count ჩანაწერის გარეშე';
+  }
+
+  @override
+  String get setlistEmptySongs =>
+      'ამ სეტლისტში სიმღერები ჯერ არ არის. დაამატე ბენდის სიმღერებიდან.';
+
+  @override
+  String get setlistAddSongs => 'სიმღერების დამატება';
+
+  @override
+  String setlistAddSongsButton(int count) {
+    return 'დამატება ($count)';
+  }
+
+  @override
+  String get setlistAllAdded => 'ყველა სიმღერა უკვე ამ სეტლისტშია.';
+
+  @override
+  String get setlistNoBandSongs =>
+      'ბენდს სიმღერები ჯერ არ აქვს. ჯერ დაამატე ისინი „სიმღერებში“.';
+
+  @override
+  String get setlistRemoveSong => 'სეტლისტიდან ამოღება';
+
+  @override
+  String get setlistDragHint =>
+      'რიგის შესაცვლელად დააჭირე სიმღერას და გადაათრიე.';
+
+  @override
+  String get setlistRename => 'სახელის შეცვლა';
+
+  @override
+  String get setlistDelete => 'სეტლისტის წაშლა';
+
+  @override
+  String setlistDeleteTitle(String name) {
+    return 'წავშალო „$name“?';
+  }
+
+  @override
+  String get setlistDeleteBody =>
+      'სიმღერები ბენდში რჩება; იშლება მხოლოდ ეს სია. რეპეტიციებს, რომლებიც მას იყენებდნენ, დანარჩენი დეტალები შეუნარჩუნდებათ.';
+
+  @override
+  String get setlistDeleted => 'სეტლისტი წაიშალა.';
+
+  @override
+  String get errSetlistsLoad => 'სეტლისტები ვერ ჩაიტვირთა. შეამოწმე კავშირი.';
+
+  @override
+  String get errSetlistSave => 'სეტლისტი ვერ შეინახა. სცადე თავიდან.';
+
+  @override
+  String get rehearsalSetlist => 'სავარჯიშო სეტლისტი';
+
+  @override
+  String get rehearsalNoSetlist => 'არცერთი';
+
+  @override
+  String rehearsalPractise(String name) {
+    return 'ვარჯიში: $name';
+  }
 }

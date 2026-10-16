@@ -1199,5 +1199,65 @@
         "type": "String"
       }
     }
+  },
+  "setlistsTitle": "Setlists",
+  "setlistsEmpty": "No setlists yet. Make one for your next gig or rehearsal.",
+  "setlistAddTitle": "New setlist",
+  "setlistNameLabel": "Setlist name",
+  "setlistNameHint": "e.g. Friday gig",
+  "setlistPageTitle": "Setlist",
+  "setlistSongCount": "{count, plural, =0{No songs} =1{1 song} other{{count} songs}}",
+  "@setlistSongCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setlistNoLength": "{count} without a recording",
+  "@setlistNoLength": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setlistEmptySongs": "No songs in this setlist yet. Add some from the band's songs.",
+  "setlistAddSongs": "Add songs",
+  "setlistAddSongsButton": "Add {count}",
+  "@setlistAddSongsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "setlistAllAdded": "Every song is already in this setlist.",
+  "setlistNoBandSongs": "The band has no songs yet. Add them under Songs first.",
+  "setlistRemoveSong": "Remove from setlist",
+  "setlistDragHint": "Hold a song and drag it to change the order.",
+  "setlistRename": "Rename",
+  "setlistDelete": "Delete setlist",
+  "setlistDeleteTitle": "Delete “{name}”?",
+  "@setlistDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "setlistDeleteBody": "The songs stay in the band; only this list goes. Rehearsals that used it keep their other details.",
+  "setlistDeleted": "Setlist deleted.",
+  "errSetlistsLoad": "Couldn't load the setlists. Check your connection.",
+  "errSetlistSave": "Couldn't save the setlist. Try again.",
+  "rehearsalSetlist": "Setlist to practise",
+  "rehearsalNoSetlist": "None",
+  "rehearsalPractise": "Practise: {name}",
+  "@rehearsalPractise": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

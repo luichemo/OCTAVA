@@ -1997,4 +1997,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String errSongTooLong(String length) {
     return 'Song recordings can be up to 10 minutes. This one is $length.';
   }
+
+  @override
+  String get setlistsTitle => 'Setlists';
+
+  @override
+  String get setlistsEmpty =>
+      'No setlists yet. Make one for your next gig or rehearsal.';
+
+  @override
+  String get setlistAddTitle => 'New setlist';
+
+  @override
+  String get setlistNameLabel => 'Setlist name';
+
+  @override
+  String get setlistNameHint => 'e.g. Friday gig';
+
+  @override
+  String get setlistPageTitle => 'Setlist';
+
+  @override
+  String setlistSongCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count songs',
+      one: '1 song',
+      zero: 'No songs',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String setlistNoLength(int count) {
+    return '$count without a recording';
+  }
+
+  @override
+  String get setlistEmptySongs =>
+      'No songs in this setlist yet. Add some from the band\'s songs.';
+
+  @override
+  String get setlistAddSongs => 'Add songs';
+
+  @override
+  String setlistAddSongsButton(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get setlistAllAdded => 'Every song is already in this setlist.';
+
+  @override
+  String get setlistNoBandSongs =>
+      'The band has no songs yet. Add them under Songs first.';
+
+  @override
+  String get setlistRemoveSong => 'Remove from setlist';
+
+  @override
+  String get setlistDragHint => 'Hold a song and drag it to change the order.';
+
+  @override
+  String get setlistRename => 'Rename';
+
+  @override
+  String get setlistDelete => 'Delete setlist';
+
+  @override
+  String setlistDeleteTitle(String name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get setlistDeleteBody =>
+      'The songs stay in the band; only this list goes. Rehearsals that used it keep their other details.';
+
+  @override
+  String get setlistDeleted => 'Setlist deleted.';
+
+  @override
+  String get errSetlistsLoad =>
+      'Couldn\'t load the setlists. Check your connection.';
+
+  @override
+  String get errSetlistSave => 'Couldn\'t save the setlist. Try again.';
+
+  @override
+  String get rehearsalSetlist => 'Setlist to practise';
+
+  @override
+  String get rehearsalNoSetlist => 'None';
+
+  @override
+  String rehearsalPractise(String name) {
+    return 'Practise: $name';
+  }
 }

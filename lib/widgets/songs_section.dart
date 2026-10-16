@@ -114,7 +114,11 @@ class _SongsSectionState extends State<SongsSection> {
   Future<void> _add() async {
     final title = await showDialog<String>(
       context: context,
-      builder: (_) => const _TitleDialog(),
+      builder: (_) => NameDialog(
+        title: context.t.songAddTitle,
+        label: context.t.songTitleLabel,
+        action: context.t.rehearsalAdd,
+      ),
     );
     if (title == null || !mounted) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -190,7 +194,7 @@ class _SongsSectionState extends State<SongsSection> {
                   onTap: () => _open(s),
                   leading: s.recordingPath == null || widget.player == null
                       ? const Icon(Icons.music_note_outlined)
-                      : _PlayButton(
+                      : SongPlayButton(
                           path: s.recordingPath!,
                           player: widget.player!,
                         ),
@@ -225,8 +229,9 @@ class _SongsSectionState extends State<SongsSection> {
   }
 }
 
-class _PlayButton extends StatelessWidget {
-  const _PlayButton({required this.path, required this.player});
+/// Plays or stops a song's recording through the session's player.
+class SongPlayButton extends StatelessWidget {
+  const SongPlayButton({super.key, required this.path, required this.player});
   final String path;
   final ClipPlayer player;
 
@@ -246,34 +251,53 @@ class _PlayButton extends StatelessWidget {
   );
 }
 
-/// Asks for a new song's title.
-class _TitleDialog extends StatefulWidget {
-  const _TitleDialog();
+/// Asks for a name (a song title, a setlist name…); pops it trimmed.
+class NameDialog extends StatefulWidget {
+  const NameDialog({
+    super.key,
+    required this.title,
+    required this.label,
+    required this.action,
+    this.maxLength = 100,
+    this.hint,
+    this.initial = '',
+  });
+
+  final String title;
+  final String label;
+
+  /// The confirm button's text.
+  final String action;
+  final int maxLength;
+  final String? hint;
+  final String initial;
 
   @override
-  State<_TitleDialog> createState() => _TitleDialogState();
+  State<NameDialog> createState() => _NameDialogState();
 }
 
-class _TitleDialogState extends State<_TitleDialog> {
-  final _title = TextEditingController();
+class _NameDialogState extends State<NameDialog> {
+  late final _name = TextEditingController(text: widget.initial);
 
   @override
   void dispose() {
-    _title.dispose();
+    _name.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t;
     return AlertDialog(
-      title: Text(t.songAddTitle),
+      title: Text(widget.title),
       content: TextField(
-        controller: _title,
+        controller: _name,
         autofocus: true,
-        maxLength: 100,
+        maxLength: widget.maxLength,
         textCapitalization: TextCapitalization.words,
-        decoration: InputDecoration(labelText: t.songTitleLabel),
+        decoration: InputDecoration(
+          labelText: widget.label,
+          hintText: widget.hint,
+        ),
         onSubmitted: (v) {
           if (v.trim().isNotEmpty) Navigator.pop(context, v.trim());
         },
@@ -281,15 +305,15 @@ class _TitleDialogState extends State<_TitleDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(t.cancel),
+          child: Text(context.t.cancel),
         ),
         ValueListenableBuilder(
-          valueListenable: _title,
+          valueListenable: _name,
           builder: (context, value, _) => FilledButton(
             onPressed: value.text.trim().isEmpty
                 ? null
-                : () => Navigator.pop(context, value.text.trim()),
-            child: Text(t.rehearsalAdd),
+                : () => Navigator.pop(context, _name.text.trim()),
+            child: Text(widget.action),
           ),
         ),
       ],

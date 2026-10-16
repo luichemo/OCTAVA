@@ -62,6 +62,7 @@ class FakeRehearsalRepository implements RehearsalRepository {
         notes: d.notes.isEmpty ? null : d.notes,
         weekly: d.weekly,
         repeatUntil: d.repeatUntil,
+        setlistId: d.setlistId,
       ),
     );
     _changes.add(null);

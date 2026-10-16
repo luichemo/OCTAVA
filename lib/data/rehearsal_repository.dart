@@ -46,7 +46,7 @@ class SupabaseRehearsalRepository implements RehearsalRepository {
   String get myId => _client.auth.currentUser!.id;
 
   static const _columns =
-      'id, band_id, starts_at, duration_minutes, place, notes, weekly, repeat_until';
+      'id, band_id, starts_at, duration_minutes, place, notes, weekly, repeat_until, setlist_id';
 
   /// Expands [rows] into dates between [from] and [until], with answers and
   /// cancellations.
@@ -142,6 +142,7 @@ class SupabaseRehearsalRepository implements RehearsalRepository {
     'repeat_until': d.weekly && d.repeatUntil != null
         ? dayKey(d.repeatUntil!)
         : null,
+    'setlist_id': d.setlistId,
   };
 
   Future<void> _write(Future<void> Function() action) async {

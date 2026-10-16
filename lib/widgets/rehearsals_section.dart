@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../data/clip_repository.dart';
 import '../data/rehearsal_repository.dart';
 import '../data/repositories.dart';
+import '../data/song_repository.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/rehearsal.dart';
+import '../models/setlist.dart';
 import '../screens/rehearsal_form_screen.dart';
+import '../screens/setlist_screen.dart';
 import '../theme.dart';
 
 /// "Fri, Oct 23 · 19:00–21:00", in the app's language.
@@ -20,17 +24,25 @@ String rehearsalWhen(RehearsalDate d) {
 }
 
 /// The band page's calendar: upcoming rehearsals with Going / Can't, Add
-/// rehearsal, and a sheet per date (who's coming, edit, call off, delete).
-/// Updates live.
+/// rehearsal, and a sheet per date (who's coming, the setlist to practise,
+/// edit, call off, delete). Updates live.
 class RehearsalsSection extends StatefulWidget {
   const RehearsalsSection({
     super.key,
     required this.repository,
     required this.band,
+    this.songs,
+    this.player,
   });
 
   final RehearsalRepository repository;
   final MyBand band;
+
+  /// For linking setlists. Without it rehearsals have no setlist.
+  final SongRepository? songs;
+
+  /// Plays recordings on an opened setlist.
+  final ClipPlayer? player;
 
   @override
   State<RehearsalsSection> createState() => _RehearsalsSectionState();
@@ -38,9 +50,11 @@ class RehearsalsSection extends StatefulWidget {
 
 class _RehearsalsSectionState extends State<RehearsalsSection> {
   List<RehearsalDate>? _dates;
+  List<Setlist> _setlists = const [];
   String? _error;
   bool _showAll = false;
   StreamSubscription<void>? _sub;
+  StreamSubscription<void>? _songsSub;
 
   /// The card shows this far ahead; "Show all" shows the rest.
   static const _preview = Duration(days: 7);
@@ -51,21 +65,28 @@ class _RehearsalsSectionState extends State<RehearsalsSection> {
   void initState() {
     super.initState();
     _sub = widget.repository.changes().listen((_) => _load());
+    _songsSub = widget.songs?.changes().listen((_) => _load());
     _load();
   }
 
   @override
   void dispose() {
     _sub?.cancel();
+    _songsSub?.cancel();
     super.dispose();
   }
 
   Future<void> _load() async {
     try {
       final dates = await widget.repository.upcoming(widget.band.id);
+      // Setlist names are extras: without them the calendar still shows.
+      final setlists = await widget.songs
+          ?.setlists(widget.band.id)
+          .catchError((_) => _setlists);
       if (!mounted) return;
       setState(() {
         _dates = dates;
+        _setlists = setlists ?? const [];
         _error = null;
       });
     } on UserFacingException catch (e) {
@@ -91,7 +112,10 @@ class _RehearsalsSectionState extends State<RehearsalsSection> {
 
   Future<void> _openForm({Rehearsal? editing}) async {
     final draft = await Navigator.of(context).push<RehearsalDraft>(
-      MaterialPageRoute(builder: (_) => RehearsalFormScreen(initial: editing)),
+      MaterialPageRoute(
+        builder: (_) =>
+            RehearsalFormScreen(initial: editing, setlists: _setlists),
+      ),
     );
     if (draft == null || !mounted) return;
     final t = context.t;
@@ -109,10 +133,26 @@ class _RehearsalsSectionState extends State<RehearsalsSection> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (_) => _DateSheet(date: d, band: widget.band),
+      builder: (_) => _DateSheet(
+        date: d,
+        band: widget.band,
+        setlist: _setlistOf(d.rehearsal),
+      ),
     );
     if (!mounted || action == null) return;
     switch (action) {
+      case 'setlist':
+        if (_setlistOf(d.rehearsal) case final setlist?) {
+          await Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => SetlistScreen(
+                repository: widget.songs!,
+                setlist: setlist,
+                player: widget.player,
+              ),
+            ),
+          );
+        }
       case 'edit':
         await _openForm(editing: d.rehearsal);
       case 'cancel':
@@ -152,6 +192,10 @@ class _RehearsalsSectionState extends State<RehearsalsSection> {
         }
     }
   }
+
+  /// The rehearsal's linked setlist, if it still exists.
+  Setlist? _setlistOf(Rehearsal r) =>
+      _setlists.where((s) => s.id == r.setlistId).firstOrNull;
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +251,7 @@ class _RehearsalsSectionState extends State<RehearsalsSection> {
               _DateTile(
                 date: d,
                 me: _me,
+                setlistName: _setlistOf(d.rehearsal)?.name,
                 onTap: () => _openDate(d),
                 onAnswer: (going) =>
                     _run(() => widget.repository.answer(d, going: going)),
@@ -237,10 +282,14 @@ class _DateTile extends StatelessWidget {
     required this.me,
     required this.onTap,
     required this.onAnswer,
+    this.setlistName,
   });
 
   final RehearsalDate date;
   final String me;
+
+  /// The linked setlist's name, shown as "Practise: …".
+  final String? setlistName;
   final VoidCallback onTap;
   final ValueChanged<bool> onAnswer;
 
@@ -291,6 +340,25 @@ class _DateTile extends StatelessWidget {
                 d.rehearsal.place!,
                 style: TextStyle(color: colors.onSurfaceVariant),
               ),
+            if (setlistName != null && !d.cancelled)
+              Row(
+                spacing: 4,
+                children: [
+                  Icon(
+                    Icons.queue_music_rounded,
+                    size: 16,
+                    color: colors.onSurfaceVariant,
+                  ),
+                  Expanded(
+                    child: Text(
+                      t.rehearsalPractise(setlistName!),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
+                  ),
+                ],
+              ),
             if (d.cancelled)
               Text(
                 t.rehearsalCancelledLabel,
@@ -336,10 +404,13 @@ class _DateTile extends StatelessWidget {
 /// A date's details: who's going, who can't, who hasn't answered, and
 /// Edit / Call off this date / Delete. Pops the chosen action.
 class _DateSheet extends StatelessWidget {
-  const _DateSheet({required this.date, required this.band});
+  const _DateSheet({required this.date, required this.band, this.setlist});
 
   final RehearsalDate date;
   final MyBand band;
+
+  /// The linked setlist; tapping it opens it.
+  final Setlist? setlist;
 
   @override
   Widget build(BuildContext context) {
@@ -389,6 +460,14 @@ class _DateSheet extends StatelessWidget {
               group(t.rehearsalNoAnswer, names(null)),
             ],
             const SizedBox(height: 8),
+            if (setlist case final setlist?)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.queue_music_rounded),
+                title: Text(t.rehearsalPractise(setlist.name)),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.pop(context, 'setlist'),
+              ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.edit_outlined),

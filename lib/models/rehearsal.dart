@@ -10,6 +10,7 @@ class Rehearsal {
     this.notes,
     this.weekly = false,
     this.repeatUntil,
+    this.setlistId,
   });
 
   factory Rehearsal.fromRow(Map<String, dynamic> row) => Rehearsal(
@@ -24,6 +25,7 @@ class Rehearsal {
       final String d => DateTime.parse(d),
       _ => null,
     },
+    setlistId: row['setlist_id'] as String?,
   );
 
   final String id;
@@ -38,6 +40,9 @@ class Rehearsal {
 
   /// The last day a weekly rehearsal can fall on; null means no end.
   final DateTime? repeatUntil;
+
+  /// The setlist to practise, if one is linked.
+  final String? setlistId;
 }
 
 /// What a member enters in the rehearsal form.
@@ -48,6 +53,7 @@ typedef RehearsalDraft = ({
   String notes,
   bool weekly,
   DateTime? repeatUntil,
+  String? setlistId,
 });
 
 /// One date of a rehearsal: when it starts, whether it's called off, and

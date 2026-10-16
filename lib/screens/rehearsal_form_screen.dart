@@ -3,15 +3,24 @@ import 'package:intl/intl.dart';
 
 import '../l10n/l10n.dart';
 import '../models/rehearsal.dart';
+import '../models/setlist.dart';
 import '../theme.dart';
 
 /// Adds or edits a rehearsal: day, start time, length, place, notes and
-/// "Repeat every week" (optionally until a day). Pops a [RehearsalDraft].
+/// "Repeat every week" (optionally until a day), and the setlist to
+/// practise. Pops a [RehearsalDraft].
 class RehearsalFormScreen extends StatefulWidget {
-  const RehearsalFormScreen({super.key, this.initial});
+  const RehearsalFormScreen({
+    super.key,
+    this.initial,
+    this.setlists = const [],
+  });
 
   /// The rehearsal being edited; null to add one.
   final Rehearsal? initial;
+
+  /// The band's setlists to choose from. Without any there's no choice.
+  final List<Setlist> setlists;
 
   @override
   State<RehearsalFormScreen> createState() => _RehearsalFormScreenState();
@@ -25,6 +34,7 @@ class _RehearsalFormScreenState extends State<RehearsalFormScreen> {
   late final _notes = TextEditingController(text: widget.initial?.notes ?? '');
   late bool _weekly = widget.initial?.weekly ?? false;
   late DateTime? _until = widget.initial?.repeatUntil;
+  late String? _setlistId = widget.initial?.setlistId;
 
   static const _lengths = [30, 60, 90, 120, 150, 180, 240];
 
@@ -104,6 +114,9 @@ class _RehearsalFormScreenState extends State<RehearsalFormScreen> {
       notes: _notes.text,
       weekly: _weekly,
       repeatUntil: _weekly ? _until : null,
+      setlistId: widget.setlists.any((s) => s.id == _setlistId)
+          ? _setlistId
+          : null,
     ));
   }
 
@@ -214,6 +227,34 @@ class _RehearsalFormScreenState extends State<RehearsalFormScreen> {
                           }),
                           icon: const Icon(Icons.close),
                         ),
+                ),
+              if (widget.setlists.isNotEmpty)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.queue_music_rounded),
+                  title: Text(t.rehearsalSetlist),
+                  trailing: DropdownButton<String?>(
+                    value: widget.setlists.any((s) => s.id == _setlistId)
+                        ? _setlistId
+                        : null,
+                    onChanged: (v) => setState(() {
+                      _setlistId = v;
+                    }),
+                    items: [
+                      DropdownMenuItem(child: Text(t.rehearsalNoSetlist)),
+                      for (final s in widget.setlists)
+                        DropdownMenuItem(
+                          value: s.id,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 160),
+                            child: Text(
+                              s.name,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               const SizedBox(height: 24),
               PrintButton(onPressed: _save, child: Text(t.saveChanges)),

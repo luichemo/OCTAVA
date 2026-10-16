@@ -17,6 +17,7 @@ import '../theme.dart';
 import '../widgets/person_avatar.dart';
 import '../widgets/record_sheet.dart';
 import '../widgets/rehearsals_section.dart';
+import '../widgets/setlists_section.dart';
 import '../widgets/songs_section.dart';
 import 'band_profile_screen.dart';
 
@@ -337,9 +338,17 @@ class _BandScreenState extends State<BandScreen> {
                             RehearsalsSection(
                               repository: rehearsals,
                               band: band,
+                              songs: widget.songs,
+                              player: widget.player,
                             ),
                           if (widget.songs case final songs?)
                             SongsSection(
+                              repository: songs,
+                              bandId: band.id,
+                              player: widget.player,
+                            ),
+                          if (widget.songs case final songs?)
+                            SetlistsSection(
                               repository: songs,
                               bandId: band.id,
                               player: widget.player,

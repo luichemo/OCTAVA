@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/l10n.dart';
+import '../models/setlist.dart';
 import '../models/song.dart';
 import 'clip_repository.dart';
 import 'repositories.dart';
@@ -19,7 +20,7 @@ const _songPrefix = 'song:';
 String? songPath(String key) =>
     key.startsWith(_songPrefix) ? key.substring(_songPrefix.length) : null;
 
-/// The band's songs.
+/// The band's songs and setlists.
 abstract interface class SongRepository {
   /// Ready songs first (see sortSongs).
   Future<List<Song>> list(String bandId);
@@ -44,7 +45,20 @@ abstract interface class SongRepository {
   /// A temporary link for playing a song recording.
   Future<String> recordingUrl(String path);
 
-  /// Fires when a song in any of your bands changes.
+  /// The band's setlists, by name.
+  Future<List<Setlist>> setlists(String bandId);
+
+  /// Adds an empty setlist; returns it.
+  Future<Setlist> addSetlist(String bandId, String name);
+  Future<void> renameSetlist(String setlistId, String name);
+
+  /// Deletes the setlist (the songs stay).
+  Future<void> deleteSetlist(String setlistId);
+
+  /// Replaces the setlist's songs with [songIds], in that order.
+  Future<void> setSetlistSongs(String setlistId, List<String> songIds);
+
+  /// Fires when a song or setlist in any of your bands changes.
   Stream<void> changes();
 }
 
@@ -204,21 +218,101 @@ class SupabaseSongRepository implements SongRepository {
   }
 
   @override
+  Future<List<Setlist>> setlists(String bandId) async {
+    try {
+      final rows = await _client
+          .from('setlists')
+          .select('id, band_id, name, setlist_songs(song_id, position)')
+          .eq('band_id', bandId)
+          .order('name');
+      return [
+        for (final r in rows)
+          Setlist(
+            id: r['id'] as String,
+            bandId: r['band_id'] as String,
+            name: r['name'] as String,
+            songIds: [
+              for (final e
+                  in ([...(r['setlist_songs'] as List? ?? const [])]..sort(
+                    (a, b) =>
+                        (a['position'] as int).compareTo(b['position'] as int),
+                  )))
+                e['song_id'] as String,
+            ],
+          ),
+      ];
+    } catch (_) {
+      throw UserFacingException(L10n.current.errSetlistsLoad);
+    }
+  }
+
+  Future<T> _setlistDo<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on PostgrestException catch (e) {
+      if (e.code == '42501') {
+        throw UserFacingException(L10n.current.errBandNotMember);
+      }
+      throw UserFacingException(L10n.current.errSetlistSave);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errBandAction);
+    }
+  }
+
+  @override
+  Future<Setlist> addSetlist(String bandId, String name) =>
+      _setlistDo(() async {
+        final row = await _client
+            .from('setlists')
+            .insert({'band_id': bandId, 'name': name.trim(), 'created_by': _me})
+            .select('id, band_id, name')
+            .single();
+        return Setlist(
+          id: row['id'] as String,
+          bandId: row['band_id'] as String,
+          name: row['name'] as String,
+        );
+      });
+
+  @override
+  Future<void> renameSetlist(String setlistId, String name) => _setlistDo(
+    () => _client
+        .from('setlists')
+        .update({'name': name.trim()})
+        .eq('id', setlistId),
+  );
+
+  @override
+  Future<void> deleteSetlist(String setlistId) =>
+      _setlistDo(() => _client.from('setlists').delete().eq('id', setlistId));
+
+  @override
+  Future<void> setSetlistSongs(String setlistId, List<String> songIds) =>
+      _setlistDo(
+        () => _client.rpc(
+          'set_setlist_songs',
+          params: {'setlist': setlistId, 'song_ids': songIds},
+        ),
+      );
+
+  @override
   Stream<void> changes() {
     late final RealtimeChannel channel;
     final out = StreamController<void>(
       onCancel: () => _client.removeChannel(channel),
     );
-    channel = _client.channel('songs-$_me')
-      ..onPostgresChanges(
+    channel = _client.channel('songs-$_me');
+    for (final table in const ['songs', 'setlists', 'setlist_songs']) {
+      channel.onPostgresChanges(
         event: PostgresChangeEvent.all,
         schema: 'public',
-        table: 'songs',
+        table: table,
         callback: (_) {
           if (!out.isClosed) out.add(null);
         },
-      )
-      ..subscribe();
+      );
+    }
+    channel.subscribe();
     return out.stream;
   }
 }
