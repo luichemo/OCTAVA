@@ -2267,4 +2267,100 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get legalPrivacyRow => 'კონფიდენციალურობის პოლიტიკა';
+
+  @override
+  String get modViewProfile => 'პროფილის ნახვა';
+
+  @override
+  String modEvidenceTitle(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'მისი ბოლო $count შეტყობინება $name-სთვის',
+      one: 'მისი ბოლო შეტყობინება $name-სთვის',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modEvidenceNote =>
+      'დაკოპირდა საჩივრის გაგზავნისას; რჩება მაშინაც, თუ ჩატს წაშლიან.';
+
+  @override
+  String modJoined(String date) {
+    return 'შემოუერთდა $date';
+  }
+
+  @override
+  String get modProfileGone => 'ეს ანგარიში აღარ არსებობს.';
+
+  @override
+  String get modModerators => 'მოდერატორები';
+
+  @override
+  String modModeratorCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count მოდერატორი',
+      one: '1 მოდერატორი',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modSearchPeople => 'მოძებნე სახელით';
+
+  @override
+  String get modSearchHint => 'ჩაწერე მინიმუმ 2 ასო.';
+
+  @override
+  String get modNoOneFound => 'ამ სახელით ვერავინ მოიძებნა.';
+
+  @override
+  String get modMakeModerator => 'მოდერატორად დანიშვნა';
+
+  @override
+  String get modIsModerator => 'მოდერატორი';
+
+  @override
+  String get modAdmin => 'ადმინი';
+
+  @override
+  String get modRemoveModerator => 'მოხსნა';
+
+  @override
+  String modRemoveModeratorTitle(String name) {
+    return 'მოვხსნათ $name მოდერატორობიდან?';
+  }
+
+  @override
+  String get modRemoveModeratorBody =>
+      'საჩივრებს ვეღარ ნახავს. შემდეგ ისევ შეგიძლია დაამატო.';
+
+  @override
+  String modMakeModeratorTitle(String name) {
+    return 'დავნიშნოთ $name მოდერატორად?';
+  }
+
+  @override
+  String get modMakeModeratorBody =>
+      'ნახავს ყველა საჩივარს, დარეპორტებულ შეტყობინებებს და პროფილებს, და შეეძლება ანგარიშების შეჩერება.';
+
+  @override
+  String modMadeModerator(String name) {
+    return '$name ახლა მოდერატორია.';
+  }
+
+  @override
+  String modRemovedModerator(String name) {
+    return '$name აღარ არის მოდერატორი.';
+  }
+
+  @override
+  String get errModSuspendedCant =>
+      'შეჩერებული ანგარიში ვერ იქნება მოდერატორი.';
+
+  @override
+  String get errModAdminStays => 'ადმინი ყოველთვის მოდერატორად რჩება.';
 }

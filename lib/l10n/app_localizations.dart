@@ -3943,6 +3943,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Privacy policy'**
   String get legalPrivacyRow;
+
+  /// No description provided for @modViewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get modViewProfile;
+
+  /// No description provided for @modEvidenceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Their last message to {name}} other{Their last {count} messages to {name}}}'**
+  String modEvidenceTitle(int count, String name);
+
+  /// No description provided for @modEvidenceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied when the report was filed; it stays even if they delete the chat.'**
+  String get modEvidenceNote;
+
+  /// No description provided for @modJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined {date}'**
+  String modJoined(String date);
+
+  /// No description provided for @modProfileGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This account no longer exists.'**
+  String get modProfileGone;
+
+  /// No description provided for @modModerators.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderators'**
+  String get modModerators;
+
+  /// No description provided for @modModeratorCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 moderator} other{{count} moderators}}'**
+  String modModeratorCount(int count);
+
+  /// No description provided for @modSearchPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people by name'**
+  String get modSearchPeople;
+
+  /// No description provided for @modSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type at least 2 letters to find someone.'**
+  String get modSearchHint;
+
+  /// No description provided for @modNoOneFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No one by that name.'**
+  String get modNoOneFound;
+
+  /// No description provided for @modMakeModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Make moderator'**
+  String get modMakeModerator;
+
+  /// No description provided for @modIsModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderator'**
+  String get modIsModerator;
+
+  /// No description provided for @modAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get modAdmin;
+
+  /// No description provided for @modRemoveModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get modRemoveModerator;
+
+  /// No description provided for @modRemoveModeratorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} as a moderator?'**
+  String modRemoveModeratorTitle(String name);
+
+  /// No description provided for @modRemoveModeratorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll stop seeing reports. You can add them again later.'**
+  String get modRemoveModeratorBody;
+
+  /// No description provided for @modMakeModeratorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {name} a moderator?'**
+  String modMakeModeratorTitle(String name);
+
+  /// No description provided for @modMakeModeratorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll see every report, the reported messages and people\'s profiles, and can suspend accounts.'**
+  String get modMakeModeratorBody;
+
+  /// No description provided for @modMadeModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is now a moderator.'**
+  String modMadeModerator(String name);
+
+  /// No description provided for @modRemovedModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is no longer a moderator.'**
+  String modRemovedModerator(String name);
+
+  /// No description provided for @errModSuspendedCant.
+  ///
+  /// In en, this message translates to:
+  /// **'A suspended account can\'t be a moderator.'**
+  String get errModSuspendedCant;
+
+  /// No description provided for @errModAdminStays.
+  ///
+  /// In en, this message translates to:
+  /// **'An admin always stays a moderator.'**
+  String get errModAdminStays;
 }
 
 class _AppLocalizationsDelegate

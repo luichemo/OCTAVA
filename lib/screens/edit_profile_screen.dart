@@ -24,6 +24,7 @@ import '../widgets/record_sheet.dart';
 import '../widgets/theme_picker.dart';
 import 'card_preview_screen.dart';
 import 'moderation_screen.dart';
+import 'moderators_screen.dart';
 import 'onboarding_screen.dart';
 
 /// Your profile page (owner's design, 2026-10-19): your avatar, name and
@@ -71,7 +72,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   /// Moderators see Reports with the number of open ones.
   bool _moderator = false;
+  bool _admin = false;
   int? _openReports;
+  int? _moderatorCount;
 
   @override
   void initState() {
@@ -99,18 +102,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
     if (widget.moderation case final moderation?) {
       final moderator = await moderation.isModerator();
+      final admin = moderator && await moderation.isAdmin();
       int? open;
+      int? mods;
       if (moderator) {
         try {
           open = (await moderation.openReports()).length;
+          if (admin) mods = (await moderation.moderators()).length;
         } on UserFacingException {
-          // The row still opens the list, which shows the error.
+          // The rows still open their pages, which show the error.
         }
       }
       if (mounted) {
         setState(() {
           _moderator = moderator;
+          _admin = admin;
           _openReports = open;
+          _moderatorCount = mods;
         });
       }
     }
@@ -415,12 +423,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             MaterialPageRoute<void>(
                               builder: (_) => ModerationScreen(
                                 repository: widget.moderation!,
+                                player: widget.player,
+                                avatars: widget.avatars,
                               ),
                             ),
                           );
                           if (mounted) _loadExtras();
                         },
                       ),
+                      if (_admin)
+                        _Row(
+                          icon: Icons.shield_outlined,
+                          title: t.modModerators,
+                          summary: _moderatorCount == null
+                              ? null
+                              : t.modModeratorCount(_moderatorCount!),
+                          onTap: () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => ModeratorsScreen(
+                                  repository: widget.moderation!,
+                                  avatars: widget.avatars,
+                                ),
+                              ),
+                            );
+                            if (mounted) _loadExtras();
+                          },
+                        ),
                     ],
                   ),
                 _Group(

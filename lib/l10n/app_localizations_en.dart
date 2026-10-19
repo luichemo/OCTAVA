@@ -2284,4 +2284,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get legalPrivacyRow => 'Privacy policy';
+
+  @override
+  String get modViewProfile => 'View profile';
+
+  @override
+  String modEvidenceTitle(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Their last $count messages to $name',
+      one: 'Their last message to $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modEvidenceNote =>
+      'Copied when the report was filed; it stays even if they delete the chat.';
+
+  @override
+  String modJoined(String date) {
+    return 'Joined $date';
+  }
+
+  @override
+  String get modProfileGone => 'This account no longer exists.';
+
+  @override
+  String get modModerators => 'Moderators';
+
+  @override
+  String modModeratorCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count moderators',
+      one: '1 moderator',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modSearchPeople => 'Search people by name';
+
+  @override
+  String get modSearchHint => 'Type at least 2 letters to find someone.';
+
+  @override
+  String get modNoOneFound => 'No one by that name.';
+
+  @override
+  String get modMakeModerator => 'Make moderator';
+
+  @override
+  String get modIsModerator => 'Moderator';
+
+  @override
+  String get modAdmin => 'Admin';
+
+  @override
+  String get modRemoveModerator => 'Remove';
+
+  @override
+  String modRemoveModeratorTitle(String name) {
+    return 'Remove $name as a moderator?';
+  }
+
+  @override
+  String get modRemoveModeratorBody =>
+      'They\'ll stop seeing reports. You can add them again later.';
+
+  @override
+  String modMakeModeratorTitle(String name) {
+    return 'Make $name a moderator?';
+  }
+
+  @override
+  String get modMakeModeratorBody =>
+      'They\'ll see every report, the reported messages and people\'s profiles, and can suspend accounts.';
+
+  @override
+  String modMadeModerator(String name) {
+    return '$name is now a moderator.';
+  }
+
+  @override
+  String modRemovedModerator(String name) {
+    return '$name is no longer a moderator.';
+  }
+
+  @override
+  String get errModSuspendedCant =>
+      'A suspended account can\'t be a moderator.';
+
+  @override
+  String get errModAdminStays => 'An admin always stays a moderator.';
 }
