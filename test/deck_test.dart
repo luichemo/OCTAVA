@@ -82,6 +82,8 @@ void main() {
 
     expect(m.instrument, 'Vocals');
     expect(m.whereText, 'Mtatsminda, 3 km away');
+    // The pill beside the instrument heading: the distance first.
+    expect(m.whereShort, '3 km · Mtatsminda');
     expect(m.clipSeconds, isNull);
     expect(m.lookingFor, isNull);
   });
@@ -96,5 +98,7 @@ void main() {
     );
     expect(nowhere.whereText, '');
     expect(onlyArea.whereText, 'Vake');
+    expect(onlyArea.whereShort, 'Vake');
+    expect(nowhere.whereShort, '');
   });
 }

@@ -40,7 +40,13 @@ class OnboardingScreen extends StatefulWidget {
     this.location,
     this.bandNeeds,
     this.onSignOut,
+    this.only,
   });
+
+  /// When editing, show just this section (its id: 'about', 'play', 'want'
+  /// or 'links') on its own page, titled with its name, with Save changes.
+  /// The profile page lists the sections and opens each one like this.
+  final String? only;
 
   /// "Your band needs" section, shown when editing.
   final BandNeedsRepository? bandNeeds;
@@ -291,7 +297,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: _editing
+      appBar: widget.only != null
+          ? AppBar(title: Text(sectionTitle(context, widget.only!)))
+          : _editing
           ? AppBar(
               backgroundColor: colors.surface,
               actions: [
@@ -308,355 +316,396 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             )
           : null,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-                children: _sectionCards(
-                  open: _editing ? _openSections : null,
-                  onToggle: (id) => setState(() {
-                    if (!_openSections.remove(id)) _openSections.add(id);
-                  }),
-                  [
-                    Text(
-                      _editing
-                          ? context.t.profileTitle
-                          : context.t.profileSetUpTitle,
-                      style: displayStyle(size: 44, color: colors.onSurface),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.t.profileSubtitle,
-                      style: TextStyle(color: colors.onSurfaceVariant),
-                    ),
-                    if (_editing) ...[
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => CardPreviewScreen(
-                                repository: widget.repository,
-                                player: widget.player,
-                                avatars: widget.avatars,
-                              ),
-                            ),
-                          ),
-                          icon: const Icon(Icons.visibility_outlined),
-                          label: Text(context.t.seeYourCard),
+      // A single section keeps Save changes pinned to the bottom (above the
+      // keyboard, since the body shrinks for it).
+      body: widget.only == null
+          ? _form(context)
+          : Column(
+              children: [
+                Expanded(child: _form(context)),
+                Material(
+                  shape: Border(top: BorderSide(color: colors.outlineVariant)),
+
+                  color: colors.surface,
+                  child: SafeArea(
+                    top: false,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+                          child: _saveArea(context),
                         ),
                       ),
-                    ],
-                    if (_editing &&
-                        widget.clips != null &&
-                        _clipCount == 0) ...[
-                      const SizedBox(height: 16),
-                      _NoClipsWarning(onRecord: _recordFromWarning),
-                    ],
-                    if (_editing && widget.avatars != null) ...[
-                      _Section('avatar', context.t.sectionAvatar),
-                      AvatarSection(avatars: widget.avatars!),
-                    ],
-                    _Section('about', context.t.sectionAbout),
-                    TextFormField(
-                      controller: _name,
-                      maxLength: 40,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: InputDecoration(
-                        labelText: context.t.fieldName,
-                        counterText: '',
-                      ),
-                      validator: (v) => (v ?? '').trim().isEmpty
-                          ? context.t.fieldNameError
-                          : null,
                     ),
-                    if (_needsBirthDate) ...[
-                      const SizedBox(height: 14),
-                      TextFormField(
-                        controller: _birthDateText,
-                        readOnly: true,
-                        onTap: _pickBirthDate,
-                        decoration: InputDecoration(
-                          labelText: context.t.fieldBirthDate,
-                          helperText: context.t.fieldBirthDateHelper,
-                          suffixIcon: Icon(Icons.calendar_today_rounded),
-                        ),
-                        validator: (_) => _birthDate == null
-                            ? context.t.fieldBirthDateError
-                            : null,
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _area,
-                      maxLength: 60,
-                      decoration: InputDecoration(
-                        labelText: context.t.fieldArea,
-                        hintText: context.t.fieldAreaHint,
-                        counterText: '',
-                      ),
-                    ),
-                    if (_editing && widget.bandNeeds != null) ...[
-                      _Section('band', context.t.sectionBand),
-                      BandNeedsSection(
-                        repository: widget.bandNeeds!,
-                        // The first instrument is the main one.
-                        myRole: _instruments.keys.firstOrNull,
-                      ),
-                    ],
-                    if (_editing && widget.location != null) ...[
-                      _Section('location', context.t.sectionLocation),
-                      LocationSection(location: widget.location!),
-                    ],
-                    _Section('play', context.t.sectionPlay),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final MapEntry(key: id, value: label)
-                            in instrumentLabels.entries)
-                          FilterChip(
-                            label: Text(label),
-                            selected: _instruments.containsKey(id),
-                            onSelected: (on) => setState(() {
-                              on
-                                  ? _instruments[id] = 'intermediate'
-                                  : _instruments.remove(id);
-                              if (on) _instrumentError = null;
-                            }),
-                          ),
-                      ],
-                    ),
-                    if (_instrumentError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          _instrumentError!,
-                          style: TextStyle(color: colors.error, fontSize: 13),
-                        ),
-                      ),
-                    for (final (i, id) in _instruments.keys.indexed)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                i == 0
-                                    ? context.t.instrumentMain(
-                                        instrumentLabels[id]!,
-                                      )
-                                    : instrumentLabels[id]!,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            // The star picks the main instrument (the first
-                            // one): it's on the card and fills band roles.
-                            IconButton(
-                              tooltip: i == 0
-                                  ? context.t.instrumentIsMain
-                                  : context.t.instrumentMakeMain,
-                              isSelected: i == 0,
-                              onPressed: i == 0
-                                  ? null
-                                  : () => setState(() => _makeMain(id)),
-                              icon: const Icon(Icons.star_outline_rounded),
-                              selectedIcon: const Icon(
-                                Icons.star_rounded,
-                                color: OctavaColors.pink,
-                              ),
-                            ),
-                            DropdownButton<String>(
-                              value: _instruments[id],
-                              onChanged: (skill) =>
-                                  setState(() => _instruments[id] = skill!),
-                              items: [
-                                for (final MapEntry(key: value, value: label)
-                                    in skillLabels.entries)
-                                  DropdownMenuItem(
-                                    value: value,
-                                    child: Text(label),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 18),
-                    Text(
-                      context.t.fieldGenres,
-                      style: TextStyle(color: colors.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 8),
-                    GenrePicker(
-                      selected: _genres,
-                      max: 10,
-                      onChanged: (picked) => setState(() {
-                        _genres
-                          ..clear()
-                          ..addAll(picked);
-                      }),
-                    ),
-                    _Section('want', context.t.sectionWant),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final MapEntry(key: id, value: label)
-                            in goalLabels.entries)
-                          FilterChip(
-                            label: Text(label),
-                            selected: _goals.contains(id),
-                            onSelected: (on) => setState(
-                              () => on ? _goals.add(id) : _goals.remove(id),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  /// The error (if any) and the main button.
+  Widget _saveArea(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              _error!,
+              style: TextStyle(
+                color: colors.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        PrintButton(
+          onPressed: _saving ? null : _submit,
+          child: _saving
+              ? const SizedBox.square(
+                  dimension: 22,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                )
+              : Text(
+                  _editing ? context.t.saveChanges : context.t.createProfile,
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _form(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              children: _sectionCards(
+                only: widget.only,
+                open: _editing ? _openSections : null,
+                onToggle: (id) => setState(() {
+                  if (!_openSections.remove(id)) _openSections.add(id);
+                }),
+                [
+                  Text(
+                    _editing
+                        ? context.t.profileTitle
+                        : context.t.profileSetUpTitle,
+                    style: displayStyle(size: 44, color: colors.onSurface),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.t.profileSubtitle,
+                    style: TextStyle(color: colors.onSurfaceVariant),
+                  ),
+                  if (_editing) ...[
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => CardPreviewScreen(
+                              repository: widget.repository,
+                              player: widget.player,
+                              avatars: widget.avatars,
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      context.t.rehearseQuestion,
-                      style: TextStyle(color: colors.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final MapEntry(key: id, value: label)
-                            in frequencyLabels.entries)
-                          ChoiceChip(
-                            label: Text(label),
-                            selected: _frequency == id,
-                            onSelected: (on) =>
-                                setState(() => _frequency = on ? id : null),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      context.t.gearQuestion,
-                      style: TextStyle(color: colors.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final MapEntry(key: id, value: label)
-                            in gearLabels.entries)
-                          FilterChip(
-                            label: Text(label),
-                            selected: _gear.contains(id),
-                            onSelected: (on) => setState(
-                              () => on ? _gear.add(id) : _gear.remove(id),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _lookingFor,
-                      maxLength: 300,
-                      minLines: 2,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        labelText: context.t.fieldLookingFor,
-                        hintText: context.t.fieldLookingForHint,
-                        alignLabelWithHint: true,
-                      ),
-                    ),
-                    if (_editing) ...[
-                      _Section('links', context.t.sectionLinks),
-                      TextField(
-                        controller: _linkInput,
-                        keyboardType: TextInputType.url,
-                        onSubmitted: (_) => _addLink(),
-                        decoration: InputDecoration(
-                          labelText: context.t.linksLabel,
-                          hintText: context.t.linksHint,
-                          errorText: _linkError,
-                          suffixIcon: IconButton(
-                            tooltip: context.t.addLink,
-                            onPressed: _addLink,
-                            icon: const Icon(Icons.add_rounded),
-                          ),
                         ),
+                        icon: const Icon(Icons.visibility_outlined),
+                        label: Text(context.t.seeYourCard),
                       ),
-                      for (final link in _links)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.link_rounded),
-                          title: Text(link.label),
-                          subtitle: Text(
-                            link.url,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: IconButton(
-                            tooltip: context.t.removeLink,
-                            onPressed: () => setState(() {
-                              _links.remove(link);
-                            }),
-                            icon: const Icon(Icons.close_rounded),
-                          ),
-                        ),
-                    ],
-                    if (_editing &&
-                        widget.clips != null &&
-                        widget.player != null) ...[
-                      _Section('clips', context.t.sectionClips),
-                      ClipsSection(
-                        // A new key reloads the list after recording from the warning.
-                        key: ValueKey(_clipsVersion),
-                        clips: widget.clips!,
-                        player: widget.player!,
-                        onCountChanged: (n) => setState(() {
-                          _clipCount = n;
-                        }),
-                      ),
-                    ],
-                    if (_editing) ...[
-                      _Section('language', context.t.sectionLanguage),
-                      const LanguageSection(),
-                      _Section('theme', context.t.sectionTheme),
-                      const ThemeSection(),
-                    ],
-                    const _EndOfSections(),
-                    if (_error != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Text(
-                          _error!,
-                          style: TextStyle(
-                            color: colors.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 28),
-                    PrintButton(
-                      onPressed: _saving ? null : _submit,
-                      child: _saving
-                          ? const SizedBox.square(
-                              dimension: 22,
-                              child: CircularProgressIndicator(strokeWidth: 3),
-                            )
-                          : Text(
-                              _editing
-                                  ? context.t.saveChanges
-                                  : context.t.createProfile,
-                            ),
                     ),
                   ],
-                ),
+                  if (_editing && widget.clips != null && _clipCount == 0) ...[
+                    const SizedBox(height: 16),
+                    NoClipsWarning(onRecord: _recordFromWarning),
+                  ],
+                  if (_editing && widget.avatars != null) ...[
+                    _Section('avatar', context.t.sectionAvatar),
+                    AvatarSection(avatars: widget.avatars!),
+                  ],
+                  _Section('about', context.t.sectionAbout),
+                  TextFormField(
+                    controller: _name,
+                    maxLength: 40,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(
+                      labelText: context.t.fieldName,
+                      counterText: '',
+                    ),
+                    validator: (v) => (v ?? '').trim().isEmpty
+                        ? context.t.fieldNameError
+                        : null,
+                  ),
+                  if (_needsBirthDate) ...[
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      controller: _birthDateText,
+                      readOnly: true,
+                      onTap: _pickBirthDate,
+                      decoration: InputDecoration(
+                        labelText: context.t.fieldBirthDate,
+                        helperText: context.t.fieldBirthDateHelper,
+                        suffixIcon: Icon(Icons.calendar_today_rounded),
+                      ),
+                      validator: (_) => _birthDate == null
+                          ? context.t.fieldBirthDateError
+                          : null,
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    controller: _area,
+                    maxLength: 60,
+                    decoration: InputDecoration(
+                      labelText: context.t.fieldArea,
+                      hintText: context.t.fieldAreaHint,
+                      counterText: '',
+                    ),
+                  ),
+                  if (_editing && widget.bandNeeds != null) ...[
+                    _Section('band', context.t.sectionBand),
+                    BandNeedsSection(
+                      repository: widget.bandNeeds!,
+                      // The first instrument is the main one.
+                      myRole: _instruments.keys.firstOrNull,
+                    ),
+                  ],
+                  if (_editing && widget.location != null) ...[
+                    _Section('location', context.t.sectionLocation),
+                    LocationSection(location: widget.location!),
+                  ],
+                  _Section('play', context.t.sectionPlay),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final MapEntry(key: id, value: label)
+                          in instrumentLabels.entries)
+                        FilterChip(
+                          label: Text(label),
+                          selected: _instruments.containsKey(id),
+                          onSelected: (on) => setState(() {
+                            on
+                                ? _instruments[id] = 'intermediate'
+                                : _instruments.remove(id);
+                            if (on) _instrumentError = null;
+                          }),
+                        ),
+                    ],
+                  ),
+                  if (_instrumentError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        _instrumentError!,
+                        style: TextStyle(color: colors.error, fontSize: 13),
+                      ),
+                    ),
+                  for (final (i, id) in _instruments.keys.indexed)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              i == 0
+                                  ? context.t.instrumentMain(
+                                      instrumentLabels[id]!,
+                                    )
+                                  : instrumentLabels[id]!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          // The star picks the main instrument (the first
+                          // one): it's on the card and fills band roles.
+                          IconButton(
+                            tooltip: i == 0
+                                ? context.t.instrumentIsMain
+                                : context.t.instrumentMakeMain,
+                            isSelected: i == 0,
+                            onPressed: i == 0
+                                ? null
+                                : () => setState(() => _makeMain(id)),
+                            icon: const Icon(Icons.star_outline_rounded),
+                            selectedIcon: const Icon(
+                              Icons.star_rounded,
+                              color: OctavaColors.pink,
+                            ),
+                          ),
+                          DropdownButton<String>(
+                            value: _instruments[id],
+                            onChanged: (skill) =>
+                                setState(() => _instruments[id] = skill!),
+                            items: [
+                              for (final MapEntry(key: value, value: label)
+                                  in skillLabels.entries)
+                                DropdownMenuItem(
+                                  value: value,
+                                  child: Text(label),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 18),
+                  Text(
+                    context.t.fieldGenres,
+                    style: TextStyle(color: colors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 8),
+                  GenrePicker(
+                    selected: _genres,
+                    max: 10,
+                    onChanged: (picked) => setState(() {
+                      _genres
+                        ..clear()
+                        ..addAll(picked);
+                    }),
+                  ),
+                  _Section('want', context.t.sectionWant),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final MapEntry(key: id, value: label)
+                          in goalLabels.entries)
+                        FilterChip(
+                          label: Text(label),
+                          selected: _goals.contains(id),
+                          onSelected: (on) => setState(
+                            () => on ? _goals.add(id) : _goals.remove(id),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.t.rehearseQuestion,
+                    style: TextStyle(color: colors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final MapEntry(key: id, value: label)
+                          in frequencyLabels.entries)
+                        ChoiceChip(
+                          label: Text(label),
+                          selected: _frequency == id,
+                          onSelected: (on) =>
+                              setState(() => _frequency = on ? id : null),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.t.gearQuestion,
+                    style: TextStyle(color: colors.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final MapEntry(key: id, value: label)
+                          in gearLabels.entries)
+                        FilterChip(
+                          label: Text(label),
+                          selected: _gear.contains(id),
+                          onSelected: (on) => setState(
+                            () => on ? _gear.add(id) : _gear.remove(id),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _lookingFor,
+                    maxLength: 300,
+                    minLines: 2,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: context.t.fieldLookingFor,
+                      hintText: context.t.fieldLookingForHint,
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  if (_editing) ...[
+                    _Section('links', context.t.sectionLinks),
+                    TextField(
+                      controller: _linkInput,
+                      keyboardType: TextInputType.url,
+                      onSubmitted: (_) => _addLink(),
+                      decoration: InputDecoration(
+                        labelText: context.t.linksLabel,
+                        hintText: context.t.linksHint,
+                        errorText: _linkError,
+                        suffixIcon: IconButton(
+                          tooltip: context.t.addLink,
+                          onPressed: _addLink,
+                          icon: const Icon(Icons.add_rounded),
+                        ),
+                      ),
+                    ),
+                    for (final link in _links)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.link_rounded),
+                        title: Text(link.label),
+                        subtitle: Text(
+                          link.url,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: IconButton(
+                          tooltip: context.t.removeLink,
+                          onPressed: () => setState(() {
+                            _links.remove(link);
+                          }),
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                      ),
+                  ],
+                  if (_editing &&
+                      widget.clips != null &&
+                      widget.player != null) ...[
+                    _Section('clips', context.t.sectionClips),
+                    ClipsSection(
+                      // A new key reloads the list after recording from the warning.
+                      key: ValueKey(_clipsVersion),
+                      clips: widget.clips!,
+                      player: widget.player!,
+                      onCountChanged: (n) => setState(() {
+                        _clipCount = n;
+                      }),
+                    ),
+                  ],
+                  if (_editing) ...[
+                    _Section('language', context.t.sectionLanguage),
+                    const LanguageSection(),
+                    _Section('theme', context.t.sectionTheme),
+                    const ThemeSection(),
+                  ],
+                  const _EndOfSections(),
+                  if (widget.only == null) ...[
+                    const SizedBox(height: 12),
+                    _saveArea(context),
+                  ],
+                ],
               ),
             ),
           ),
@@ -669,6 +718,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 /// A full date in the app's language, e.g. "March 12, 2001".
 String formatDate(DateTime d) =>
     DateFormat.yMMMMd(L10n.current.localeName).format(d);
+
+/// Just the fields of section [only] (no heading or card), then whatever
+/// follows the sections (the error and Save changes).
+List<Widget> _onlySection(List<Widget> children, String only) {
+  final start = children.indexWhere((w) => w is _Section && w.id == only);
+  final end = children.indexWhere((w) => w is _EndOfSections);
+  if (start < 0 || end < 0) return children;
+  var stop = children.indexWhere((w) => w is _Section, start + 1);
+  if (stop < 0 || stop > end) stop = end;
+  return [...children.sublist(start + 1, stop), ...children.sublist(end + 1)];
+}
+
+/// A profile section's name, by its id.
+String sectionTitle(BuildContext context, String id) {
+  final t = context.t;
+  return switch (id) {
+    'avatar' => t.sectionAvatar,
+    'about' => t.sectionAbout,
+    'band' => t.sectionBand,
+    'location' => t.sectionLocation,
+    'play' => t.sectionPlay,
+    'want' => t.sectionWant,
+    'links' => t.sectionLinks,
+    'clips' => t.sectionClips,
+    'language' => t.sectionLanguage,
+    'theme' => t.sectionTheme,
+    _ => id,
+  };
+}
 
 /// A section heading. [_sectionCards] puts it, and everything after it up
 /// to the next heading, on one printed card. [id] stays the same in every
@@ -712,7 +790,9 @@ List<Widget> _sectionCards(
   List<Widget> children, {
   Set<String>? open,
   required ValueChanged<String> onToggle,
+  String? only,
 }) {
+  if (only != null) return _onlySection(children, only);
   final out = <Widget>[];
   _Section? heading;
   List<Widget>? body;
@@ -852,8 +932,8 @@ class _SectionCard extends StatelessWidget {
 }
 
 /// Shown while the person has no audio clips: they don't appear in decks.
-class _NoClipsWarning extends StatelessWidget {
-  const _NoClipsWarning({required this.onRecord});
+class NoClipsWarning extends StatelessWidget {
+  const NoClipsWarning({super.key, required this.onRecord});
 
   final VoidCallback onRecord;
 

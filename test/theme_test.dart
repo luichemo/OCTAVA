@@ -29,16 +29,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    BuildContext screen() => tester.element(find.byType(EditProfileScreen));
-    expect(Theme.of(screen()).brightness, Brightness.light);
+    expect(
+      Theme.of(tester.element(find.byType(EditProfileScreen))).brightness,
+      Brightness.light,
+    );
 
     await openSection(tester, 'Theme');
-    final dark = find.widgetWithText(SegmentedButton<ThemeMode>, 'Dark');
-    await tester.scrollUntilVisible(
-      dark,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
+    BuildContext screen() =>
+        tester.element(find.byType(SegmentedButton<ThemeMode>));
     await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
 
@@ -56,10 +54,13 @@ void main() {
     expect(Theme.of(screen()).brightness, Brightness.light);
   });
 
-  testWidgets('profile sections start folded and open on tap', (tester) async {
+  testWidgets('each profile row opens its section, and shows its value', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(420, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    addTearDown(() => appTheme.value = ThemeMode.system);
     final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true)
       ..saved = const ProfileDraft(
         displayName: 'Luka',
@@ -70,21 +71,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final picker = find.byType(SegmentedButton<ThemeMode>);
-    await openSection(tester, 'Language'); // scrolls Theme into view too
-    await tester.ensureVisible(find.text('Theme'));
-    await tester.pumpAndSettle();
-    expect(picker.hitTestable(), findsNothing);
+    // The settings list shows the current theme; the picker isn't here.
+    expect(find.byType(SegmentedButton<ThemeMode>), findsNothing);
+    expect(find.text('Device'), findsNWidgets(2)); // language and theme
 
-    await tester.tap(find.text('Theme'));
+    await openSection(tester, 'Theme');
+    expect(find.byType(SegmentedButton<ThemeMode>), findsOneWidget);
+    await tester.tap(find.text('Light'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(picker);
+    await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(picker.hitTestable(), findsOneWidget);
-
-    await tester.tap(find.text('Theme'));
-    await tester.pumpAndSettle();
-    expect(picker.hitTestable(), findsNothing);
+    expect(find.byType(SegmentedButton<ThemeMode>), findsNothing);
+    expect(find.text('Light'), findsOneWidget);
   });
 
   testWidgets('the sun/moon button in the feed switches light and dark', (

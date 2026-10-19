@@ -51,6 +51,17 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<void> signOut() async => signOuts++;
+
+  int deletes = 0;
+
+  /// When set, deleting fails with this message.
+  String? deleteError;
+
+  @override
+  Future<void> deleteAccount() async {
+    if (deleteError != null) throw UserFacingException(deleteError!);
+    deletes++;
+  }
 }
 
 class FakeAuthRepository implements AuthRepository {
@@ -119,7 +130,7 @@ void main() {
       expect(repo.saved?.displayName, 'Luka');
       expect(repo.saved?.instruments, {'drums': 'intermediate'});
       expect(find.text('Set up your profile'), findsNothing);
-      expect(find.text('Your band'), findsNothing);
+      expect(find.text('YOUR BAND'), findsNothing); // no band label
     });
 
     testWidgets('asks for a name and an instrument', (tester) async {
@@ -151,7 +162,7 @@ void main() {
       final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true);
       await pump(tester, ProfileGate(repository: repo));
 
-      expect(find.text('Your band'), findsNothing);
+      expect(find.text('YOUR BAND'), findsNothing); // no band label
       // Sign out is on the profile screen.
       repo.saved = const ProfileDraft(
         displayName: 'Luka',

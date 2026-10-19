@@ -30,6 +30,10 @@ class RecordingDeck extends SampleDeck {
       (myRole: 'guitar', members: List.of(members));
 }
 
+/// The feed's open band slots (their pills show the role; screen readers
+/// hear "Drums: Open").
+final openSlots = find.bySemanticsLabel(RegExp(r': Open$'));
+
 void main() {
   final nika = MatchSummary(
     matchId: 'm1',
@@ -112,7 +116,7 @@ void main() {
       final chat = FakeChatRepository();
       final deck = RecordingDeck();
       await pumpSwipe(tester, chat, deck: deck);
-      expect(find.text('Open'), findsNWidgets(4));
+      expect(openSlots, findsNWidgets(4));
 
       deck.members.add((name: 'Nika', role: 'drums'));
       chat.matchWith(nika);
@@ -121,7 +125,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Nika wants to jam too'), findsOneWidget);
-      expect(find.text('Open'), findsNWidgets(3));
+      expect(openSlots, findsNWidgets(3));
       await tester.pump(LiveBannerListener.showFor);
     });
 

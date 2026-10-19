@@ -63,7 +63,13 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Also: Guitar · Pro, Keys · Advanced'), findsOneWidget);
+    // Pills with skill dots; screen readers hear the whole line.
+    expect(find.text('Guitar'), findsOneWidget);
+    expect(find.text('Keys'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Also: Guitar · Pro, Keys · Advanced'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the star makes an instrument the main one', (tester) async {

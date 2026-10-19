@@ -1272,5 +1272,88 @@
   "publicBandNotFound": "This band page isn't available. The band may have made it private.",
   "publicBandJoin": "Join OCTAVA",
   "publicBandJoinHint": "Musicians find each other and form bands on OCTAVA.",
-  "errPublicBandLoad": "Couldn't load this band. Check your connection."
+  "errPublicBandLoad": "Couldn't load this band. Check your connection.",
+  "kmDistance": "{distance} km",
+  "@kmDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "profileGroup": "Profile",
+  "settingsGroup": "Settings",
+  "summaryEmpty": "Not set yet",
+  "clipsCount": "{count, plural, =0{No clips yet} =1{1 clip} other{{count} clips}}",
+  "@clipsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteAccount": "Delete account",
+  "deleteAccountTitle": "Delete your account?",
+  "deleteAccountBody": "This permanently deletes your profile, clips, avatar, matches, messages and band memberships. It can't be undone.",
+  "deleteAccountConfirm": "Delete my account",
+  "accountDeleted": "Your account was deleted.",
+  "errDeleteAccount": "Couldn't delete your account. Check your connection and try again.",
+  "modGroup": "Moderation",
+  "modReports": "Reports",
+  "modOpenCount": "{count, plural, =0{No open reports} =1{1 open report} other{{count} open reports}}",
+  "@modOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "modEmpty": "No open reports. All clear.",
+  "modReportedBy": "Reported by {name} · {when}",
+  "@modReportedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "modAgainstCount": "{count, plural, =1{1 open report against them} other{{count} open reports against them}}",
+  "@modAgainstCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "modHiddenFromFeed": "Hidden from the feed until reviewed",
+  "modSuspended": "Suspended",
+  "modMessageGone": "The message was already deleted.",
+  "modDismiss": "Dismiss",
+  "modRemoveMessage": "Remove message",
+  "modSuspend": "Suspend",
+  "modUnsuspend": "Lift suspension",
+  "modSuspendTitle": "Suspend {name}?",
+  "@modSuspendTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "modSuspendBody": "They'll be hidden from the feed, signed out and unable to sign in. All their open reports will close.",
+  "modDismissed": "Report dismissed.",
+  "modMessageRemoved": "Message removed.",
+  "modSuspendedDone": "{name} is suspended.",
+  "@modSuspendedDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "modUnsuspended": "Suspension lifted.",
+  "errModeration": "Couldn't load or update the reports. Try again."
 }

@@ -57,6 +57,24 @@ class MusicianCard extends StatelessWidget {
     // words are much wider, so they start smaller still.
     final headingSize = (compact ? 60.0 : 76.0) * (georgianType ? 0.6 : 1);
     final m = musician;
+    // The heading keeps its natural size; the location pill beside it gets
+    // what's left (at least [_whereMin], or the heading shrinks to make
+    // room). Measured here because the pill sits in the same row.
+    double headingWidth(double available) {
+      if (m.whereShort.isEmpty) return available;
+      final painter = TextPainter(
+        text: TextSpan(
+          text: m.instrument,
+          style: displayStyle(size: headingSize).copyWith(height: 0.85),
+        ),
+        textScaler: MediaQuery.textScalerOf(context),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout();
+      final natural = painter.width + headingSize / 12; // + the dark outline
+      painter.dispose();
+      return min(natural, available - _whereMin - 10).clamp(0, available);
+    }
 
     return Semantics(
       label: context.t.cardSemantics(m.name, m.age, m.instrument.toLowerCase()),
@@ -170,44 +188,68 @@ class MusicianCard extends StatelessWidget {
                       left: 18,
                       right: 18,
                       bottom: -headingSize * 0.34,
-                      child: ExcludeSemantics(
-                        // Long names (Georgian especially) shrink to the card width.
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.bottomLeft,
-                          // In dark mode a dark outline is painted under the
-                          // light letters, so they stand out on the portrait.
-                          child: Stack(
-                            children: [
-                              if (dark)
-                                Text(
-                                  m.instrument,
-                                  maxLines: 1,
-                                  style: displayStyle(size: headingSize)
-                                      .copyWith(
-                                        height: 0.85,
-                                        foreground: Paint()
-                                          ..style = PaintingStyle.stroke
-                                          ..strokeWidth = headingSize / 12
-                                          ..strokeJoin = StrokeJoin.round
-                                          ..color = OctavaColors.darkShadow,
+                      // The heading, and where they are beside it.
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            width: headingWidth(box.maxWidth - 36),
+                            child: ExcludeSemantics(
+                              // Long names (Georgian especially) shrink to fit.
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.bottomLeft,
+                                // In dark mode a dark outline is painted under the
+                                // light letters, so they stand out on the portrait.
+                                child: Stack(
+                                  children: [
+                                    if (dark)
+                                      Text(
+                                        m.instrument,
+                                        maxLines: 1,
+                                        style: displayStyle(size: headingSize)
+                                            .copyWith(
+                                              height: 0.85,
+                                              foreground: Paint()
+                                                ..style = PaintingStyle.stroke
+                                                ..strokeWidth = headingSize / 12
+                                                ..strokeJoin = StrokeJoin.round
+                                                ..color =
+                                                    OctavaColors.darkShadow,
+                                            ),
                                       ),
-                                ),
-                              Text(
-                                m.instrument,
-                                maxLines: 1,
-                                style: displayStyle(size: headingSize).copyWith(
-                                  height: 0.85,
-                                  foreground: Paint()
-                                    ..color = colors.onSurface
-                                    ..blendMode = dark
-                                        ? BlendMode.srcOver
-                                        : BlendMode.multiply,
+                                    Text(
+                                      m.instrument,
+                                      maxLines: 1,
+                                      style: displayStyle(size: headingSize)
+                                          .copyWith(
+                                            height: 0.85,
+                                            foreground: Paint()
+                                              ..color = colors.onSurface
+                                              ..blendMode = dark
+                                                  ? BlendMode.srcOver
+                                                  : BlendMode.multiply,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          if (m.whereShort.isNotEmpty)
+                            Flexible(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  left: 10,
+                                  bottom: headingSize * 0.06,
+                                ),
+                                child: _Where(
+                                  text: m.whereShort,
+                                  label: m.whereText,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -253,60 +295,10 @@ class MusicianCard extends StatelessWidget {
                               ),
                           ],
                         ),
-                        if (m.otherInstruments.isNotEmpty)
-                          Text(
-                            context.t.cardAlsoPlays(
-                              [
-                                for (final i in m.otherInstruments)
-                                  '${instrumentLabel(i.id)} · ${skillLabels[i.skill] ?? i.skill}',
-                              ].join(', '),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                        // Where they are, as a small outlined pill.
-                        if (m.whereText.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 2,
-                            ),
-                            decoration: printBox(
-                              context,
-                              radius: 999,
-                              shadow: 0,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 4,
-                              children: [
-                                Icon(
-                                  Icons.near_me_outlined,
-                                  size: 14,
-                                  color: colors.onSurfaceVariant,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    m.whereText,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: colors.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         if (m.clipSeconds != null)
                           _Clip(musician: m, player: player),
+                        if (m.otherInstruments.isNotEmpty)
+                          _AlsoPlays(instruments: m.otherInstruments),
                         if (m.genres.isNotEmpty)
                           // Genre pills in the three spot inks, in turn.
                           Semantics(
@@ -386,6 +378,133 @@ class MusicianCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Where they are ("Vera, 1.2 km away"), as a small outlined pill beside
+/// the instrument heading; long places end with "…".
+/// Skill levels as 1–4 dots.
+const _skillDots = {'beginner': 1, 'intermediate': 2, 'advanced': 3, 'pro': 4};
+
+/// The other instruments, as small outlined pills: the name and 1–4 dots
+/// for the level (Beginner → Pro). Screen readers hear the whole line,
+/// "Also: Guitar · Pro, Keys · Advanced".
+class _AlsoPlays extends StatelessWidget {
+  const _AlsoPlays({required this.instruments});
+
+  final List<({String id, String skill})> instruments;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: context.t.cardAlsoPlays(
+        [
+          for (final i in instruments)
+            '${instrumentLabel(i.id)} · ${skillLabels[i.skill] ?? i.skill}',
+        ].join(', '),
+      ),
+      excludeSemantics: true,
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final i in instruments)
+            Container(
+              height: 26,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: colors.outlineVariant, width: 1.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  Text(
+                    instrumentLabel(i.id),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSurface,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 2.5,
+                    children: [
+                      for (var d = 1; d <= 4; d++)
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: d <= (_skillDots[i.skill] ?? 0)
+                                ? OctavaColors.pink
+                                : null,
+                            border: Border.all(
+                              color: d <= (_skillDots[i.skill] ?? 0)
+                                  ? OctavaColors.pink
+                                  : colors.outlineVariant,
+                              width: 1.2,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The least room the location pill gets beside the heading.
+const _whereMin = 118.0;
+
+class _Where extends StatelessWidget {
+  const _Where({required this.text, required this.label});
+  final String text;
+
+  /// What screen readers hear: "Vake, 1.2 km away".
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: label,
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        decoration: printBox(context, radius: 999, shadow: 0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 4,
+          children: [
+            Icon(
+              Icons.near_me_outlined,
+              size: 14,
+              color: colors.onSurfaceVariant,
+            ),
+            Flexible(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

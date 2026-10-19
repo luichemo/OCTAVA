@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../data/moderation_repository.dart';
 import '../data/avatar_repository.dart';
 import '../data/band_repository.dart';
 import '../data/bands_repository.dart';
@@ -60,6 +61,7 @@ class AuthGate extends StatelessWidget {
           bands: SupabaseBandsRepository(client),
           rehearsals: SupabaseRehearsalRepository(client),
           songs: SupabaseSongRepository(client),
+          moderation: SupabaseModeration(client),
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
         );
@@ -84,12 +86,16 @@ class ProfileGate extends StatefulWidget {
     this.bands,
     this.rehearsals,
     this.songs,
+    this.moderation,
   });
 
   final ProfileRepository repository;
 
   /// Band songs and their recordings.
   final SongRepository? songs;
+
+  /// Report review, for moderators (on the profile page).
+  final ModerationRepository? moderation;
 
   /// Band rehearsal calendars and reminders.
   final RehearsalRepository? rehearsals;
@@ -181,6 +187,7 @@ class _ProfileGateState extends State<ProfileGate> {
         location: widget.location,
         bandNeeds: widget.bandNeeds,
         onSignOut: widget.repository.signOut,
+        moderation: widget.moderation,
       ),
     ),
   );

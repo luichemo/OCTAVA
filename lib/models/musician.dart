@@ -110,6 +110,19 @@ class Musician {
     ].whereType<String>().where((s) => s.isNotEmpty).join(', ');
   }
 
+  /// The same, shorter, for the pill beside the instrument heading:
+  /// "1.2 km · Vake" (the distance first, so it survives when the place is
+  /// cut short next to a long instrument name).
+  String get whereShort {
+    final distance = km == null
+        ? null
+        : L10n.current.kmDistance('${km! % 1 == 0 ? km!.toInt() : km}');
+    return [
+      distance,
+      area,
+    ].whereType<String>().where((s) => s.isNotEmpty).join(' · ');
+  }
+
   // A stable seed from the id or name, so each card's artwork looks the same
   // on every run and platform (String.hashCode isn't guaranteed to be stable).
   int get _seed => key.codeUnits.fold(17, (h, c) => (h * 31 + c) & 0x7fffffff);

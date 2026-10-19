@@ -13,6 +13,10 @@ import 'package:octava/screens/swipe_screen.dart';
 import 'profile_helpers.dart';
 import 'signup_flow_test.dart' show FakeProfileRepository;
 
+/// The feed's open band slots (their pills show the role; screen readers
+/// hear "Drums: Open").
+final openSlots = find.bySemanticsLabel(RegExp(r': Open$'));
+
 void main() {
   Future<void> pump(WidgetTester tester, Widget home) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -59,9 +63,9 @@ void main() {
     testWidgets('tap the lineup, set counts and save', (tester) async {
       final needs = MemoryBandNeeds();
       await pump(tester, SwipeScreen(bandNeeds: needs));
-      expect(find.text('Open'), findsNWidgets(4));
+      expect(openSlots, findsNWidgets(4));
 
-      await tester.tap(find.text('Open').first);
+      await tester.tap(openSlots.first);
       await tester.pumpAndSettle();
       expect(find.text('Who does your band need?'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('more-drums')));
@@ -72,7 +76,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(needs.needs, {'vocals': 1, 'bass': 1, 'drums': 2});
-      expect(find.text('Open'), findsNWidgets(4)); // vocals, bass, 2× drums
+      expect(openSlots, findsNWidgets(4)); // vocals, bass, 2× drums
       expect(find.text('Keys'), findsNothing);
     });
 
@@ -80,7 +84,7 @@ void main() {
       tester,
     ) async {
       await pump(tester, SwipeScreen(bandNeeds: MemoryBandNeeds({'bass': 1})));
-      await tester.tap(find.text('Open').first);
+      await tester.tap(openSlots.first);
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const ValueKey('fewer-bass')));
@@ -104,20 +108,20 @@ void main() {
       // Nine slots (you + 8) scroll sideways instead of overflowing.
       await tester.tap(save);
       await tester.pumpAndSettle();
-      expect(find.text('Open'), findsWidgets);
+      expect(openSlots, findsWidgets);
       expect(tester.takeException(), isNull);
     });
 
     testWidgets('a second drummer fills the second drums slot', (tester) async {
       await pump(tester, SwipeScreen(bandNeeds: MemoryBandNeeds({'drums': 2})));
-      expect(find.text('Open'), findsNWidgets(2));
+      expect(openSlots, findsNWidgets(2));
 
       await swipeJam(tester); // Nika, a drummer who likes you
       await tester.pumpAndSettle();
       expect(find.textContaining('Drums is now filled'), findsOneWidget);
       await tester.tap(find.text('Say hi'));
       await tester.pumpAndSettle();
-      expect(find.text('Open'), findsOneWidget);
+      expect(openSlots, findsOneWidget);
     });
 
     testWidgets("a match your band doesn't need says so", (tester) async {

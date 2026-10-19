@@ -8,6 +8,10 @@ import 'package:octava/data/sample_musicians.dart';
 import 'package:octava/main.dart';
 import 'package:octava/screens/swipe_screen.dart';
 
+/// The feed's open band slots (their pills show the role; screen readers
+/// hear "Drums: Open").
+final openSlots = find.bySemanticsLabel(RegExp(r': Open$'));
+
 void main() {
   // A phone-sized screen, so the full card layout is used.
   Future<void> pumpApp(WidgetTester tester) async {
@@ -22,8 +26,8 @@ void main() {
     await pumpApp(tester);
 
     expect(find.bySemanticsLabel('OCTAVA'), findsOneWidget); // the logo
-    expect(find.text('Your band'), findsNothing);
-    expect(find.text('Open'), findsNWidgets(4));
+    expect(find.text('YOUR BAND'), findsNothing); // no band label
+    expect(openSlots, findsNWidgets(4));
     expect(find.text('Nika, 24'), findsOneWidget);
     expect(find.text('Fits your open drums slot'), findsOneWidget);
   });
@@ -36,7 +40,7 @@ void main() {
 
     expect(find.text('Nika, 24'), findsNothing);
     expect(find.text('Mariam, 27'), findsOneWidget);
-    expect(find.text('Open'), findsNWidgets(4));
+    expect(openSlots, findsNWidgets(4));
   });
 
   testWidgets('Jam on someone who likes you is a match and fills the slot', (
@@ -54,8 +58,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('You said hi to Nika'), findsOneWidget);
-    expect(find.text('Nika'), findsOneWidget); // in the Drums slot
-    expect(find.text('Open'), findsNWidgets(3));
+    // The Drums segment is now taken (screen readers hear who).
+    expect(find.bySemanticsLabel('Drums: Nika'), findsOneWidget);
+    expect(openSlots, findsNWidgets(3));
   });
 
   testWidgets('dragging a card right counts as Jam', (tester) async {

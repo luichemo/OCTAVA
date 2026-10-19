@@ -168,8 +168,15 @@ ThemeData octavaTheme(Brightness brightness) {
       side: inkSide,
       shape: const StadiumBorder(),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      labelStyle: labelText.copyWith(color: ink),
       // Selected chips are aqua in both modes, so their text stays dark.
+      // (Chips read the selected colour from the label's WidgetStateColor;
+      // secondaryLabelStyle alone left white text on aqua in dark mode.)
+      labelStyle: labelText.copyWith(
+        color: WidgetStateColor.resolveWith(
+          (states) =>
+              states.contains(WidgetState.selected) ? OctavaColors.ink : ink,
+        ),
+      ),
       secondaryLabelStyle: labelText.copyWith(color: OctavaColors.ink),
     ),
     checkboxTheme: CheckboxThemeData(

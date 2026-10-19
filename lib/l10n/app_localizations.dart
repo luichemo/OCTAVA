@@ -3727,6 +3727,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load this band. Check your connection.'**
   String get errPublicBandLoad;
+
+  /// No description provided for @kmDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} km'**
+  String kmDistance(String distance);
+
+  /// No description provided for @profileGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileGroup;
+
+  /// No description provided for @settingsGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsGroup;
+
+  /// No description provided for @summaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set yet'**
+  String get summaryEmpty;
+
+  /// No description provided for @clipsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No clips yet} =1{1 clip} other{{count} clips}}'**
+  String clipsCount(int count);
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes your profile, clips, avatar, matches, messages and band memberships. It can\'t be undone.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was deleted.'**
+  String get accountDeleted;
+
+  /// No description provided for @errDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete your account. Check your connection and try again.'**
+  String get errDeleteAccount;
+
+  /// No description provided for @modGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderation'**
+  String get modGroup;
+
+  /// No description provided for @modReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get modReports;
+
+  /// No description provided for @modOpenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No open reports} =1{1 open report} other{{count} open reports}}'**
+  String modOpenCount(int count);
+
+  /// No description provided for @modEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No open reports. All clear.'**
+  String get modEmpty;
+
+  /// No description provided for @modReportedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported by {name} · {when}'**
+  String modReportedBy(String name, String when);
+
+  /// No description provided for @modAgainstCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 open report against them} other{{count} open reports against them}}'**
+  String modAgainstCount(int count);
+
+  /// No description provided for @modHiddenFromFeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden from the feed until reviewed'**
+  String get modHiddenFromFeed;
+
+  /// No description provided for @modSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get modSuspended;
+
+  /// No description provided for @modMessageGone.
+  ///
+  /// In en, this message translates to:
+  /// **'The message was already deleted.'**
+  String get modMessageGone;
+
+  /// No description provided for @modDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get modDismiss;
+
+  /// No description provided for @modRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove message'**
+  String get modRemoveMessage;
+
+  /// No description provided for @modSuspend.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend'**
+  String get modSuspend;
+
+  /// No description provided for @modUnsuspend.
+  ///
+  /// In en, this message translates to:
+  /// **'Lift suspension'**
+  String get modUnsuspend;
+
+  /// No description provided for @modSuspendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend {name}?'**
+  String modSuspendTitle(String name);
+
+  /// No description provided for @modSuspendBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll be hidden from the feed, signed out and unable to sign in. All their open reports will close.'**
+  String get modSuspendBody;
+
+  /// No description provided for @modDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Report dismissed.'**
+  String get modDismissed;
+
+  /// No description provided for @modMessageRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Message removed.'**
+  String get modMessageRemoved;
+
+  /// No description provided for @modSuspendedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is suspended.'**
+  String modSuspendedDone(String name);
+
+  /// No description provided for @modUnsuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspension lifted.'**
+  String get modUnsuspended;
+
+  /// No description provided for @errModeration.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load or update the reports. Try again.'**
+  String get errModeration;
 }
 
 class _AppLocalizationsDelegate

@@ -602,7 +602,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
                       BandLineup(
                         band: _band,
                         justFilled: _justFilled,

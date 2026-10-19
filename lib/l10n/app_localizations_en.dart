@@ -2138,4 +2138,135 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errPublicBandLoad =>
       'Couldn\'t load this band. Check your connection.';
+
+  @override
+  String kmDistance(String distance) {
+    return '$distance km';
+  }
+
+  @override
+  String get profileGroup => 'Profile';
+
+  @override
+  String get settingsGroup => 'Settings';
+
+  @override
+  String get summaryEmpty => 'Not set yet';
+
+  @override
+  String clipsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clips',
+      one: '1 clip',
+      zero: 'No clips yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountBody =>
+      'This permanently deletes your profile, clips, avatar, matches, messages and band memberships. It can\'t be undone.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete my account';
+
+  @override
+  String get accountDeleted => 'Your account was deleted.';
+
+  @override
+  String get errDeleteAccount =>
+      'Couldn\'t delete your account. Check your connection and try again.';
+
+  @override
+  String get modGroup => 'Moderation';
+
+  @override
+  String get modReports => 'Reports';
+
+  @override
+  String modOpenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open reports',
+      one: '1 open report',
+      zero: 'No open reports',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modEmpty => 'No open reports. All clear.';
+
+  @override
+  String modReportedBy(String name, String when) {
+    return 'Reported by $name · $when';
+  }
+
+  @override
+  String modAgainstCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count open reports against them',
+      one: '1 open report against them',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modHiddenFromFeed => 'Hidden from the feed until reviewed';
+
+  @override
+  String get modSuspended => 'Suspended';
+
+  @override
+  String get modMessageGone => 'The message was already deleted.';
+
+  @override
+  String get modDismiss => 'Dismiss';
+
+  @override
+  String get modRemoveMessage => 'Remove message';
+
+  @override
+  String get modSuspend => 'Suspend';
+
+  @override
+  String get modUnsuspend => 'Lift suspension';
+
+  @override
+  String modSuspendTitle(String name) {
+    return 'Suspend $name?';
+  }
+
+  @override
+  String get modSuspendBody =>
+      'They\'ll be hidden from the feed, signed out and unable to sign in. All their open reports will close.';
+
+  @override
+  String get modDismissed => 'Report dismissed.';
+
+  @override
+  String get modMessageRemoved => 'Message removed.';
+
+  @override
+  String modSuspendedDone(String name) {
+    return '$name is suspended.';
+  }
+
+  @override
+  String get modUnsuspended => 'Suspension lifted.';
+
+  @override
+  String get errModeration =>
+      'Couldn\'t load or update the reports. Try again.';
 }

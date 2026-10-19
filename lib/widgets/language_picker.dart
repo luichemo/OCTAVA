@@ -6,6 +6,14 @@ import '../l10n/l10n.dart';
 const _english = 'English';
 const _georgian = 'ქართული';
 
+/// The chosen language's name ("English", "ქართული"), or "Device".
+String languageName(BuildContext context, Locale? language) =>
+    switch (language?.languageCode) {
+      'en' => _english,
+      'ka' => _georgian,
+      _ => context.t.languageDevice,
+    };
+
 /// Device / English / ქართული, for the profile screen. Applies right away.
 class LanguageSection extends StatelessWidget {
   const LanguageSection({super.key});

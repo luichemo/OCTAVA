@@ -8,9 +8,13 @@ import '../models/band.dart';
 
 export '../models/band.dart' show youMarker;
 
-/// Your slot, then one slot per needed role, filled with a member's name or
-/// "Open". The slot at index [justFilled] briefly flashes pink when a match
-/// fills it. Tapping the lineup calls [onEdit].
+/// The feed's band row as one thin strip (owner's pick, 2026-10-19): one
+/// segment per slot with the role's name in it (pink
+/// when taken, yours outlined in ink; outlined and muted when open), "2/5"
+/// and a chevron. Four segments share the width; more scroll sideways.
+/// Screen readers hear each slot ("Drums: Nika" / "Bass: Open"). The slot at
+/// index [justFilled] flashes yellow when a match fills it. Tapping the strip
+/// calls [onEdit].
 class BandLineup extends StatelessWidget {
   const BandLineup({
     super.key,
@@ -23,127 +27,116 @@ class BandLineup extends StatelessWidget {
   final List<BandSlot> band;
   final int? justFilled;
 
-  /// Opens the role chooser. Without it the row isn't tappable.
+  /// Opens the role chooser. Without it the strip isn't tappable.
   final VoidCallback? onEdit;
 
-  /// Up to this many slots share the width; more scroll sideways.
-  static const _fitSlots = 6;
+  /// How many segments fit across; the rest scroll.
+  static const _visible = 4;
+  static const _gap = 3.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final t = context.t;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final scrolls = band.length > _fitSlots;
-    final slots = [
-      // `(i, (:role, member: who))` unpacks the index and the record's
-      // fields, like `[i, { role, member: who }]` destructuring in JS.
-      for (final (i, (:role, member: who)) in band.indexed)
-        TweenAnimationBuilder<double>(
-          // A new key restarts the flash each time this slot fills.
-          key: ValueKey('$i-$role-$who'),
-          tween: Tween(begin: i == justFilled && !reduceMotion ? 1 : 0, end: 0),
-          duration: const Duration(milliseconds: 700),
-          builder: (context, flash, _) {
-            // You: a white slot. Members: pink, flashing yellow as they
-            // arrive. Open: an empty outline.
-            final you = who == youMarker;
-            final member = who != null && !you;
-            final fill = member
-                ? Color.lerp(OctavaColors.pink, OctavaColors.yellow, flash)!
-                : you
-                ? colors.surfaceContainer
-                : Colors.transparent;
-            final text = member ? OctavaColors.ink : colors.onSurface;
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              decoration: who == null
-                  ? BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colors.outlineVariant,
-                        width: 2,
-                      ),
-                    )
-                  : printBox(
-                      context,
-                      color: fill,
-                      radius: 12,
-                      shadow: 2,
-                      borderColor: member ? OctavaColors.ink : null,
-                    ),
-              child: Column(
-                children: [
-                  // Long names (e.g. Georgian "დასარტყამები") shrink to
-                  // fit the slot instead of wrapping.
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        instrumentLabel(role),
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: who == null ? colors.onSurfaceVariant : text,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // "Open" shrinks to fit (it's long in Georgian);
-                  // member names end with "…" instead.
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: who == null
-                        ? FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              context.t.slotOpen,
-                              maxLines: 1,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: colors.onSurfaceVariant,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            you ? context.t.slotYou : who,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: you ? OctavaColors.pink : text,
-                            ),
-                          ),
-                  ),
-                ],
+    final filled = band.where((s) => s.member != null).length;
+    const small = TextStyle(fontSize: 12, fontWeight: FontWeight.w700);
+
+    Widget segment(int i, String role, String? who, double width) => Semantics(
+      // Its own node, or the slots merge into one label.
+      container: true,
+      label:
+          '${instrumentLabel(role)}: '
+          '${who == null ? t.slotOpen : (who == youMarker ? t.slotYou : who)}',
+      child: TweenAnimationBuilder<double>(
+        // A new key restarts the flash each time it fills.
+        key: ValueKey('$i-$role-$who'),
+        tween: Tween(begin: i == justFilled && !reduceMotion ? 1 : 0, end: 0),
+        duration: const Duration(milliseconds: 700),
+        builder: (context, flash, _) => Container(
+          width: width,
+          height: 24,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: who == null
+                ? null
+                : Color.lerp(OctavaColors.pink, OctavaColors.yellow, flash),
+            borderRadius: BorderRadius.circular(7),
+            border: who == null
+                ? Border.all(color: colors.outlineVariant, width: 1.2)
+                : who == youMarker
+                ? Border.all(color: OctavaColors.ink, width: 1.2)
+                : null,
+          ),
+          child: ExcludeSemantics(
+            // Long names (Georgian especially) shrink to fit their segment.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                instrumentLabel(role),
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: who == null
+                      ? colors.onSurfaceVariant
+                      : OctavaColors.ink,
+                ),
               ),
-            );
-          },
-        ),
-    ];
-    final row = scrolls
-        ? SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            // Room for the slots' hard shadows.
-            padding: const EdgeInsets.only(bottom: 2, right: 2),
-            child: Row(
-              spacing: 6,
-              children: [
-                for (final slot in slots) SizedBox(width: 64, child: slot),
-              ],
             ),
-          )
-        : Row(
-            spacing: 6,
-            children: [for (final slot in slots) Expanded(child: slot)],
-          );
+          ),
+        ),
+      ),
+    );
+
+    final strip = SizedBox(
+      height: 28,
+      child: Row(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) {
+                // Four across (fewer slots share the width); more scroll.
+                final across = band.length.clamp(1, _visible);
+                final width = (box.maxWidth - _gap * (across - 1)) / across;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    spacing: _gap,
+                    children: [
+                      // `(i, (:role, member: who))` unpacks the index and the
+                      // record's fields, like `[i, { role, member: who }]`.
+                      for (final (i, (:role, member: who)) in band.indexed)
+                        segment(i, role, who, width),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 10),
+          ExcludeSemantics(
+            child: Text(
+              '$filled/${band.length}',
+              style: small.copyWith(color: colors.onSurface),
+            ),
+          ),
+          if (onEdit != null)
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: colors.onSurfaceVariant,
+            ),
+        ],
+      ),
+    );
     final edit = onEdit;
-    return Container(
-      decoration: printBox(context, radius: 20),
-      padding: const EdgeInsets.all(12),
-      child: edit == null ? row : GestureDetector(onTap: edit, child: row),
+    if (edit == null) return strip;
+    return GestureDetector(
+      onTap: edit,
+      behavior: HitTestBehavior.opaque,
+      child: strip,
     );
   }
 }

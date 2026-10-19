@@ -42,6 +42,9 @@ abstract interface class ProfileRepository {
   Future<void> updateProfile(ProfileDraft draft);
 
   Future<void> signOut();
+
+  /// Deletes your account and everything in it for good, then signs out.
+  Future<void> deleteAccount();
 }
 
 class SupabaseAuthRepository implements AuthRepository {
@@ -266,6 +269,19 @@ class SupabaseProfileRepository implements ProfileRepository {
 
   @override
   Future<void> signOut() => _client.auth.signOut();
+
+  @override
+  Future<void> deleteAccount() async {
+    // The delete-account Edge Function does it on the server (leaves your
+    // bands, removes your files, deletes the login, which cascades).
+    try {
+      await _client.functions.invoke('delete-account');
+    } catch (_) {
+      throw UserFacingException(L10n.current.errDeleteAccount);
+    }
+    // The session belongs to a deleted user now; clear it locally.
+    await _client.auth.signOut().catchError((_) {});
+  }
 
   /// Runs a database write, turning errors into messages for the person.
   /// Messages raised by our own database rules (like the 16+ check) are

@@ -2121,4 +2121,135 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get errPublicBandLoad => 'ბენდი ვერ ჩაიტვირთა. შეამოწმე კავშირი.';
+
+  @override
+  String kmDistance(String distance) {
+    return '$distance კმ';
+  }
+
+  @override
+  String get profileGroup => 'პროფილი';
+
+  @override
+  String get settingsGroup => 'პარამეტრები';
+
+  @override
+  String get summaryEmpty => 'ჯერ არ არის';
+
+  @override
+  String clipsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ჩანაწერი',
+      one: '1 ჩანაწერი',
+      zero: 'ჩანაწერები ჯერ არ არის',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteAccount => 'ანგარიშის წაშლა';
+
+  @override
+  String get deleteAccountTitle => 'წავშალო შენი ანგარიში?';
+
+  @override
+  String get deleteAccountBody =>
+      'სამუდამოდ წაიშლება შენი პროფილი, ჩანაწერები, ავატარი, მეჩები, შეტყობინებები და ბენდებში წევრობა. ამის გაუქმება შეუძლებელია.';
+
+  @override
+  String get deleteAccountConfirm => 'წაშალე ჩემი ანგარიში';
+
+  @override
+  String get accountDeleted => 'შენი ანგარიში წაიშალა.';
+
+  @override
+  String get errDeleteAccount =>
+      'ანგარიში ვერ წაიშალა. შეამოწმე კავშირი და სცადე თავიდან.';
+
+  @override
+  String get modGroup => 'მოდერაცია';
+
+  @override
+  String get modReports => 'საჩივრები';
+
+  @override
+  String modOpenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ღია საჩივარი',
+      one: '1 ღია საჩივარი',
+      zero: 'ღია საჩივრები არ არის',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modEmpty => 'ღია საჩივრები არ არის. ყველაფერი რიგზეა.';
+
+  @override
+  String modReportedBy(String name, String when) {
+    return 'საჩივარი: $name · $when';
+  }
+
+  @override
+  String modAgainstCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'მის წინააღმდეგ $count ღია საჩივარია',
+      one: 'მის წინააღმდეგ 1 ღია საჩივარია',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get modHiddenFromFeed => 'დამალულია ლენტიდან განხილვამდე';
+
+  @override
+  String get modSuspended => 'შეჩერებულია';
+
+  @override
+  String get modMessageGone => 'შეტყობინება უკვე წაშლილია.';
+
+  @override
+  String get modDismiss => 'უარყოფა';
+
+  @override
+  String get modRemoveMessage => 'შეტყობინების წაშლა';
+
+  @override
+  String get modSuspend => 'შეჩერება';
+
+  @override
+  String get modUnsuspend => 'შეჩერების მოხსნა';
+
+  @override
+  String modSuspendTitle(String name) {
+    return 'შევაჩერო $name?';
+  }
+
+  @override
+  String get modSuspendBody =>
+      'ის დაიმალება ლენტიდან, გავა ანგარიშიდან და ვეღარ შევა. მისი ყველა ღია საჩივარი დაიხურება.';
+
+  @override
+  String get modDismissed => 'საჩივარი უარყოფილია.';
+
+  @override
+  String get modMessageRemoved => 'შეტყობინება წაიშალა.';
+
+  @override
+  String modSuspendedDone(String name) {
+    return '$name შეჩერებულია.';
+  }
+
+  @override
+  String get modUnsuspended => 'შეჩერება მოხსნილია.';
+
+  @override
+  String get errModeration =>
+      'საჩივრები ვერ ჩაიტვირთა ან ვერ განახლდა. სცადე თავიდან.';
 }

@@ -39,14 +39,14 @@ void main() {
       ),
     );
 
-    expect(find.text('შენი ბენდი'), findsNothing); // Your band heading is hidden.
     expect(find.text('დასარტყამები'), findsWidgets); // Drums (lineup + card)
-    expect(find.text('თავისუფალი'), findsNWidgets(4)); // Open
+    // Open slots show their role; screen readers hear "…: თავისუფალი".
+    expect(find.bySemanticsLabel(RegExp(r': თავისუფალი$')), findsNWidgets(4));
     expect(find.text('ყველგან'), findsOneWidget); // Everywhere
     expect(find.text('გაზიარება'), findsOneWidget); // Share (location)
     expect(find.byTooltip('პროფილი'), findsOneWidget); // Profile
     expect(find.text('შენს ბენდს სჭირდება: დასარტყამები'), findsOneWidget);
-    expect(find.text('Your band'), findsNothing);
+    expect(find.text('შენი ბენდი'), findsNothing); // no band label
   });
 
   testWidgets('filters in Georgian', (tester) async {

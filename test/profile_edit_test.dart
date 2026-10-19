@@ -161,31 +161,31 @@ void main() {
       );
     await pump(tester, EditProfileScreen(repository: repo));
 
-    expect(find.text('Your profile'), findsOneWidget);
+    // The profile page lists the sections with a summary each.
+    expect(find.text('Luka'), findsWidgets);
+    expect(find.text('Vocals · Pro'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Date of birth'), findsNothing);
 
+    // About you opens on its own page; saving comes back to the list.
+    await openSection(tester, 'About you');
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Name'),
       'Luka G',
     );
-    final scroll = find.byType(Scrollable).first;
+    await tester.tap(find.text('Save changes'));
+    await tester.pumpAndSettle();
+    expect(find.text('Profile saved.'), findsOneWidget);
+    expect(find.text('Save changes'), findsNothing);
+
+    await openSection(tester, 'Links');
     final linkField = find.widgetWithText(
       TextField,
       'YouTube, TikTok, SoundCloud, Spotify…',
     );
-    await tester.scrollUntilVisible(linkField, 200, scrollable: scroll);
     await tester.enterText(linkField, 'soundcloud.com/lukag');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(find.text('SoundCloud'), findsOneWidget);
-
-    await tester.scrollUntilVisible(
-      find.text('Save changes'),
-      200,
-      scrollable: scroll,
-    );
-    await tester.ensureVisible(find.text('Save changes'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
 
@@ -205,19 +205,16 @@ void main() {
         instruments: {'vocals': 'pro'},
       );
     await pump(tester, EditProfileScreen(repository: repo));
+    await openSection(tester, 'Links');
 
-    final scroll = find.byType(Scrollable).first;
     final linkField = find.widgetWithText(
       TextField,
       'YouTube, TikTok, SoundCloud, Spotify…',
     );
-    await tester.scrollUntilVisible(linkField, 200, scrollable: scroll);
     await tester.enterText(
       linkField,
       'youtube.com/watch?v=abc',
     ); // no Enter, no +
-    await tester.ensureVisible(find.text('Save changes'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Save changes'));
     await tester.pumpAndSettle();
 
@@ -254,6 +251,60 @@ void main() {
     expect(find.textContaining('Check the link'), findsOneWidget);
   });
 
+  group('delete account', () {
+    FakeProfileRepository profile() =>
+        FakeProfileRepository(hasBirthDate: true, hasProfile: true)
+          ..saved = const ProfileDraft(
+            displayName: 'Luka',
+            instruments: {'vocals': 'pro'},
+          );
+
+    Future<void> openDelete(WidgetTester tester) async {
+      final row = find.text('Delete account');
+      await tester.scrollUntilVisible(
+        row,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.text('Delete your account?'), findsOneWidget);
+    }
+
+    testWidgets('asks first; Cancel keeps the account', (tester) async {
+      final repo = profile();
+      await pump(tester, EditProfileScreen(repository: repo));
+      await openDelete(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(repo.deletes, 0);
+      expect(find.text('Delete account'), findsOneWidget);
+    });
+
+    testWidgets('confirming deletes it and says so', (tester) async {
+      final repo = profile();
+      await pump(tester, EditProfileScreen(repository: repo));
+      await openDelete(tester);
+      await tester.tap(find.text('Delete my account'));
+      await tester.pumpAndSettle();
+      expect(repo.deletes, 1);
+      expect(find.text('Your account was deleted.'), findsOneWidget);
+    });
+
+    testWidgets('a failure keeps you on the page with the reason', (
+      tester,
+    ) async {
+      final repo = profile()..deleteError = "Couldn't delete your account.";
+      await pump(tester, EditProfileScreen(repository: repo));
+      await openDelete(tester);
+      await tester.tap(find.text('Delete my account'));
+      await tester.pumpAndSettle();
+      expect(repo.deletes, 0);
+      expect(find.text("Couldn't delete your account."), findsOneWidget);
+      expect(find.text('Delete account'), findsOneWidget);
+    });
+  });
+
   testWidgets('"See your card" shows your own card', (tester) async {
     final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true)
       ..saved = const ProfileDraft(
@@ -263,7 +314,7 @@ void main() {
       );
     await pump(tester, EditProfileScreen(repository: repo));
 
-    await tester.tap(find.text('See your card'));
+    await tester.tap(find.byTooltip('See your card')); // the eye icon
     await tester.pumpAndSettle();
 
     expect(find.text('Your card'), findsOneWidget);
