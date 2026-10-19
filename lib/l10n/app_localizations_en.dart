@@ -2269,4 +2269,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errModeration =>
       'Couldn\'t load or update the reports. Try again.';
+
+  @override
+  String get legalAgree => 'By creating an account you agree to the';
+
+  @override
+  String get legalTerms => 'Terms of use';
+
+  @override
+  String get legalPrivacy => 'Privacy policy';
+
+  @override
+  String get legalTermsRow => 'Terms of use';
+
+  @override
+  String get legalPrivacyRow => 'Privacy policy';
 }

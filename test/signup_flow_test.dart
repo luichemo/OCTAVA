@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 
+import 'package:octava/data/push_notifications.dart';
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/musician.dart';
@@ -83,6 +84,22 @@ class FakeAuthRepository implements AuthRepository {
     if (error != null) throw UserFacingException(error!);
     lastEmail = email;
   }
+}
+
+/// Counts start/stop calls, like the app's notification setup.
+class FakePush implements PushNotifications {
+  int starts = 0;
+  int stops = 0;
+  ValueChanged<PushData>? onOpen;
+
+  @override
+  Future<void> start({required ValueChanged<PushData> onOpen}) async {
+    starts++;
+    this.onOpen = onOpen;
+  }
+
+  @override
+  Future<void> stop() async => stops++;
 }
 
 void main() {
@@ -175,6 +192,33 @@ void main() {
       expect(repo.signOuts, 1);
     });
 
+    testWidgets('notifications start with the app and stop on sign-out', (
+      tester,
+    ) async {
+      final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true)
+        ..saved = const ProfileDraft(
+          displayName: 'Luka',
+          instruments: {'vocals': 'pro'},
+        );
+      final push = FakePush();
+      await pump(tester, ProfileGate(repository: repo, push: push));
+      expect(push.starts, 1);
+      expect(push.onOpen, isNotNull);
+
+      await tester.tap(find.byTooltip('Profile'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Sign out'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Sign out'));
+      await tester.pumpAndSettle();
+      expect(push.stops, 1);
+      expect(repo.signOuts, 1);
+      expect(push.starts, 1); // not started twice
+    });
+
     testWidgets('a new account is asked for a date of birth', (tester) async {
       await pump(tester, ProfileGate(repository: FakeProfileRepository()));
       expect(
@@ -200,6 +244,9 @@ void main() {
       await tester.tap(find.text('Create account')); // the tab
       await tester.pumpAndSettle();
       expect(find.text('16+ musicians only'), findsOneWidget);
+      // With links to the terms and the privacy policy.
+      expect(find.text('Terms of use'), findsOneWidget);
+      expect(find.text('Privacy policy'), findsOneWidget);
 
       await tester.tap(find.text('Sign in')); // the tab
       await tester.pumpAndSettle();

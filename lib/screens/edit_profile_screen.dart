@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
+import '../config/links.dart';
 import '../data/avatar_repository.dart';
 import '../data/band_repository.dart';
 import '../data/clip_repository.dart';
@@ -430,6 +433,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         summary: r.summary,
                         onTap: r.onTap,
                       ),
+                    _Row(
+                      icon: Icons.policy_outlined,
+                      title: t.legalPrivacyRow,
+                      onTap: () => launchUrl(
+                        Uri.parse(privacyUrl),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                    ),
+                    _Row(
+                      icon: Icons.gavel_rounded,
+                      title: t.legalTermsRow,
+                      onTap: () => launchUrl(
+                        Uri.parse(termsUrl),
+                        mode: LaunchMode.externalApplication,
+                      ),
+                    ),
                     if (widget.onSignOut case final signOut?)
                       _Row(
                         icon: Icons.logout_rounded,

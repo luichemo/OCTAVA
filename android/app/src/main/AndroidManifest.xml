@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <!-- Recording clips with the ➕ button. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Push notifications (Android 13+ asks for this). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="octava"
         android:name="${applicationName}"

@@ -3913,6 +3913,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load or update the reports. Try again.'**
   String get errModeration;
+
+  /// No description provided for @legalAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'By creating an account you agree to the'**
+  String get legalAgree;
+
+  /// No description provided for @legalTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get legalTerms;
+
+  /// No description provided for @legalPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get legalPrivacy;
+
+  /// No description provided for @legalTermsRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of use'**
+  String get legalTermsRow;
+
+  /// No description provided for @legalPrivacyRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get legalPrivacyRow;
 }
 
 class _AppLocalizationsDelegate

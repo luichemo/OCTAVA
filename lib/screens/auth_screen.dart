@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
+import '../config/links.dart';
 import '../l10n/l10n.dart';
 
 import '../data/repositories.dart';
@@ -299,6 +302,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                               color: colors.onSurface,
                                             ),
                                           ),
+                                          _LegalLinks(color: colors.onSurface),
                                         ],
                                       ),
                                     ),
@@ -430,4 +434,42 @@ class _DotsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DotsPainter old) => old.line != line;
+}
+
+/// "By creating an account you agree to the Terms of use · Privacy policy",
+/// with both opening the pages on the website.
+class _LegalLinks extends StatelessWidget {
+  const _LegalLinks({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    Widget link(String label, String url) => InkWell(
+      onTap: () =>
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w700,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ),
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      children: [
+        Text(t.legalAgree, style: TextStyle(color: color, fontSize: 13)),
+        link(t.legalTerms, termsUrl),
+        Text('·', style: TextStyle(color: color)),
+        link(t.legalPrivacy, privacyUrl),
+      ],
+    );
+  }
 }

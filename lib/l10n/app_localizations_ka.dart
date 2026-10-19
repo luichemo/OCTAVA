@@ -2252,4 +2252,19 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get errModeration =>
       'საჩივრები ვერ ჩაიტვირთა ან ვერ განახლდა. სცადე თავიდან.';
+
+  @override
+  String get legalAgree => 'ანგარიშის შექმნით ეთანხმები:';
+
+  @override
+  String get legalTerms => 'გამოყენების წესებს';
+
+  @override
+  String get legalPrivacy => 'კონფიდენციალურობის პოლიტიკას';
+
+  @override
+  String get legalTermsRow => 'გამოყენების წესები';
+
+  @override
+  String get legalPrivacyRow => 'კონფიდენციალურობის პოლიტიკა';
 }

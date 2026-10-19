@@ -4,6 +4,7 @@ import '../l10n/l10n.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../data/push_notifications.dart';
 import '../data/moderation_repository.dart';
 import '../data/avatar_repository.dart';
 import '../data/band_repository.dart';
@@ -62,6 +63,7 @@ class AuthGate extends StatelessWidget {
           rehearsals: SupabaseRehearsalRepository(client),
           songs: SupabaseSongRepository(client),
           moderation: SupabaseModeration(client),
+          push: FirebasePush(client),
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
         );
@@ -87,6 +89,7 @@ class ProfileGate extends StatefulWidget {
     this.rehearsals,
     this.songs,
     this.moderation,
+    this.push,
   });
 
   final ProfileRepository repository;
@@ -96,6 +99,9 @@ class ProfileGate extends StatefulWidget {
 
   /// Report review, for moderators (on the profile page).
   final ModerationRepository? moderation;
+
+  /// Phone notifications; started once the swipe screen shows.
+  final PushNotifications? push;
 
   /// Band rehearsal calendars and reminders.
   final RehearsalRepository? rehearsals;
@@ -168,6 +174,40 @@ class _ProfileGateState extends State<ProfileGate> {
       ? null
       : (RehearsalReminders(widget.rehearsals!)..start());
 
+  bool _pushStarted = false;
+
+  /// Starts notifications once, when the signed-in app first shows.
+  void _startPush() {
+    if (_pushStarted || widget.push == null) return;
+    _pushStarted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.push!.start(onOpen: _openFromNotification);
+    });
+  }
+
+  /// A tapped notification opens its chat, band or the Bands section.
+  Future<void> _openFromNotification(PushData data) async {
+    if (!mounted) return;
+    switch (data['type']) {
+      case 'chat' when widget.chat != null:
+        final matches = await widget.chat!.loadMatches();
+        final match = matches
+            .where((m) => m.matchId == data['match_id'])
+            .firstOrNull;
+        if (match != null && mounted) _openChatFor(match);
+      case 'band' when _bands != null && data['band_id'] is String:
+        _openBandChat(data['band_id'] as String);
+      case 'bands' when widget.chat != null:
+        _openMatches();
+    }
+  }
+
+  /// Stops notifications to this device, then signs out.
+  Future<void> _signOut() async {
+    await widget.push?.stop();
+    await widget.repository.signOut();
+  }
+
   @override
   void dispose() {
     _reminders?.dispose();
@@ -186,7 +226,7 @@ class _ProfileGateState extends State<ProfileGate> {
         avatars: widget.avatars,
         location: widget.location,
         bandNeeds: widget.bandNeeds,
-        onSignOut: widget.repository.signOut,
+        onSignOut: _signOut,
         moderation: widget.moderation,
       ),
     ),
@@ -270,6 +310,11 @@ class _ProfileGateState extends State<ProfileGate> {
     );
   }
 
+  Widget _withPush(Widget child) {
+    _startPush();
+    return child;
+  }
+
   @override
   Widget build(BuildContext context) {
     // FutureBuilder: shows a different widget while the Future is pending,
@@ -290,29 +335,31 @@ class _ProfileGateState extends State<ProfileGate> {
           null => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),
-          ProfileStatus.ready => LiveBannerListener(
-            live: _live,
-            avatars: widget.avatars,
-            onOpen: _openChatFor,
-            bands: _bands,
-            onOpenBand: _openBandChat,
-            reminders: _reminders?.banners,
-            child: SwipeScreen(
-              source: widget.deck,
-              onRecord: widget.clips == null
-                  ? null
-                  : () => showRecordSheet(context, clips: widget.clips!),
-              onOpenMatches: widget.chat == null ? null : _openMatches,
-              onOpenChat: widget.chat == null ? null : _openChat,
-              safety: widget.safety,
-              player: _player,
-              onOpenProfile: _openProfile,
-              avatars: widget.avatars,
-              location: widget.location,
-              filterStore: widget.filterStore,
-              bandNeeds: widget.bandNeeds,
+          ProfileStatus.ready => _withPush(
+            LiveBannerListener(
               live: _live,
+              avatars: widget.avatars,
+              onOpen: _openChatFor,
               bands: _bands,
+              onOpenBand: _openBandChat,
+              reminders: _reminders?.banners,
+              child: SwipeScreen(
+                source: widget.deck,
+                onRecord: widget.clips == null
+                    ? null
+                    : () => showRecordSheet(context, clips: widget.clips!),
+                onOpenMatches: widget.chat == null ? null : _openMatches,
+                onOpenChat: widget.chat == null ? null : _openChat,
+                safety: widget.safety,
+                player: _player,
+                onOpenProfile: _openProfile,
+                avatars: widget.avatars,
+                location: widget.location,
+                filterStore: widget.filterStore,
+                bandNeeds: widget.bandNeeds,
+                live: _live,
+                bands: _bands,
+              ),
             ),
           ),
           final status => OnboardingScreen(

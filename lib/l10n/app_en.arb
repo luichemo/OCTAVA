@@ -1355,5 +1355,10 @@
     }
   },
   "modUnsuspended": "Suspension lifted.",
-  "errModeration": "Couldn't load or update the reports. Try again."
+  "errModeration": "Couldn't load or update the reports. Try again.",
+  "legalAgree": "By creating an account you agree to the",
+  "legalTerms": "Terms of use",
+  "legalPrivacy": "Privacy policy",
+  "legalTermsRow": "Terms of use",
+  "legalPrivacyRow": "Privacy policy"
 }

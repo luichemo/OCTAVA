@@ -161,6 +161,7 @@
     body.desktop .scan { display: flex; }
 
     footer { margin-top: 36px; font-size: 13px; color: var(--ink-soft); text-align: center; }
+    footer a { color: inherit; }
     @media (max-width: 480px) { .btn { width: 100%; } .scan img { width: 120px; height: 120px; } }
   </style>
 </head>
@@ -233,7 +234,7 @@
       </section>
     </main>
 
-    <footer data-t="footer"></footer>
+    <footer><span data-t="footer"></span> · <a href="../privacy/" data-t="privacyLink"></a> · <a href="../terms/" data-t="termsLink"></a></footer>
   </div>
 
   <script>
@@ -281,6 +282,8 @@
         scanTitle: "Open it on your phone",
         scan: "Point your phone's camera at this code.",
         footer: "© 2026 OCTAVA",
+        privacyLink: "Privacy policy",
+        termsLink: "Terms of use",
       },
       ka: {
         title: "OCTAVA · იპოვე შენი ბენდი",
@@ -317,6 +320,8 @@
         scanTitle: "გახსენი ტელეფონზე",
         scan: "მიუშვირე ტელეფონის კამერა ამ კოდს.",
         footer: "© 2026 OCTAVA",
+        privacyLink: "კონფიდენციალურობა",
+        termsLink: "გამოყენების წესები",
       },
     };
 

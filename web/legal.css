@@ -1,0 +1,43 @@
+/* Shared look for the privacy policy and terms (web/privacy, web/terms):
+   the landing page's poster style, made calm for long reading. */
+@font-face { font-family: "Bebas"; src: url("get/fonts/BebasNeue-Regular.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; src: url("assets/assets/fonts/Inter-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Inter"; src: url("assets/assets/fonts/Inter-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Noto Georgian"; src: url("get/fonts/NotoSansGeorgian-400.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Noto Georgian"; src: url("get/fonts/NotoSansGeorgian-700.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+
+:root {
+  --ink: #22328C; --ink-soft: #56619E; --paper: #EEF0EC; --card: #FAFBF8;
+  --shadow: #22328C; --pink: #FF4FA3; --yellow: #FFE14D; --aqua: #74D3EA;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E8EBF8; --ink-soft: #A7B0DA; --paper: #10173A; --card: #18214D; --shadow: #05081C;
+  }
+}
+:root[data-theme="dark"] { --ink: #E8EBF8; --ink-soft: #A7B0DA; --paper: #10173A; --card: #18214D; --shadow: #05081C; }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.6 "Inter", "Noto Georgian", system-ui, sans-serif; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+header a img { height: 36px; width: auto; display: block; }
+.lang { font: 600 14px "Inter", "Noto Georgian", sans-serif; color: var(--ink); background: var(--card);
+  border: 2px solid var(--ink); border-radius: 999px; padding: 6px 14px; box-shadow: 2px 2px 0 var(--shadow); cursor: pointer; }
+main { margin-top: 18px; background: var(--card); border: 2px solid var(--ink); border-radius: 24px;
+  box-shadow: 5px 5px 0 var(--shadow); padding: 24px 22px; }
+h1 { font-family: "Bebas", "Noto Georgian", sans-serif; font-weight: 400; letter-spacing: .03em;
+  font-size: clamp(40px, 9vw, 64px); line-height: .95; margin: 0 0 6px; }
+h2 { font-size: 18px; margin: 28px 0 6px; }
+p, li { margin: 6px 0; }
+ul { padding-left: 22px; }
+.meta { color: var(--ink-soft); font-size: 14px; margin-bottom: 18px; }
+.note { background: var(--yellow); color: #22328C; border-radius: 12px; padding: 10px 14px; font-weight: 600; }
+a { color: inherit; }
+footer { margin-top: 28px; font-size: 13px; color: var(--ink-soft); text-align: center; }
+footer a { margin: 0 8px; }
+/* One language at a time; the toggle switches html[data-lang]. */
+[lang="ka"] { font-size: 15px; }
+html[data-lang="en"] section[lang="ka"], html[data-lang="ka"] section[lang="en"] { display: none; }
+html[data-lang="ka"] h1 { font-weight: 700; letter-spacing: 0; line-height: 1.15; font-size: clamp(30px, 7vw, 46px); }
