@@ -1,7 +1,20 @@
-<title>OCTAVA Marketing Brief</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap">
+<!doctype html>
+<!-- OCTAVA weekly marketing brief: https://luichemo.github.io/OCTAVA/brief/
+     For the marketing helper. Not linked from the app or site, and kept out of
+     search engines. Update the week's tasks here each Monday. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>OCTAVA · Marketing brief</title>
+<link rel="icon" type="image/png" href="../favicon.png">
 <style>
+  @font-face { font-family: "Bebas Neue"; src: url("../get/fonts/BebasNeue-Regular.ttf") format("truetype"); font-display: swap; }
+  @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "Inter"; src: url("../assets/assets/fonts/Inter-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
   /* Layout: one readable column of printed cards, like a gig poster pinned to a board. */
   :root {
     --paper: #EEF0EC; --card: #FAFBF8; --ink: #22328C; --ink-soft: #56619E; --line: #C5CBE0;
@@ -14,7 +27,8 @@
   :root[data-theme="dark"] {
     --paper: #10173A; --card: #18214D; --ink: #E8EBF8; --ink-soft: #A7B0DA; --line: #33407A; --shadow: #05081C; color-scheme: dark }
 
-  body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
   .wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 22px;
     padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   h1, h2 { font-family: var(--display); font-weight: 400; letter-spacing: .5px; line-height: 1; margin: 0; text-wrap: balance; }
@@ -55,6 +69,8 @@
   @media (prefers-reduced-motion: reduce) { .stamp { transform: none; } button:active { transform: none; } }
 </style>
 
+</head>
+<body>
 <main class="wrap">
   <section class="card hero">
     <span class="stamp">Marketing brief · week 1</span>
@@ -195,3 +211,6 @@ Ideas or questions for next week:
     try { navigator.clipboard.writeText(text).then(done, select); } catch (e) { select(); }
   });
 </script>
+
+</body>
+</html>
