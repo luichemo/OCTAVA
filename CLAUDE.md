@@ -31,7 +31,7 @@ Stack (chosen by the owner): **Flutter** (Dart) for the iOS and Android app, and
 
 ## Commands
 
-On the owner's Mac, Flutter 3.47.7 (Dart 3.13.5) is installed with Homebrew at `/opt/homebrew/share/flutter`; `/opt/homebrew/bin` is on PATH through `brew shellenv` in `.zprofile`. Chrome and macOS desktop targets are available. Android builds need Android Studio and the Android SDK; iOS builds need a full Xcode installation and CocoaPods. `flutter doctor -v` reports these missing platform tools.
+On the owner's Mac, Flutter 3.47.7 (Dart 3.13.5) is installed with Homebrew at `/opt/homebrew/share/flutter`; `/opt/homebrew/bin` is on PATH through `brew shellenv` in `.zprofile`. Chrome and macOS desktop targets are available. Since 2026-10-20 the Mac also has Xcode and Android Studio: the app has been built and run on an iPhone simulator, on the owner's real iPhone (from Xcode) and on an Android emulator (Android Studio's Device Manager). The Mac is where iOS and the Android emulator work; the Windows PC can do neither.
 
 On the owner's Windows PC, Flutter is installed at `C:\src\flutter` (stable channel) and is on the user PATH. A shell started before PATH was updated needs the full path, `/c/src/flutter/bin/flutter`. An older Flutter (3.41, Dart 3.11) also exists at `C:\Users\lchemia\Documents\flutter` and can't build this project, which needs Dart ^3.13.5. If `flutter --version` shows 3.41, check VS Code's `dart.flutterSdkPath` setting, which should be `C:\src\flutter`; the Dart extension puts that SDK first on its terminals' PATH.
 
@@ -146,6 +146,7 @@ How v1 fits together:
 
 A handoff note for the next session; update or delete it as these get done.
 - **Email is done** (2026-10-20): Brevo sends, both templates are pasted, Confirm email is on, and a fresh sign-up was confirmed through the email link (auth log: `/signup` 200, `/verify` 303).
+- **Mac builds work** (2026-10-20): iOS on the simulator and a real iPhone, Android on an emulator; only a quick look so far, no full test. Next on the Mac: run `git status` and commit what the build changed (e.g. `ios/Podfile.lock`, Xcode project settings such as the signing team), then a proper pass (sign-up, clip recording, playback, chat, voice messages, push permission) on the iPhone and the emulator. iOS push still needs an APNs key in Firebase and iOS `FirebaseOptions` in `firebase_config.dart`.
 - **Owner's dashboard to-dos:** delete the `cleanup-files` Edge Function (a do-nothing stub left from the 2026-10-19 reset); leaked-password protection (Authentication → Attack Protection) waits for Supabase Pro.
 - **Pre-launch order** (owner's plan): test with friends through the web preview and an APK, then buy a domain, then Google Play ($25, closed test with 12 testers for 14 days), Supabase Pro at public launch, Apple last. Still open: Georgian review by a native speaker, deep links, voice-message reports in band chats, removing the 12 test musicians when testing ends (`test_world_files.py --remove`).
 
