@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
@@ -31,23 +33,91 @@ import 'chat_screen.dart';
 import 'edit_profile_screen.dart';
 import 'matches_screen.dart';
 import 'onboarding_screen.dart';
+import 'password_reset_screen.dart';
 import 'swipe_screen.dart';
 
 /// Picks the first screen: sign in → set up profile → swipe.
 /// Rebuilds whenever Supabase signs someone in or out.
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+/// A password-reset link first shows the new-password screen.
+class AuthGate extends StatefulWidget {
+  const AuthGate({
+    super.key,
+    this.resetToken,
+    this.recovering = false,
+    this.linkExpired = false,
+  });
+
+  /// The one-time code from a password-reset link (`?reset=` on the web).
+  final String? resetToken;
+
+  /// Opened from Supabase's default reset email (`#…type=recovery`), which
+  /// has already signed in.
+  final bool recovering;
+
+  /// Opened from an email link that had expired or was already used.
+  final bool linkExpired;
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  final client = Supabase.instance.client;
+  late final _auth = SupabaseAuthRepository(client);
+  late bool _resetting = widget.resetToken != null || widget.recovering;
+  late bool _linkExpired = widget.linkExpired;
+  StreamSubscription<AuthState>? _recovery;
+
+  @override
+  void initState() {
+    super.initState();
+    // Supabase's own link, opened in the same browser, signs in and says so.
+    _recovery = client.auth.onAuthStateChange.listen((state) {
+      if (state.event == AuthChangeEvent.passwordRecovery && mounted) {
+        setState(() {
+          _resetting = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _recovery?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final client = Supabase.instance.client;
+    // A recovery link that didn't sign in has expired.
+    if (_resetting &&
+        widget.resetToken == null &&
+        client.auth.currentUser == null) {
+      _resetting = false;
+      _linkExpired = true;
+    }
+    if (_resetting) {
+      markAppReady();
+      return PasswordResetScreen(
+        auth: _auth,
+        tokenHash: widget.resetToken,
+        onDone: () => setState(() {
+          _resetting = false;
+        }),
+      );
+    }
     return StreamBuilder<AuthState>(
       stream: client.auth.onAuthStateChange,
       builder: (context, _) {
         final user = client.auth.currentUser;
         if (user == null) {
           markAppReady();
-          return AuthScreen(auth: SupabaseAuthRepository(client));
+          final expired = _linkExpired;
+          _linkExpired = false;
+          return AuthScreen(
+            auth: _auth,
+            initialError: expired ? context.t.errResetLink : null,
+          );
         }
         // A new key per user resets ProfileGate's state when the account changes.
         return ProfileGate(

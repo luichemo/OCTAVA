@@ -33,10 +33,6 @@ abstract interface class DeckSource {
   /// Pass or Jam on a band. True when a Jam sent a join request.
   Future<bool> swipeBand(BandCardData band, Decision decision);
 
-  /// TEMPORARY, for testers: clears your swipes that didn't make a match,
-  /// so everyone shows up again. Remove before launch.
-  Future<void> resetSwipes();
-
   /// Your main instrument and your matches (oldest first), which fill the
   /// band lineup (see `buildLineup`).
   Future<({String? myRole, List<BandMember> members})> loadBand();
@@ -77,9 +73,6 @@ class SampleDeck implements DeckSource {
 
   @override
   Future<void> undo(Musician musician) async {}
-
-  @override
-  Future<void> resetSwipes() async {}
 
   @override
   Future<List<BandCardData>> loadBandCards() async => const [];
@@ -162,15 +155,6 @@ class SupabaseDeck implements DeckSource {
       throw UserFacingException(bandErrorMessage(e.message));
     } catch (_) {
       throw UserFacingException(L10n.current.errSaveSwipe);
-    }
-  }
-
-  @override
-  Future<void> resetSwipes() async {
-    try {
-      await _client.rpc('reset_my_swipes');
-    } catch (_) {
-      throw UserFacingException(L10n.current.errResetSwipes);
     }
   }
 

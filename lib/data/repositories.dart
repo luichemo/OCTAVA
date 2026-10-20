@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/musician.dart';
 import '../models/profile_draft.dart';
 import '../l10n/l10n.dart';
+import 'public_band_repository.dart' show publicSiteUrl;
 
 /// Where the signed-in user is in setting up their account.
 enum ProfileStatus { needsBirthDate, needsProfile, ready }
@@ -25,6 +26,16 @@ abstract interface class AuthRepository {
   /// Returns true when the account needs email confirmation before signing in.
   Future<bool> signUp(String email, String password);
   Future<void> signIn(String email, String password);
+
+  /// Emails a link to choose a new password, if the account exists (the
+  /// answer is the same either way, so emails can't be probed).
+  Future<void> sendPasswordReset(String email);
+
+  /// Signs in with a reset link's one-time code (`?reset=` on the web).
+  Future<void> openResetLink(String tokenHash);
+
+  /// Sets a new password for the signed-in account.
+  Future<void> setNewPassword(String password);
 }
 
 abstract interface class ProfileRepository {
@@ -86,6 +97,55 @@ class SupabaseAuthRepository implements AuthRepository {
       );
     } on AuthException catch (e) {
       throw UserFacingException(authMessage(e));
+    } catch (_) {
+      throw UserFacingException(_offline);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _client.auth.resetPasswordForEmail(
+        email.trim(),
+        // Where Supabase's default email link lands, signed in
+        // (`#…type=recovery`; main.dart notices it). The custom template,
+        // usable once SMTP is connected, links to `?reset=<code>` instead
+        // (supabase/templates/reset_password.html).
+        redirectTo: kIsWeb
+            ? '${Uri.base.origin}${Uri.base.path}'
+            : publicSiteUrl,
+      );
+    } on AuthException catch (e) {
+      throw UserFacingException(authMessage(e));
+    } catch (_) {
+      throw UserFacingException(_offline);
+    }
+  }
+
+  @override
+  Future<void> openResetLink(String tokenHash) async {
+    try {
+      await _client.auth.verifyOTP(
+        type: OtpType.recovery,
+        tokenHash: tokenHash,
+      );
+    } on AuthException {
+      throw UserFacingException(L10n.current.errResetLink);
+    } catch (_) {
+      throw UserFacingException(_offline);
+    }
+  }
+
+  @override
+  Future<void> setNewPassword(String password) async {
+    try {
+      await _client.auth.updateUser(UserAttributes(password: password));
+    } on AuthException catch (e) {
+      throw UserFacingException(
+        e.code == 'same_password'
+            ? L10n.current.errSamePassword
+            : authMessage(e),
+      );
     } catch (_) {
       throw UserFacingException(_offline);
     }

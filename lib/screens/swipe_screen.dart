@@ -201,42 +201,6 @@ class _SwipeScreenState extends State<SwipeScreen>
     }
   }
 
-  /// TEMPORARY, for testers: clears your swipes and loads everyone again.
-  Future<void> _resetSwipes() async {
-    final messenger = ScaffoldMessenger.of(context);
-    final t = context.t;
-    // It deletes your swipes, so ask: it sits right under "Check again"
-    // and was being tapped by mistake.
-    final sure = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.resetSwipesTitle),
-        content: Text(t.resetSwipesBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(t.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(t.resetSwipesConfirm),
-          ),
-        ],
-      ),
-    );
-    if (sure != true || !mounted) return;
-    try {
-      await widget.source.resetSwipes();
-      // Replaces the last swipe's toast instead of queueing behind it.
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(t.resetSwipesDone)));
-      if (mounted) _reload();
-    } on UserFacingException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(e.message)));
-    }
-  }
-
   void _reload() {
     setState(() {
       _loading = true;
@@ -649,9 +613,6 @@ class _SwipeScreenState extends State<SwipeScreen>
                                 body: context.t.heardEveryoneBody,
                                 action: context.t.checkAgain,
                                 onAction: _reload,
-                                // TEMPORARY, for testers. Remove before launch.
-                                extraAction: context.t.resetSwipes,
-                                onExtraAction: _resetSwipes,
                               );
                             }
                             return _buildDeck();
@@ -818,18 +779,12 @@ class _DeckMessage extends StatelessWidget {
     required this.body,
     required this.action,
     required this.onAction,
-    this.extraAction,
-    this.onExtraAction,
   });
 
   final String title;
   final String body;
   final String action;
   final VoidCallback onAction;
-
-  /// A second, quieter button.
-  final String? extraAction;
-  final VoidCallback? onExtraAction;
 
   @override
   Widget build(BuildContext context) {
@@ -848,12 +803,6 @@ class _DeckMessage extends StatelessWidget {
           Text(title, style: displayStyle(size: 48, color: colors.onSurface)),
           Text(body, style: TextStyle(color: colors.onSurfaceVariant)),
           OutlinedButton(onPressed: onAction, child: Text(action)),
-          if (extraAction != null)
-            TextButton.icon(
-              onPressed: onExtraAction,
-              icon: const Icon(Icons.delete_sweep_outlined),
-              label: Text(extraAction!),
-            ),
         ],
       ),
     );

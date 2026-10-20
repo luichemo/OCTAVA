@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
 import 'data/clip_repository.dart';
+import 'data/crash_reports.dart';
 import 'data/public_band_repository.dart';
 import 'data/theme_setting.dart';
 import 'l10n/l10n.dart';
@@ -17,14 +18,28 @@ import 'widgets/splash.dart';
 // and theme must be ready before the first screen draws, so main waits.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await startCrashReports();
+  // Supabase's own email links (password reset, while the default email
+  // template is used) come back with the sign-in in the address after `#`.
+  // Read it before Supabase takes it out of the address bar.
+  final linkFragment = kIsWeb ? Uri.base.fragment : '';
   await Supabase.initialize(
     url: SupabaseConfig.url,
     publishableKey: SupabaseConfig.publishableKey,
+    // "Implicit": an email link carries the sign-in itself, so it works in
+    // any browser or device. PKCE (the default) only works in the browser
+    // that asked for the email, and a reset asked for on a phone is opened
+    // on whatever device reads the email.
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.implicit,
+    ),
   );
   await appLanguage.load();
   await appTheme.load();
   // A public band link (`?band=<id>`) opens that band's page, no sign-in.
   final bandId = kIsWeb ? bandIdFromLink(Uri.base) : null;
+  // A password-reset email links to `?reset=<code>`.
+  final resetToken = kIsWeb ? Uri.base.queryParameters['reset'] : null;
   runApp(
     OctavaApp(
       home: bandId != null
@@ -34,7 +49,11 @@ Future<void> main() async {
           // The web page has its own splash (web/index.html), removed
           // when the app is ready; phones show it in Flutter.
           : kIsWeb
-          ? const AuthGate()
+          ? AuthGate(
+              resetToken: resetToken,
+              recovering: linkFragment.contains('type=recovery'),
+              linkExpired: linkFragment.contains('error_code=otp_expired'),
+            )
           : SplashGate(ready: appReady, child: const AuthGate()),
     ),
   );

@@ -1472,16 +1472,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get resetSwipes => 'Reset my swipes (test)';
-
-  @override
-  String get resetSwipesDone => 'Your swipes are cleared. Everyone\'s back.';
-
-  @override
-  String get errResetSwipes =>
-      'Couldn\'t reset your swipes. Check your connection.';
-
-  @override
   String get reportMessage => 'Report this message';
 
   @override
@@ -1670,16 +1660,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bandWithdrawn => 'Request withdrawn.';
-
-  @override
-  String get resetSwipesTitle => 'Reset all your swipes?';
-
-  @override
-  String get resetSwipesBody =>
-      'Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.';
-
-  @override
-  String get resetSwipesConfirm => 'Reset swipes';
 
   @override
   String get voiceMessage => '🎤 Voice message';
@@ -2380,4 +2360,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errModAdminStays => 'An admin always stays a moderator.';
+
+  @override
+  String get authForgot => 'Forgot password?';
+
+  @override
+  String get authResetNeedsEmail =>
+      'Type your email above, then tap Forgot password.';
+
+  @override
+  String authResetSent(String email) {
+    return 'If there\'s an account for $email, we\'ve sent it a link to choose a new password. Check your inbox and spam folder.';
+  }
+
+  @override
+  String get resetTitle => 'Choose a new password';
+
+  @override
+  String get resetBody => 'You\'ll use it to sign in on every device.';
+
+  @override
+  String get resetNew => 'New password';
+
+  @override
+  String get resetRepeat => 'Repeat the password';
+
+  @override
+  String get resetMismatch => 'The passwords don\'t match.';
+
+  @override
+  String get resetSave => 'Save password';
+
+  @override
+  String get resetNotNow => 'Not now';
+
+  @override
+  String get resetDone => 'Password changed.';
+
+  @override
+  String get resetBack => 'Back to sign in';
+
+  @override
+  String get errResetLink =>
+      'This link has expired or was already used. Ask for a new one on the sign-in screen.';
+
+  @override
+  String get errSamePassword =>
+      'That\'s your current password. Pick a different one.';
 }

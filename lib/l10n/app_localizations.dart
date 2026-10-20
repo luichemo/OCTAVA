@@ -2588,24 +2588,6 @@ abstract class AppLocalizations {
   /// **'{instrument} in {band}'**
   String bandMemberRole(String instrument, String band);
 
-  /// TEMPORARY tester button on the empty deck; remove before launch.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset my swipes (test)'**
-  String get resetSwipes;
-
-  /// No description provided for @resetSwipesDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Your swipes are cleared. Everyone\'s back.'**
-  String get resetSwipesDone;
-
-  /// No description provided for @errResetSwipes.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t reset your swipes. Check your connection.'**
-  String get errResetSwipes;
-
   /// No description provided for @reportMessage.
   ///
   /// In en, this message translates to:
@@ -2923,24 +2905,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request withdrawn.'**
   String get bandWithdrawn;
-
-  /// No description provided for @resetSwipesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset all your swipes?'**
-  String get resetSwipesTitle;
-
-  /// No description provided for @resetSwipesBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.'**
-  String get resetSwipesBody;
-
-  /// No description provided for @resetSwipesConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset swipes'**
-  String get resetSwipesConfirm;
 
   /// No description provided for @voiceMessage.
   ///
@@ -4075,6 +4039,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An admin always stays a moderator.'**
   String get errModAdminStays;
+
+  /// No description provided for @authForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgot;
+
+  /// No description provided for @authResetNeedsEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your email above, then tap Forgot password.'**
+  String get authResetNeedsEmail;
+
+  /// No description provided for @authResetSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If there\'s an account for {email}, we\'ve sent it a link to choose a new password. Check your inbox and spam folder.'**
+  String authResetSent(String email);
+
+  /// No description provided for @resetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password'**
+  String get resetTitle;
+
+  /// No description provided for @resetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll use it to sign in on every device.'**
+  String get resetBody;
+
+  /// No description provided for @resetNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get resetNew;
+
+  /// No description provided for @resetRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat the password'**
+  String get resetRepeat;
+
+  /// No description provided for @resetMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords don\'t match.'**
+  String get resetMismatch;
+
+  /// No description provided for @resetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save password'**
+  String get resetSave;
+
+  /// No description provided for @resetNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get resetNotNow;
+
+  /// No description provided for @resetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed.'**
+  String get resetDone;
+
+  /// No description provided for @resetBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign in'**
+  String get resetBack;
+
+  /// No description provided for @errResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'This link has expired or was already used. Ask for a new one on the sign-in screen.'**
+  String get errResetLink;
+
+  /// No description provided for @errSamePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s your current password. Pick a different one.'**
+  String get errSamePassword;
 }
 
 class _AppLocalizationsDelegate

@@ -13,9 +13,12 @@ import '../widgets/octava_logo.dart';
 /// Create an account or sign in with email and password. When this succeeds,
 /// Supabase's auth state changes and AuthGate moves on by itself.
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key, required this.auth});
+  const AuthScreen({super.key, required this.auth, this.initialError});
 
   final AuthRepository auth;
+
+  /// Shown when the screen opens, e.g. after an expired email link.
+  final String? initialError;
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -27,7 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _password = TextEditingController();
   bool _creating = false; // Opens on context.t.authSignIn; returning users are the common case.
   bool _busy = false;
-  String? _error;
+  late String? _error = widget.initialError;
   String? _notice;
 
   @override
@@ -63,6 +66,44 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Emails a reset link to the address typed above.
+  Future<void> _forgot() async {
+    final t = context.t;
+    final email = _email.text.trim();
+    if (!_emailPattern.hasMatch(email)) {
+      setState(() {
+        _error = t.authResetNeedsEmail;
+        _notice = null;
+      });
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+      _notice = null;
+    });
+    try {
+      await widget.auth.sendPasswordReset(email);
+      if (mounted) {
+        setState(() {
+          _notice = t.authResetSent(email);
+        });
+      }
+    } on UserFacingException catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.message;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+        });
+      }
     }
   }
 
@@ -192,6 +233,14 @@ class _AuthScreenState extends State<AuthScreen> {
                                 return null;
                               },
                             ),
+                            if (!_creating)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: _busy ? null : _forgot,
+                                  child: Text(t.authForgot),
+                                ),
+                              ),
                             if (_error != null) ...[
                               const SizedBox(height: 14),
                               Text(

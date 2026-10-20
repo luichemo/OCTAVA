@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "520618326168",
+    "project_id": "octava-app-ge",
+    "storage_bucket": "octava-app-ge.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520618326168:android:86c0e3f66c4bda1a7b78ed",
+        "android_client_info": {
+          "package_name": "com.octava.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARzSSjEcMG5cGg1M1KhPMvYdlp-zhpaik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

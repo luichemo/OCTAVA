@@ -10,6 +10,7 @@ import 'package:octava/models/musician.dart';
 import 'package:octava/models/profile_draft.dart';
 import 'package:octava/screens/auth_gate.dart';
 import 'package:octava/screens/auth_screen.dart';
+import 'package:octava/screens/password_reset_screen.dart';
 
 /// Stands in for Supabase: remembers what was saved, like the real database.
 class FakeProfileRepository implements ProfileRepository {
@@ -83,6 +84,32 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> signIn(String email, String password) async {
     if (error != null) throw UserFacingException(error!);
     lastEmail = email;
+  }
+
+  String? resetEmail;
+  String? openedToken;
+  String? newPassword;
+
+  /// Reset links that work; any other code is expired.
+  final goodTokens = <String>{'good'};
+
+  @override
+  Future<void> sendPasswordReset(String email) async {
+    if (error != null) throw UserFacingException(error!);
+    resetEmail = email;
+  }
+
+  @override
+  Future<void> openResetLink(String tokenHash) async {
+    openedToken = tokenHash;
+    if (!goodTokens.contains(tokenHash)) {
+      throw const UserFacingException('expired');
+    }
+  }
+
+  @override
+  Future<void> setNewPassword(String password) async {
+    newPassword = password;
   }
 }
 
@@ -318,6 +345,105 @@ void main() {
         find.text("That email and password don't match an account."),
         findsOneWidget,
       );
+    });
+  });
+
+  group('password reset', () {
+    testWidgets('Forgot password needs an email, then sends the link', (
+      tester,
+    ) async {
+      final auth = FakeAuthRepository();
+      await pump(tester, AuthScreen(auth: auth));
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pump();
+      expect(
+        find.text('Type your email above, then tap Forgot password.'),
+        findsOneWidget,
+      );
+      expect(auth.resetEmail, isNull);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'),
+        'nika@example.com',
+      );
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pumpAndSettle();
+      expect(auth.resetEmail, 'nika@example.com');
+      expect(
+        find.textContaining('a link to choose a new password'),
+        findsOneWidget,
+      );
+
+      // Not offered while creating an account.
+      await tester.tap(find.text('Create account'));
+      await tester.pumpAndSettle();
+      expect(find.text('Forgot password?'), findsNothing);
+    });
+
+    testWidgets('a good link lets you set a new password', (tester) async {
+      final auth = FakeAuthRepository();
+      var done = false;
+      await pump(
+        tester,
+        PasswordResetScreen(
+          auth: auth,
+          tokenHash: 'good',
+          onDone: () => done = true,
+        ),
+      );
+      expect(auth.openedToken, 'good');
+      expect(find.text('Choose a new password'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'New password'),
+        'longenough1',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Repeat the password'),
+        'different1',
+      );
+      await tester.tap(find.text('Save password'));
+      await tester.pumpAndSettle();
+      expect(find.text("The passwords don't match."), findsOneWidget);
+      expect(auth.newPassword, isNull);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Repeat the password'),
+        'longenough1',
+      );
+      await tester.tap(find.text('Save password'));
+      await tester.pumpAndSettle();
+      expect(auth.newPassword, 'longenough1');
+      expect(find.text('Password changed.'), findsOneWidget);
+      expect(done, isTrue);
+    });
+
+    testWidgets('sign-in can open with an expired-link message', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        AuthScreen(auth: FakeAuthRepository(), initialError: 'Link expired'),
+      );
+      expect(find.text('Link expired'), findsOneWidget);
+    });
+
+    testWidgets('an expired link says so and goes back', (tester) async {
+      var done = false;
+      await pump(
+        tester,
+        PasswordResetScreen(
+          auth: FakeAuthRepository(),
+          tokenHash: 'used',
+          onDone: () => done = true,
+        ),
+      );
+      expect(
+        find.textContaining('expired or was already used'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Back to sign in'));
+      expect(done, isTrue);
     });
   });
 }

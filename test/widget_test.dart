@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'swipe_helpers.dart';
 
-import 'package:octava/data/deck.dart';
 import 'package:octava/data/sample_musicians.dart';
 import 'package:octava/main.dart';
 import 'package:octava/screens/swipe_screen.dart';
@@ -99,47 +98,4 @@ void main() {
 
     expect(find.text('Nika, 24'), findsOneWidget);
   });
-
-  testWidgets('the temporary reset clears your swipes and refills the deck', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    final deck = _ResettableDeck();
-    await tester.pumpWidget(OctavaApp(home: SwipeScreen(source: deck)));
-    await tester.pumpAndSettle();
-    for (var i = 0; i < sampleMusicians.length; i++) {
-      await swipePass(tester);
-      await tester.pumpAndSettle();
-    }
-
-    await tester.tap(find.text('Reset my swipes (test)'));
-    await tester.pumpAndSettle();
-    // It asks first; Cancel changes nothing.
-    expect(find.text('Reset all your swipes?'), findsOneWidget);
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(deck.resets, 0);
-
-    await tester.tap(find.text('Reset my swipes (test)'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Reset swipes'));
-    await tester.pumpAndSettle();
-    expect(deck.resets, 1);
-    expect(
-      find.text("Your swipes are cleared. Everyone's back."),
-      findsOneWidget,
-    );
-    expect(find.text('Nika, 24'), findsOneWidget);
-  });
-}
-
-class _ResettableDeck extends SampleDeck {
-  _ResettableDeck();
-
-  int resets = 0;
-
-  @override
-  Future<void> resetSwipes() async => resets++;
 }

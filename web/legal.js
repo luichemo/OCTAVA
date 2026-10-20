@@ -2,7 +2,7 @@
 
 // The address people write to about privacy, their account or these terms.
 // Set it once here; every page shows it. Empty shows a placeholder.
-const CONTACT_EMAIL = '';
+const CONTACT_EMAIL = 'octavabandmate@gmail.com';
 
 (function () {
   const root = document.documentElement;

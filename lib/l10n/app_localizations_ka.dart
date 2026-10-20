@@ -1464,15 +1464,6 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get resetSwipes => 'სვაიპების განულება (ტესტი)';
-
-  @override
-  String get resetSwipesDone => 'სვაიპები გასუფთავდა. ყველა ისევ აქ არის.';
-
-  @override
-  String get errResetSwipes => 'სვაიპები ვერ განულდა. შეამოწმე ინტერნეტი.';
-
-  @override
   String get reportMessage => 'საჩივარი ამ შეტყობინებაზე';
 
   @override
@@ -1659,16 +1650,6 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get bandWithdrawn => 'მოთხოვნა გაუქმდა.';
-
-  @override
-  String get resetSwipesTitle => 'განვაახლოთ ყველა სვაიპი?';
-
-  @override
-  String get resetSwipesBody =>
-      'ყველა, ვინც გამოტოვე ან ვისაც ჯემი აურჩიე, ისევ გამოჩნდება, ბენდებიც. მეჩები და ჩატები რჩება. ეს სატესტო ფუნქციაა.';
-
-  @override
-  String get resetSwipesConfirm => 'სვაიპების განულება';
 
   @override
   String get voiceMessage => '🎤 ხმოვანი შეტყობინება';
@@ -2363,4 +2344,50 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get errModAdminStays => 'ადმინი ყოველთვის მოდერატორად რჩება.';
+
+  @override
+  String get authForgot => 'დაგავიწყდა პაროლი?';
+
+  @override
+  String get authResetNeedsEmail =>
+      'ზემოთ ჩაწერე ელფოსტა და მერე დააჭირე „დაგავიწყდა პაროლი?“.';
+
+  @override
+  String authResetSent(String email) {
+    return 'თუ $email-ზე ანგარიში არსებობს, გამოვუგზავნეთ ბმული ახალი პაროლის ასარჩევად. შეამოწმე შემოსულები და სპამი.';
+  }
+
+  @override
+  String get resetTitle => 'აირჩიე ახალი პაროლი';
+
+  @override
+  String get resetBody => 'მას ყველა მოწყობილობაზე შესასვლელად გამოიყენებ.';
+
+  @override
+  String get resetNew => 'ახალი პაროლი';
+
+  @override
+  String get resetRepeat => 'გაიმეორე პაროლი';
+
+  @override
+  String get resetMismatch => 'პაროლები არ ემთხვევა.';
+
+  @override
+  String get resetSave => 'პაროლის შენახვა';
+
+  @override
+  String get resetNotNow => 'ახლა არა';
+
+  @override
+  String get resetDone => 'პაროლი შეიცვალა.';
+
+  @override
+  String get resetBack => 'შესვლაზე დაბრუნება';
+
+  @override
+  String get errResetLink =>
+      'ბმულს ვადა გაუვიდა ან უკვე გამოყენებულია. ახალი მოითხოვე შესვლის გვერდზე.';
+
+  @override
+  String get errSamePassword => 'ეს შენი ამჟამინდელი პაროლია. აირჩიე სხვა.';
 }

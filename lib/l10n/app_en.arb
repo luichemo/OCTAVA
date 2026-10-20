@@ -855,12 +855,6 @@
       }
     }
   },
-  "resetSwipes": "Reset my swipes (test)",
-  "resetSwipesDone": "Your swipes are cleared. Everyone's back.",
-  "errResetSwipes": "Couldn't reset your swipes. Check your connection.",
-  "@resetSwipes": {
-    "description": "TEMPORARY tester button on the empty deck; remove before launch."
-  },
   "reportMessage": "Report this message",
   "errBandProfile": "Some of those genres or roles aren't on the list.",
   "bandEditTitle": "Edit band",
@@ -1004,9 +998,6 @@
   "bandRequestWaiting": "Asked to join · waiting for the band's vote",
   "bandWithdraw": "Withdraw",
   "bandWithdrawn": "Request withdrawn.",
-  "resetSwipesTitle": "Reset all your swipes?",
-  "resetSwipesBody": "Everyone you passed on or chose Jam on comes back, and bands too. Your matches and chats stay. This is a testing tool.",
-  "resetSwipesConfirm": "Reset swipes",
   "voiceMessage": "🎤 Voice message",
   "voiceRecord": "Record a voice message",
   "voiceCancel": "Cancel recording",
@@ -1363,14 +1354,35 @@
   "legalPrivacyRow": "Privacy policy",
   "modViewProfile": "View profile",
   "modEvidenceTitle": "{count, plural, =1{Their last message to {name}} other{Their last {count} messages to {name}}}",
-  "@modEvidenceTitle": {"placeholders": {"count": {"type": "int"}, "name": {"type": "String"}}},
+  "@modEvidenceTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "modEvidenceNote": "Copied when the report was filed; it stays even if they delete the chat.",
   "modJoined": "Joined {date}",
-  "@modJoined": {"placeholders": {"date": {"type": "String"}}},
+  "@modJoined": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "modProfileGone": "This account no longer exists.",
   "modModerators": "Moderators",
   "modModeratorCount": "{count, plural, =1{1 moderator} other{{count} moderators}}",
-  "@modModeratorCount": {"placeholders": {"count": {"type": "int"}}},
+  "@modModeratorCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "modSearchPeople": "Search people by name",
   "modSearchHint": "Type at least 2 letters to find someone.",
   "modNoOneFound": "No one by that name.",
@@ -1379,15 +1391,60 @@
   "modAdmin": "Admin",
   "modRemoveModerator": "Remove",
   "modRemoveModeratorTitle": "Remove {name} as a moderator?",
-  "@modRemoveModeratorTitle": {"placeholders": {"name": {"type": "String"}}},
+  "@modRemoveModeratorTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "modRemoveModeratorBody": "They'll stop seeing reports. You can add them again later.",
   "modMakeModeratorTitle": "Make {name} a moderator?",
-  "@modMakeModeratorTitle": {"placeholders": {"name": {"type": "String"}}},
+  "@modMakeModeratorTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "modMakeModeratorBody": "They'll see every report, the reported messages and people's profiles, and can suspend accounts.",
   "modMadeModerator": "{name} is now a moderator.",
-  "@modMadeModerator": {"placeholders": {"name": {"type": "String"}}},
+  "@modMadeModerator": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "modRemovedModerator": "{name} is no longer a moderator.",
-  "@modRemovedModerator": {"placeholders": {"name": {"type": "String"}}},
+  "@modRemovedModerator": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "errModSuspendedCant": "A suspended account can't be a moderator.",
-  "errModAdminStays": "An admin always stays a moderator."
+  "errModAdminStays": "An admin always stays a moderator.",
+  "authForgot": "Forgot password?",
+  "authResetNeedsEmail": "Type your email above, then tap Forgot password.",
+  "authResetSent": "If there's an account for {email}, we've sent it a link to choose a new password. Check your inbox and spam folder.",
+  "@authResetSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "resetTitle": "Choose a new password",
+  "resetBody": "You'll use it to sign in on every device.",
+  "resetNew": "New password",
+  "resetRepeat": "Repeat the password",
+  "resetMismatch": "The passwords don't match.",
+  "resetSave": "Save password",
+  "resetNotNow": "Not now",
+  "resetDone": "Password changed.",
+  "resetBack": "Back to sign in",
+  "errResetLink": "This link has expired or was already used. Ask for a new one on the sign-in screen.",
+  "errSamePassword": "That's your current password. Pick a different one."
 }
