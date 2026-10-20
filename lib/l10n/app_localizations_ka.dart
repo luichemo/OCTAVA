@@ -2349,10 +2349,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get authForgot => 'დაგავიწყდა პაროლი?';
 
   @override
-  String get authResetNeedsEmail =>
-      'ზემოთ ჩაწერე ელფოსტა და მერე დააჭირე „დაგავიწყდა პაროლი?“.';
-
-  @override
   String authResetSent(String email) {
     return 'თუ $email-ზე ანგარიში არსებობს, გამოვუგზავნეთ ბმული ახალი პაროლის ასარჩევად. შეამოწმე შემოსულები და სპამი.';
   }
@@ -2380,6 +2376,33 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get resetDone => 'პაროლი შეიცვალა.';
+
+  @override
+  String get forgotTitle => 'დაგავიწყდა პაროლი?';
+
+  @override
+  String get forgotBody =>
+      'ჩაწერე ელფოსტა, რომლითაც დარეგისტრირდი, და გამოგიგზავნით ბმულს ახალი პაროლის ასარჩევად.';
+
+  @override
+  String get forgotSend => 'ბმულის გაგზავნა';
+
+  @override
+  String get forgotSentTitle => 'შეამოწმე ელფოსტა';
+
+  @override
+  String get forgotHint => 'არ მოგივიდა? შეამოწმე სპამი ან გაგზავნე თავიდან.';
+
+  @override
+  String get forgotResend => 'თავიდან გაგზავნა';
+
+  @override
+  String forgotResendIn(int seconds) {
+    return 'თავიდან გაგზავნა $seconds წამში';
+  }
+
+  @override
+  String get errResetWait => 'ახალი ბმულის მოთხოვნამდე ერთი წუთი დაიცადე.';
 
   @override
   String get resetBack => 'შესვლაზე დაბრუნება';

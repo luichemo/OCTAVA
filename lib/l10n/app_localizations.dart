@@ -4046,12 +4046,6 @@ abstract class AppLocalizations {
   /// **'Forgot password?'**
   String get authForgot;
 
-  /// No description provided for @authResetNeedsEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Type your email above, then tap Forgot password.'**
-  String get authResetNeedsEmail;
-
   /// No description provided for @authResetSent.
   ///
   /// In en, this message translates to:
@@ -4105,6 +4099,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password changed.'**
   String get resetDone;
+
+  /// No description provided for @forgotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your password?'**
+  String get forgotTitle;
+
+  /// No description provided for @forgotBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the email you signed up with and we\'ll send you a link to choose a new password.'**
+  String get forgotBody;
+
+  /// No description provided for @forgotSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get forgotSend;
+
+  /// No description provided for @forgotSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get forgotSentTitle;
+
+  /// No description provided for @forgotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t get it? Look in your spam folder, or send it again.'**
+  String get forgotHint;
+
+  /// No description provided for @forgotResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get forgotResend;
+
+  /// No description provided for @forgotResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again in {seconds} s'**
+  String forgotResendIn(int seconds);
+
+  /// No description provided for @errResetWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait a minute before asking for another link.'**
+  String get errResetWait;
 
   /// No description provided for @resetBack.
   ///

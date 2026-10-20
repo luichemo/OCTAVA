@@ -7,6 +7,7 @@ import 'package:octava/main.dart';
 import 'package:octava/models/deck_filters.dart';
 import 'package:octava/screens/auth_screen.dart';
 import 'package:octava/screens/filters_screen.dart';
+import 'package:octava/screens/forgot_password_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
 
 import 'filters_test.dart' show FakeLocation;
@@ -58,6 +59,24 @@ void main() {
     expect(find.text('25 კმ'), findsOneWidget);
     expect(find.text('ნებისმიერ ადგილას'), findsOneWidget);
     expect(find.text('ბასი'), findsOneWidget);
+  });
+
+  testWidgets('forgot password in Georgian, before and after sending', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      ForgotPasswordScreen(
+        auth: FakeAuthRepository(),
+        email: 'nika@example.com',
+      ),
+    );
+    expect(find.text('დაგავიწყდა პაროლი?'), findsOneWidget);
+    await tester.tap(find.text('ბმულის გაგზავნა')); // Send link
+    await tester.pumpAndSettle();
+    expect(find.text('შეამოწმე ელფოსტა'), findsOneWidget); // Check your email
+    expect(find.text('თავიდან გაგზავნა 60 წამში'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 60));
   });
 
   testWidgets('the sign-in screen switches language with one tap', (

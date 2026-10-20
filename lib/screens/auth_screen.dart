@@ -9,6 +9,7 @@ import '../data/repositories.dart';
 import '../theme.dart';
 import '../widgets/language_picker.dart';
 import '../widgets/octava_logo.dart';
+import 'forgot_password_screen.dart';
 
 /// Create an account or sign in with email and password. When this succeeds,
 /// Supabase's auth state changes and AuthGate moves on by itself.
@@ -69,42 +70,18 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  /// Emails a reset link to the address typed above.
-  Future<void> _forgot() async {
-    final t = context.t;
-    final email = _email.text.trim();
-    if (!_emailPattern.hasMatch(email)) {
-      setState(() {
-        _error = t.authResetNeedsEmail;
-        _notice = null;
-      });
-      return;
-    }
+  /// Opens the forgot-password page, with the email typed so far.
+  void _forgot() {
     setState(() {
-      _busy = true;
       _error = null;
       _notice = null;
     });
-    try {
-      await widget.auth.sendPasswordReset(email);
-      if (mounted) {
-        setState(() {
-          _notice = t.authResetSent(email);
-        });
-      }
-    } on UserFacingException catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.message;
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _busy = false;
-        });
-      }
-    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            ForgotPasswordScreen(auth: widget.auth, email: _email.text.trim()),
+      ),
+    );
   }
 
   void _switchTo(bool creating) {
@@ -202,7 +179,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 prefixIcon: const Icon(Icons.mail_outline),
                               ),
                               validator: (v) =>
-                                  v != null && _emailPattern.hasMatch(v.trim())
+                                  v != null && emailPattern.hasMatch(v.trim())
                                   ? null
                                   : t.authEmailError,
                             ),
@@ -371,7 +348,8 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
-final _emailPattern = RegExp(r'^\S+@\S+\.\S+$');
+/// Good enough to catch typos; Supabase does the real check.
+final emailPattern = RegExp(r'^\S+@\S+\.\S+$');
 
 /// "Create account | Sign in" as two tabs; the chosen one is a pink pill.
 class _AuthTabs extends StatelessWidget {

@@ -107,15 +107,18 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       await _client.auth.resetPasswordForEmail(
         email.trim(),
-        // Where Supabase's default email link lands, signed in
-        // (`#…type=recovery`; main.dart notices it). The custom template,
-        // usable once SMTP is connected, links to `?reset=<code>` instead
-        // (supabase/templates/reset_password.html).
+        // Our template (supabase/templates/reset_password.html) links to
+        // `?reset=<code>`; this is only where Supabase's default email
+        // would land, signed in (`#…type=recovery`; main.dart notices it).
         redirectTo: kIsWeb
             ? '${Uri.base.origin}${Uri.base.path}'
             : publicSiteUrl,
       );
     } on AuthException catch (e) {
+      // Supabase sends one email per address about every 60 s.
+      if (e.code == 'over_email_send_rate_limit') {
+        throw UserFacingException(L10n.current.errResetWait);
+      }
       throw UserFacingException(authMessage(e));
     } catch (_) {
       throw UserFacingException(_offline);

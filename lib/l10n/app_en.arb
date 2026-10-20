@@ -1427,7 +1427,6 @@
   "errModSuspendedCant": "A suspended account can't be a moderator.",
   "errModAdminStays": "An admin always stays a moderator.",
   "authForgot": "Forgot password?",
-  "authResetNeedsEmail": "Type your email above, then tap Forgot password.",
   "authResetSent": "If there's an account for {email}, we've sent it a link to choose a new password. Check your inbox and spam folder.",
   "@authResetSent": {
     "placeholders": {
@@ -1444,6 +1443,21 @@
   "resetSave": "Save password",
   "resetNotNow": "Not now",
   "resetDone": "Password changed.",
+  "forgotTitle": "Forgot your password?",
+  "forgotBody": "Type the email you signed up with and we'll send you a link to choose a new password.",
+  "forgotSend": "Send link",
+  "forgotSentTitle": "Check your email",
+  "forgotHint": "Didn't get it? Look in your spam folder, or send it again.",
+  "forgotResend": "Send again",
+  "forgotResendIn": "Send again in {seconds} s",
+  "@forgotResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "errResetWait": "Please wait a minute before asking for another link.",
   "resetBack": "Back to sign in",
   "errResetLink": "This link has expired or was already used. Ask for a new one on the sign-in screen.",
   "errSamePassword": "That's your current password. Pick a different one."

@@ -10,6 +10,7 @@ import 'package:octava/models/musician.dart';
 import 'package:octava/models/profile_draft.dart';
 import 'package:octava/screens/auth_gate.dart';
 import 'package:octava/screens/auth_screen.dart';
+import 'package:octava/screens/forgot_password_screen.dart';
 import 'package:octava/screens/password_reset_screen.dart';
 
 /// Stands in for Supabase: remembers what was saved, like the real database.
@@ -349,35 +350,75 @@ void main() {
   });
 
   group('password reset', () {
-    testWidgets('Forgot password needs an email, then sends the link', (
+    testWidgets('Forgot password opens its own page and sends the link', (
       tester,
     ) async {
       final auth = FakeAuthRepository();
       await pump(tester, AuthScreen(auth: auth));
-      await tester.tap(find.text('Forgot password?'));
-      await tester.pump();
-      expect(
-        find.text('Type your email above, then tap Forgot password.'),
-        findsOneWidget,
-      );
-      expect(auth.resetEmail, isNull);
-
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Email'),
         'nika@example.com',
       );
       await tester.tap(find.text('Forgot password?'));
       await tester.pumpAndSettle();
+      expect(find.text('Forgot your password?'), findsOneWidget);
+      // The email typed on sign-in comes along.
+      expect(find.text('nika@example.com'), findsOneWidget);
+
+      // A bad address is caught before anything is sent.
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'),
+        'nika',
+      );
+      await tester.tap(find.text('Send link'));
+      await tester.pumpAndSettle();
+      expect(find.text('Enter your email address'), findsOneWidget);
+      expect(auth.resetEmail, isNull);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'),
+        'nika@example.com',
+      );
+      await tester.tap(find.text('Send link'));
+      await tester.pumpAndSettle();
       expect(auth.resetEmail, 'nika@example.com');
+      expect(find.text('Check your email'), findsOneWidget);
       expect(
         find.textContaining('a link to choose a new password'),
         findsOneWidget,
       );
 
+      // Send again waits a minute, then sends to the same address.
+      expect(find.text('Send again in 60 s'), findsOneWidget);
+      auth.resetEmail = null;
+      await tester.tap(find.text('Send again in 60 s'));
+      await tester.pump();
+      expect(auth.resetEmail, isNull);
+      await tester.pump(const Duration(seconds: 60));
+      expect(find.text('Send again'), findsOneWidget);
+      await tester.tap(find.text('Send again'));
+      await tester.pumpAndSettle();
+      expect(auth.resetEmail, 'nika@example.com');
+
+      // Back to sign in.
+      await tester.pump(const Duration(seconds: 60));
+      await tester.tap(find.text('Back to sign in'));
+      await tester.pumpAndSettle();
+      expect(find.text('Forgot password?'), findsOneWidget);
+
       // Not offered while creating an account.
       await tester.tap(find.text('Create account'));
       await tester.pumpAndSettle();
       expect(find.text('Forgot password?'), findsNothing);
+    });
+
+    testWidgets('Forgot password shows errors from sending', (tester) async {
+      final auth = FakeAuthRepository(error: 'Please wait a minute.');
+      await pump(tester, ForgotPasswordScreen(auth: auth, email: 'a@b.co'));
+      await tester.tap(find.text('Send link'));
+      await tester.pumpAndSettle();
+      expect(find.text('Please wait a minute.'), findsOneWidget);
+      expect(find.text('Check your email'), findsNothing);
     });
 
     testWidgets('a good link lets you set a new password', (tester) async {
