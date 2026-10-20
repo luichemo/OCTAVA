@@ -178,6 +178,47 @@ void main() {
       expect(find.text('YOUR BAND'), findsNothing); // no band label
     });
 
+    testWidgets('sign-up asks where you heard about OCTAVA, optionally', (
+      tester,
+    ) async {
+      final repo = FakeProfileRepository(hasBirthDate: true);
+      await pump(tester, ProfileGate(repository: repo));
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Name'),
+        'Luka',
+      );
+      await tester.tap(find.widgetWithText(FilterChip, 'Drums'));
+      await tester.pump();
+      final friend = find.widgetWithText(ChoiceChip, 'A friend');
+      await tester.scrollUntilVisible(
+        friend,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(friend);
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Where did you hear about OCTAVA? (optional)'),
+        findsOneWidget,
+      );
+      await tester.tap(friend);
+      await tester.pump();
+      await tester.ensureVisible(find.text('Create profile'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create profile'));
+      await tester.pumpAndSettle();
+      expect(repo.saved?.heardFrom, 'friend');
+      expect(repo.saved?.toProfileRow('me')['heard_from'], 'friend');
+    });
+
+    test('the profile row only carries heard_from when it was answered', () {
+      const draft = ProfileDraft(
+        displayName: 'Luka',
+        instruments: {'drums': 'pro'},
+      );
+      expect(draft.toProfileRow('me').containsKey('heard_from'), isFalse);
+    });
+
     testWidgets('asks for a name and an instrument', (tester) async {
       final repo = FakeProfileRepository(hasBirthDate: true);
       await pump(tester, ProfileGate(repository: repo));
@@ -215,6 +256,8 @@ void main() {
       );
       await tester.tap(find.byTooltip('Profile'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Sign out'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Sign out'));
       await tester.pumpAndSettle();
       expect(repo.signOuts, 1);
@@ -240,6 +283,8 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
+      await tester.ensureVisible(find.text('Sign out'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Sign out'));
       await tester.pumpAndSettle();
       expect(push.stops, 1);

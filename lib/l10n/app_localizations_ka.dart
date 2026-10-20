@@ -349,7 +349,7 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get heardEveryoneBody =>
-      'ჯერჯერობით სულ ესაა. ახალი მუსიკოსები ყოველკვირა ემატებიან.';
+      'ჯერჯერობით ესაა ყველა. მოიწვიე ნაცნობი მუსიკოსები ან გააფართოვე ფილტრები.';
 
   @override
   String get checkAgain => 'ხელახლა შემოწმება';
@@ -2413,4 +2413,51 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get errSamePassword => 'ეს შენი ამჟამინდელი პაროლია. აირჩიე სხვა.';
+
+  @override
+  String get inviteGroup => 'მეგობრები';
+
+  @override
+  String get inviteMusicians => 'მუსიკოსების მოწვევა';
+
+  @override
+  String get inviteSummary => 'მოიწვიე ბენდის წევრები და მეგობრები';
+
+  @override
+  String get inviteSubject => 'შემომიერთდი OCTAVA-ზე';
+
+  @override
+  String inviteMessage(String link) {
+    return 'OCTAVA-ზე ვარ: აპი, სადაც მუსიკოსები ერთმანეთის დაკვრას უსმენენ და ბენდებს ქმნიან. შემომიერთდი: $link';
+  }
+
+  @override
+  String get inviteCopied => 'მოწვევის ბმული დაკოპირდა. ჩასვი ჩატში.';
+
+  @override
+  String get heardSection => 'ბოლო კითხვა';
+
+  @override
+  String get heardQuestion => 'საიდან გაიგე OCTAVA-ს შესახებ? (არასავალდებულო)';
+
+  @override
+  String get heardTiktok => 'TikTok';
+
+  @override
+  String get heardInstagram => 'Instagram';
+
+  @override
+  String get heardFriend => 'მეგობრისგან';
+
+  @override
+  String get heardPoster => 'პოსტერი ან ფლაერი';
+
+  @override
+  String get heardJamNight => 'ჯემ-საღამო';
+
+  @override
+  String get heardSearch => 'ძიება ან აპების მაღაზია';
+
+  @override
+  String get heardOther => 'სხვაგან';
 }

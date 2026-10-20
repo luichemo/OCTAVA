@@ -25,6 +25,7 @@ import '../theme.dart';
 import '../widgets/band_card.dart';
 import '../widgets/band_lineup.dart';
 import '../widgets/band_roles_sheet.dart';
+import '../widgets/invite.dart';
 import '../widgets/musician_card.dart';
 import '../widgets/octava_logo.dart';
 import '../widgets/safety_sheet.dart';
@@ -608,11 +609,17 @@ class _SwipeScreenState extends State<SwipeScreen>
                               );
                             }
                             if (_queue.isEmpty) {
+                              // Seen everyone: the best fix for an empty
+                              // feed is bringing friends in.
                               return _DeckMessage(
                                 title: context.t.heardEveryoneTitle,
                                 body: context.t.heardEveryoneBody,
-                                action: context.t.checkAgain,
-                                onAction: _reload,
+                                main: context.t.inviteMusicians,
+                                onMain: inviteMusicians,
+                                action: context.t.changeFilters,
+                                onAction: _openFilters,
+                                extra: context.t.checkAgain,
+                                onExtra: _reload,
                               );
                             }
                             return _buildDeck();
@@ -779,12 +786,25 @@ class _DeckMessage extends StatelessWidget {
     required this.body,
     required this.action,
     required this.onAction,
+    this.main,
+    this.onMain,
+    this.extra,
+    this.onExtra,
   });
 
   final String title;
   final String body;
   final String action;
   final VoidCallback onAction;
+
+  /// An optional main action above [action], as a pink button. It gets the
+  /// button's own context (the share sheet anchors to it on iPads).
+  final String? main;
+  final ValueChanged<BuildContext>? onMain;
+
+  /// An optional quiet action under [action].
+  final String? extra;
+  final VoidCallback? onExtra;
 
   @override
   Widget build(BuildContext context) {
@@ -802,7 +822,25 @@ class _DeckMessage extends StatelessWidget {
         children: [
           Text(title, style: displayStyle(size: 48, color: colors.onSurface)),
           Text(body, style: TextStyle(color: colors.onSurfaceVariant)),
+          if (main != null && onMain != null)
+            Builder(
+              builder: (context) => PrintButton(
+                onPressed: () => onMain!(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: [
+                    const Icon(Icons.group_add_outlined),
+                    Flexible(
+                      child: Text(main!, overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           OutlinedButton(onPressed: onAction, child: Text(action)),
+          if (extra != null && onExtra != null)
+            TextButton(onPressed: onExtra, child: Text(extra!)),
         ],
       ),
     );

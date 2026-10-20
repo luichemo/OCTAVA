@@ -354,7 +354,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get heardEveryoneBody =>
-      'That\'s everyone for now. New musicians join every week.';
+      'That\'s everyone for now. Invite musicians you know, or widen your filters.';
 
   @override
   String get checkAgain => 'Check again';
@@ -2432,4 +2432,51 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errSamePassword =>
       'That\'s your current password. Pick a different one.';
+
+  @override
+  String get inviteGroup => 'Friends';
+
+  @override
+  String get inviteMusicians => 'Invite musicians';
+
+  @override
+  String get inviteSummary => 'Bring your bandmates and friends';
+
+  @override
+  String get inviteSubject => 'Join me on OCTAVA';
+
+  @override
+  String inviteMessage(String link) {
+    return 'I\'m on OCTAVA, an app where musicians hear each other play and form bands. Join me: $link';
+  }
+
+  @override
+  String get inviteCopied => 'Invite link copied. Paste it in a chat.';
+
+  @override
+  String get heardSection => 'One last thing';
+
+  @override
+  String get heardQuestion => 'Where did you hear about OCTAVA? (optional)';
+
+  @override
+  String get heardTiktok => 'TikTok';
+
+  @override
+  String get heardInstagram => 'Instagram';
+
+  @override
+  String get heardFriend => 'A friend';
+
+  @override
+  String get heardPoster => 'Poster or flyer';
+
+  @override
+  String get heardJamNight => 'Jam night';
+
+  @override
+  String get heardSearch => 'Search or app store';
+
+  @override
+  String get heardOther => 'Somewhere else';
 }

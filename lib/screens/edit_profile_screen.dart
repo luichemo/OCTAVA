@@ -18,6 +18,7 @@ import '../theme.dart';
 import '../widgets/avatar_section.dart';
 import '../widgets/band_roles_sheet.dart';
 import '../widgets/clips_section.dart';
+import '../widgets/invite.dart';
 import '../widgets/language_picker.dart';
 import '../widgets/location_section.dart';
 import '../widgets/record_sheet.dart';
@@ -406,6 +407,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         summary: r.summary,
                         onTap: r.onTap,
                       ),
+                  ],
+                ),
+                _Group(
+                  title: t.inviteGroup,
+                  rows: [
+                    Builder(
+                      builder: (context) => _Row(
+                        icon: Icons.group_add_outlined,
+                        title: t.inviteMusicians,
+                        summary: t.inviteSummary,
+                        onTap: () => inviteMusicians(context),
+                      ),
+                    ),
                   ],
                 ),
                 if (_moderator && widget.moderation != null)

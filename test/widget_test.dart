@@ -6,6 +6,7 @@ import 'swipe_helpers.dart';
 import 'package:octava/data/sample_musicians.dart';
 import 'package:octava/main.dart';
 import 'package:octava/screens/swipe_screen.dart';
+import 'package:octava/widgets/invite.dart';
 
 /// The feed's open band slots (their pills show the role; screen readers
 /// hear "Drums: Open").
@@ -92,6 +93,20 @@ void main() {
     }
 
     expect(find.text("You've heard everyone"), findsOneWidget);
+    expect(
+      find.text(
+        "That's everyone for now. Invite musicians you know, or widen your filters.",
+      ),
+      findsOneWidget,
+    );
+
+    // Invite musicians opens the share sheet with the landing-page link.
+    String? shared;
+    debugShareOverride = (text) async => shared = text;
+    addTearDown(() => debugShareOverride = null);
+    await tester.tap(find.text('Invite musicians'));
+    await tester.pumpAndSettle();
+    expect(shared, contains('https://luichemo.github.io/OCTAVA/get/'));
 
     await tester.tap(find.text('Check again'));
     await tester.pumpAndSettle();

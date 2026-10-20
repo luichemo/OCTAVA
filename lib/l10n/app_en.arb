@@ -183,7 +183,7 @@
   "noMatchBody": "Nobody matches your filters right now. Try fewer filters or a bigger distance.",
   "changeFilters": "Change filters",
   "heardEveryoneTitle": "You've heard everyone",
-  "heardEveryoneBody": "That's everyone for now. New musicians join every week.",
+  "heardEveryoneBody": "That's everyone for now. Invite musicians you know, or widen your filters.",
   "checkAgain": "Check again",
   "locationPrompt": "See how far away people are.",
   "shareLocation": "Share location",
@@ -1460,5 +1460,27 @@
   "errResetWait": "Please wait a minute before asking for another link.",
   "resetBack": "Back to sign in",
   "errResetLink": "This link has expired or was already used. Ask for a new one on the sign-in screen.",
-  "errSamePassword": "That's your current password. Pick a different one."
+  "errSamePassword": "That's your current password. Pick a different one.",
+  "inviteGroup": "Friends",
+  "inviteMusicians": "Invite musicians",
+  "inviteSummary": "Bring your bandmates and friends",
+  "inviteSubject": "Join me on OCTAVA",
+  "inviteMessage": "I'm on OCTAVA, an app where musicians hear each other play and form bands. Join me: {link}",
+  "@inviteMessage": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteCopied": "Invite link copied. Paste it in a chat.",
+  "heardSection": "One last thing",
+  "heardQuestion": "Where did you hear about OCTAVA? (optional)",
+  "heardTiktok": "TikTok",
+  "heardInstagram": "Instagram",
+  "heardFriend": "A friend",
+  "heardPoster": "Poster or flyer",
+  "heardJamNight": "Jam night",
+  "heardSearch": "Search or app store",
+  "heardOther": "Somewhere else"
 }

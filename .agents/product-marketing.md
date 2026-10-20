@@ -1,6 +1,6 @@
 # Product Marketing Context
 
-**Document version:** v1
+**Document version:** v2
 **Last updated:** 2026-10-20
 
 ## Product Overview
@@ -65,7 +65,7 @@
 ## Objections
 | Objection | Response |
 |-----------|----------|
-| "Nobody near me uses it yet." | Distance is optional, so the feed can show everyone; early musicians get seen first. Honest risk: with a worldwide launch, feeds in any one city start thin, so marketing should keep inviting friends and bandmates (referrals) and show where people already are. |
+| "Nobody near me uses it yet." | Distance is optional, so the feed can show everyone, and **Invite musicians** (profile page and the empty feed) shares OCTAVA with your bandmates and friends in one tap. Honest risk: with a worldwide launch, feeds in any one city start thin, so marketing should keep inviting friends and bandmates (referrals) and show where people already are. |
 | "I don't want to post a recording of myself." | A short phone clip is enough; record right in the app. It's how people decide to say hi, and it saves you bad-fit rehearsals. |
 | "Is it safe? (especially for my teenager)" | 16+ only; teens and adults never chat one-on-one; report and block everywhere; moderators review reports. |
 | "Is it really free? What's the catch?" | Free, no ads. A small optional subscription may come later for extras; matching and chat stay free. |
@@ -132,6 +132,7 @@
 
 ## Goals
 **Business goal:** Grow an active community of musicians worldwide, starting with hobbyists and beginners; reach ~1,000 active users before considering OCTAVA Plus.
+**Channel tracking:** sign-up asks "Where did you hear about OCTAVA?" (optional: TikTok, Instagram, a friend, poster or flyer, jam night, search or app store, somewhere else), stored in `profiles.heard_from` and counted in the dashboard.
 **Conversion action:** Install (store) or sign up (web preview) → finish the profile **with at least one clip** (otherwise hidden from the feed) → first match → first band.
 **Current metrics:** Pre-launch. Plan: friends test (web preview + APK) → domain → Google Play closed test (12 testers, 14 days) → Supabase Pro at public launch → Apple.
 
@@ -139,6 +140,7 @@
 *Decisions and tested lessons. Newest first. Keep it to about 20 active entries.*
 | Date | Learning | Evidence | Applies to | Status |
 |------|----------|----------|------------|--------|
+| 2026-10-20 | Built for growth: Invite musicians (share sheet with the /get/ link), an honest empty feed (invite or widen filters, no "new musicians every week"), and the sign-up channel question | Owner decision after reviewing this doc against the app | launch, referrals, social, copywriting | active |
 | 2026-10-20 | Launch worldwide from day one, not city by city; first 100 users are hobbyists and beginners | Owner decision | launch, social, community-marketing, aso, copywriting | active |
 | 2026-10-20 | People currently find bandmates mostly through friends and jam nights, not apps | Owner's observation (one data point) | competitors, copywriting, social | watch |
 | 2026-10-20 | Matching and chat stay free; Plus only adds extras, never ads | Owner decision | pricing, paywalls, all copy | active |
@@ -146,4 +148,5 @@
 
 ## Changelog
 *Newest first. One line per revision: what changed and why.*
+- v2 (2026-10-20) — Objections and Goals: the app now has Invite musicians and a sign-up channel question; removed the unbuilt "early musicians get seen first" claim.
 - v1 (2026-10-20) — Initial context, drafted from the repo (CLAUDE.md, landing page, app texts), with the owner's answers: worldwide launch, hobbyists first, friends and jam nights as the main alternative.

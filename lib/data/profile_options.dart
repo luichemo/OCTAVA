@@ -65,6 +65,21 @@ Map<String, String> get frequencyLabels {
 }
 
 /// Gear and logistics flags: profiles column → label.
+/// Where people heard about OCTAVA, asked at sign-up. Keys must match the
+/// `profiles.heard_from` check.
+Map<String, String> get heardFromLabels {
+  final t = L10n.current;
+  return {
+    'tiktok': t.heardTiktok,
+    'instagram': t.heardInstagram,
+    'friend': t.heardFriend,
+    'poster': t.heardPoster,
+    'jam_night': t.heardJamNight,
+    'search': t.heardSearch,
+    'other': t.heardOther,
+  };
+}
+
 Map<String, String> get gearLabels {
   final t = L10n.current;
   return {

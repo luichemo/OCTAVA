@@ -12,6 +12,7 @@ class ProfileDraft {
     this.frequency,
     this.gear = const {},
     this.links = const [],
+    this.heardFrom,
   });
 
   /// Rebuilds a draft from the database rows, for editing.
@@ -70,6 +71,10 @@ class ProfileDraft {
   /// Links to YouTube, TikTok and so on. Saved when editing a profile.
   final List<ProfileLink> links;
 
+  /// Where they heard about OCTAVA (`heardFromLabels` ids); asked only at
+  /// sign-up, optional, and never read back.
+  final String? heardFrom;
+
   /// Rows for the `profile_links` table.
   List<Map<String, dynamic>> toLinkRows(String userId) => [
     for (final l in links) {'profile_id': userId, 'kind': l.kind, 'url': l.url},
@@ -88,6 +93,7 @@ class ProfileDraft {
     'has_car': gear.contains('has_car'),
     'has_rehearsal_space': gear.contains('has_rehearsal_space'),
     'has_home_studio': gear.contains('has_home_studio'),
+    'heard_from': ?heardFrom,
   };
 
   /// Rows for the `profile_instruments` table.

@@ -701,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @heardEveryoneBody.
   ///
   /// In en, this message translates to:
-  /// **'That\'s everyone for now. New musicians join every week.'**
+  /// **'That\'s everyone for now. Invite musicians you know, or widen your filters.'**
   String get heardEveryoneBody;
 
   /// No description provided for @checkAgain.
@@ -4165,6 +4165,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That\'s your current password. Pick a different one.'**
   String get errSamePassword;
+
+  /// No description provided for @inviteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get inviteGroup;
+
+  /// No description provided for @inviteMusicians.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite musicians'**
+  String get inviteMusicians;
+
+  /// No description provided for @inviteSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your bandmates and friends'**
+  String get inviteSummary;
+
+  /// No description provided for @inviteSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Join me on OCTAVA'**
+  String get inviteSubject;
+
+  /// No description provided for @inviteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m on OCTAVA, an app where musicians hear each other play and form bands. Join me: {link}'**
+  String inviteMessage(String link);
+
+  /// No description provided for @inviteCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite link copied. Paste it in a chat.'**
+  String get inviteCopied;
+
+  /// No description provided for @heardSection.
+  ///
+  /// In en, this message translates to:
+  /// **'One last thing'**
+  String get heardSection;
+
+  /// No description provided for @heardQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did you hear about OCTAVA? (optional)'**
+  String get heardQuestion;
+
+  /// No description provided for @heardTiktok.
+  ///
+  /// In en, this message translates to:
+  /// **'TikTok'**
+  String get heardTiktok;
+
+  /// No description provided for @heardInstagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get heardInstagram;
+
+  /// No description provided for @heardFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'A friend'**
+  String get heardFriend;
+
+  /// No description provided for @heardPoster.
+  ///
+  /// In en, this message translates to:
+  /// **'Poster or flyer'**
+  String get heardPoster;
+
+  /// No description provided for @heardJamNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Jam night'**
+  String get heardJamNight;
+
+  /// No description provided for @heardSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search or app store'**
+  String get heardSearch;
+
+  /// No description provided for @heardOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Somewhere else'**
+  String get heardOther;
 }
 
 class _AppLocalizationsDelegate

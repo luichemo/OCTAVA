@@ -109,6 +109,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String? _frequency;
   final Set<String> _gear = {};
 
+  /// Sign-up only: where they heard about OCTAVA (optional).
+  String? _heardFrom;
+
   final List<ProfileLink> _links = [];
   final _linkInput = TextEditingController();
   String? _linkError;
@@ -279,6 +282,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         frequency: _frequency,
         gear: Set.of(_gear),
         links: List.of(_links),
+        heardFrom: _editing ? null : _heardFrom,
       );
       if (_editing) {
         await widget.repository.updateProfile(draft);
@@ -679,6 +683,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           icon: const Icon(Icons.close_rounded),
                         ),
                       ),
+                  ],
+                  if (!_editing) ...[
+                    _Section('heard', context.t.heardSection),
+                    Text(
+                      context.t.heardQuestion,
+                      style: TextStyle(color: colors.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final MapEntry(key: id, value: label)
+                            in heardFromLabels.entries)
+                          ChoiceChip(
+                            label: Text(label),
+                            selected: _heardFrom == id,
+                            onSelected: (on) => setState(() {
+                              _heardFrom = on ? id : null;
+                            }),
+                          ),
+                      ],
+                    ),
                   ],
                   if (_editing &&
                       widget.clips != null &&

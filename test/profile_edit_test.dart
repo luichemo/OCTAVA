@@ -17,6 +17,7 @@ import 'package:octava/screens/edit_profile_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
 import 'package:octava/data/deck.dart';
 import 'package:octava/widgets/clips_section.dart';
+import 'package:octava/widgets/invite.dart';
 
 import 'profile_helpers.dart';
 import 'signup_flow_test.dart' show FakeProfileRepository;
@@ -251,6 +252,31 @@ void main() {
     expect(find.textContaining('Check the link'), findsOneWidget);
   });
 
+  testWidgets('Invite musicians shares the landing-page link', (tester) async {
+    final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true)
+      ..saved = const ProfileDraft(
+        displayName: 'Luka',
+        instruments: {'vocals': 'pro'},
+      );
+    String? shared;
+    debugShareOverride = (text) async => shared = text;
+    addTearDown(() => debugShareOverride = null);
+    await pump(tester, EditProfileScreen(repository: repo));
+    final row = find.text('Invite musicians');
+    await tester.scrollUntilVisible(
+      row,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(row);
+    await tester.pumpAndSettle();
+    expect(find.text('Bring your bandmates and friends'), findsOneWidget);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(shared, startsWith("I'm on OCTAVA"));
+    expect(shared, endsWith('https://luichemo.github.io/OCTAVA/get/'));
+  });
+
   group('delete account', () {
     FakeProfileRepository profile() =>
         FakeProfileRepository(hasBirthDate: true, hasProfile: true)
@@ -266,6 +292,9 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
+      // Fully on screen, not just peeking in at the bottom edge.
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
       await tester.tap(row);
       await tester.pumpAndSettle();
       expect(find.text('Delete your account?'), findsOneWidget);
