@@ -1,0 +1,197 @@
+<title>OCTAVA Marketing Brief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: one readable column of printed cards, like a gig poster pinned to a board. */
+  :root {
+    --paper: #EEF0EC; --card: #FAFBF8; --ink: #22328C; --ink-soft: #56619E; --line: #C5CBE0;
+    --pink: #FF4FA3; --yellow: #FFE14D; --aqua: #74D3EA; --shadow: #22328C; --on-fill: #22328C;
+    --display: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --paper: #10173A; --card: #18214D; --ink: #E8EBF8; --ink-soft: #A7B0DA; --line: #33407A; --shadow: #05081C; color-scheme: dark } }
+  :root[data-theme="dark"] {
+    --paper: #10173A; --card: #18214D; --ink: #E8EBF8; --ink-soft: #A7B0DA; --line: #33407A; --shadow: #05081C; color-scheme: dark }
+
+  body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+  .wrap { max-width: 720px; margin: 0 auto; display: grid; gap: 22px;
+    padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1, h2 { font-family: var(--display); font-weight: 400; letter-spacing: .5px; line-height: 1; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(44px, 9vw, 68px); }
+  h2 { font-size: 30px; }
+  h3 { font-size: 16px; margin: 0; }
+  p, ul, ol { margin: 0; }
+  ul, ol { padding-left: 1.2em; display: grid; gap: 6px; }
+  a { color: var(--ink); font-weight: 600; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+  .card { background: var(--card); border: 2px solid var(--ink); border-radius: 20px; box-shadow: 5px 5px 0 var(--shadow);
+    padding: 22px; display: grid; gap: 14px; min-width: 0; }
+  .hero { background: var(--pink); border-color: var(--on-fill); color: var(--on-fill); box-shadow: 6px 6px 0 var(--yellow); }
+  .hero a { color: var(--on-fill); }
+  .stamp { justify-self: start; background: var(--yellow); color: var(--on-fill); font-family: var(--display); font-size: 20px;
+    padding: 2px 10px; transform: rotate(-2deg); border: 2px solid var(--on-fill); }
+  .lead { font-size: 18px; font-weight: 500; max-width: 60ch; }
+  .muted { color: var(--ink-soft); }
+  .steps { list-style: none; padding: 0; counter-reset: s; gap: 12px; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; }
+  .steps li::before { content: counter(s); font-family: var(--display); font-size: 22px; width: 34px; height: 34px; display: grid; place-items: center;
+    border: 2px solid var(--ink); border-radius: 999px; background: var(--aqua); color: var(--on-fill); }
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .rules > div { border: 2px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+  .tag { font-family: var(--display); font-size: 20px; }
+  .task { border-top: 2px dashed var(--line); padding-top: 14px; display: grid; gap: 6px; }
+  .task:first-of-type { border-top: 0; padding-top: 0; }
+  .time { font-size: 13px; font-weight: 600; color: var(--ink-soft); letter-spacing: .4px; text-transform: uppercase; }
+  pre { margin: 0; white-space: pre-wrap; font: 14px/1.6 ui-monospace, "Cascadia Mono", Menlo, monospace; background: var(--paper);
+    border: 2px solid var(--line); border-radius: 12px; padding: 14px; overflow-x: auto; }
+  button { justify-self: start; font: 600 15px var(--body); color: var(--on-fill); background: var(--pink); border: 2px solid var(--on-fill);
+    border-radius: 999px; padding: 9px 18px; box-shadow: 3px 3px 0 var(--yellow); cursor: pointer; }
+  button:active { transform: translate(3px, 3px); box-shadow: none; }
+  .gloss { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+  .gloss dt { font-weight: 700; }
+  .gloss dd { margin: 0; min-width: 0; }
+  @media (max-width: 480px) { .gloss { grid-template-columns: 1fr; } .gloss dd { margin-bottom: 6px; } }
+  @media (prefers-reduced-motion: reduce) { .stamp { transform: none; } button:active { transform: none; } }
+</style>
+
+<main class="wrap">
+  <section class="card hero">
+    <span class="stamp">Marketing brief · week 1</span>
+    <h1>Swipe. Jam. Form a band.</h1>
+    <p class="lead">Welcome to OCTAVA! This page explains what we're building, how our weekly tasks work, and what to do first.</p>
+  </section>
+
+  <section class="card">
+    <h2>What OCTAVA is</h2>
+    <p>A free phone app for finding people to make music with. Musicians make a profile with a short audio clip, then swipe through other musicians: <b>Jam</b> on people they'd like to play with, <b>Pass</b> on the rest. When both choose Jam, it's a match and they can chat. Matches can form a band, and bands show up in the feed with the roles they need, so others can ask to join. Bands then get a rehearsal calendar, songs, setlists and a public band page.</p>
+    <p>It's for musicians aged 16+, in English and Georgian, everywhere at once. Our first focus is <b>hobbyists and beginners</b>: people who want to play for fun with others at their level.</p>
+    <p>There are no subscriptions and no ads. One person (the developer) builds it; the marketing plan and weekly tasks are drafted with Claude, an AI assistant that has the whole project in front of it.</p>
+    <p><a href="https://luichemo.github.io/OCTAVA/" target="_blank" rel="noopener">Open the web preview</a> · <a href="https://luichemo.github.io/OCTAVA/get/" target="_blank" rel="noopener">Landing page with the QR code</a></p>
+  </section>
+
+  <section class="card">
+    <h2>Where we are now</h2>
+    <p>The app works end to end, but nobody outside our circle has used it yet. The plan, in order:</p>
+    <ol>
+      <li><b>Friends test</b> — 5–10 musician friends try it (web preview and Android).</li>
+      <li><b>Google Play closed test</b> — Google requires 12 testers for 14 days.</li>
+      <li><b>Soft launch</b> — posters with the QR code at jam nights, rehearsal studios, music schools and gear shops; an OCTAVA jam night.</li>
+      <li><b>Public launch</b> on Google Play, then iPhone later.</li>
+    </ol>
+    <p>Our channels: <b>TikTok and Instagram Reels</b>, and the <b>local music scene</b>. The biggest risk is an empty feed, so most of the work is about getting musicians to bring their bandmates and friends.</p>
+  </section>
+
+  <section class="card">
+    <h2>How we work together</h2>
+    <ol class="steps">
+      <li><span><b>Monday:</b> you get this week's tasks, each with a rough time estimate.</span></li>
+      <li><span><b>During the week:</b> do them in any order. If something is unclear or a better idea comes up, just say so.</span></li>
+      <li><span><b>Sunday:</b> send a short report using the template below.</span></li>
+      <li><span>The report goes back into the plan, so next week's tasks build on what you found. The real words musicians use are the most valuable thing you can bring back.</span></li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>The rules</h2>
+    <div class="rules">
+      <div>
+        <span class="tag">Do</span>
+        <ul>
+          <li>Sound like a bandmate: short, warm, plain words. Say <i>musicians</i>, <i>bandmates</i>, <i>Jam</i>, <i>clip</i>, <i>rehearsal</i>.</li>
+          <li>Show real people and real sound, with their permission.</li>
+          <li>Write down exactly what musicians say, word for word.</li>
+          <li>Register any OCTAVA account with the project email, <b>octavabandmate@gmail.com</b>, so the project keeps access.</li>
+        </ul>
+      </div>
+      <div>
+        <span class="tag">Don't</span>
+        <ul>
+          <li>No dating language (date, flirt, crush): it isn't a dating app, and 16–17 year olds use it.</li>
+          <li>No invented numbers, fake reviews or fake profiles.</li>
+          <li>Don't promise features that don't exist, or say "AI-powered".</li>
+          <li>No content with under-18s without a parent's OK, and nothing aimed at under-16s.</li>
+          <li>Nothing gets posted publicly until the first posts are approved.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Week 1 tasks</h2>
+    <div class="task">
+      <span class="time">About 45 min</span>
+      <h3>1. Try the app like a new musician</h3>
+      <p>Sign up on the web preview, record or upload a clip, swipe through the feed and look at a band. Note the 3 things that confused you and the 3 you liked. (Some profiles there are test musicians for now.)</p>
+    </div>
+    <div class="task">
+      <span class="time">About 30 min</span>
+      <h3>2. Claim the social accounts</h3>
+      <p>Create TikTok and Instagram accounts with the project email. Try <b>@octava.app</b> first; if it's taken, list 3 available alternatives before choosing. Bio: <i>Swipe. Jam. Form a band.</i> with a link to the landing page. Don't post yet.</p>
+    </div>
+    <div class="task">
+      <span class="time">About 1.5 hours</span>
+      <h3>3. Map where musicians look for each other</h3>
+      <p>Find 10 online places (Facebook groups, Telegram chats, subreddits, Discord servers) and 5 real places near you (jam nights, studios, music schools, gear shops). For each: link or address, rough size, and whether they allow promotion.</p>
+    </div>
+    <div class="task">
+      <span class="time">About 1 hour</span>
+      <h3>4. Look at the competition</h3>
+      <p>Spend 20 minutes each on <b>Vampr</b>, <b>BandMix</b> and one local option you know. For each: what they do, what they charge, and 3 complaints from their store reviews, copied word for word.</p>
+    </div>
+    <div class="task">
+      <span class="time">About 1 hour</span>
+      <h3>5. Sketch 3 short videos</h3>
+      <p>Pick 3 ideas (or your own): <i>"Tinder, but you hear them play first"</i>; <i>"Our drummer quit"</i>, where a band finds a new one through the app; <i>"Beginner-friendly"</i>, someone who's played for 6 months finding people at their level. For each: the hook (first 2 seconds), the shots, the caption. Ideas only; no filming yet.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Weekly report</h2>
+    <p class="muted">Copy this, fill it in, and send it on Sunday.</p>
+    <pre id="report">OCTAVA report, week __
+
+Done:
+-
+
+Not done (and why):
+-
+
+What musicians said (exact words, who said it):
+- "..." (guitarist, hobbyist)
+
+Numbers (followers, views, sign-ups, anything you counted):
+-
+
+Ideas or questions for next week:
+-</pre>
+    <button type="button" id="copy">Copy the template</button>
+  </section>
+
+  <section class="card">
+    <h2>Words we use</h2>
+    <dl class="gloss">
+      <dt>Jam</dt><dd>Swipe right: you'd like to play with them</dd>
+      <dt>Pass</dt><dd>Swipe left</dd>
+      <dt>Match</dt><dd>Both chose Jam; the chat opens</dd>
+      <dt>Clip</dt><dd>A short audio recording on a profile (up to 2 minutes). Without one, you're hidden from the feed.</dd>
+      <dt>Band card</dt><dd>A band shown in the feed with the roles it needs; Jam on it = ask to join</dd>
+      <dt>Open role</dt><dd>An instrument a band is looking for</dd>
+    </dl>
+  </section>
+</main>
+
+<script>
+  const btn = document.getElementById('copy');
+  btn.addEventListener('click', () => {
+    const text = document.getElementById('report').textContent;
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy the template'; }, 2000); };
+    const select = () => {
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById('report'));
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      btn.textContent = 'Selected: press Ctrl+C';
+    };
+    try { navigator.clipboard.writeText(text).then(done, select); } catch (e) { select(); }
+  });
+</script>
