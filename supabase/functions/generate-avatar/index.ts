@@ -7,9 +7,16 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { Image } from "npm:imagescript@1.3.0";
 
 const DAILY_LIMIT = 5;
 const MODEL = "@cf/black-forest-labs/flux-1-schnell";
+
+// The model always returns 1024×1024 (about 450 KB). Cards show the avatar
+// about phone-width, so 768 px still looks sharp and is about a third of the
+// size, which matters because every card shown downloads it.
+const AVATAR_SIZE = 768;
+const AVATAR_QUALITY = 75;
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -54,6 +61,19 @@ function buildPrompt(instrumentId: string | undefined, genres: string[]): string
     mood.length ? `Mood inspired by ${mood.join(", ")} music.` : "",
     "Clearly an illustration, not a photo. No face details, no text, no letters, no logos.",
   ].join(" ");
+}
+
+// Smaller JPEG for storage and downloads; the original if anything goes wrong.
+async function shrink(jpeg: Uint8Array): Promise<Uint8Array> {
+  try {
+    const image = await Image.decode(jpeg);
+    if (image.width <= AVATAR_SIZE) return jpeg;
+    const small = await image.resize(AVATAR_SIZE, Image.RESIZE_AUTO).encodeJPEG(AVATAR_QUALITY);
+    return small.length < jpeg.length ? small : jpeg;
+  } catch (e) {
+    console.error("Couldn't shrink the avatar; saving the original", e);
+    return jpeg;
+  }
 }
 
 function base64ToBytes(b64: string): Uint8Array {
@@ -130,7 +150,7 @@ Deno.serve(async (req) => {
   const path = `${user.id}/${Date.now()}.jpg`;
   const { error: uploadError } = await admin.storage
     .from("avatars")
-    .upload(path, base64ToBytes(image), { contentType: "image/jpeg" });
+    .upload(path, await shrink(base64ToBytes(image)), { contentType: "image/jpeg" });
   if (uploadError) {
     console.error("Upload failed", uploadError);
     return json({ error: "Couldn't save your avatar. Try again." }, 500);
