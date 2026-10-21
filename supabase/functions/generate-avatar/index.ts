@@ -7,7 +7,6 @@
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { Image } from "npm:imagescript@1.3.0";
 
 const DAILY_LIMIT = 5;
 const MODEL = "@cf/black-forest-labs/flux-1-schnell";
@@ -64,8 +63,12 @@ function buildPrompt(instrumentId: string | undefined, genres: string[]): string
 }
 
 // Smaller JPEG for storage and downloads; the original if anything goes wrong.
+// ImageScript's Deno build is pure WebAssembly (its npm package needs a native
+// binary the Edge runtime doesn't have). It's imported here, not at the top,
+// so a problem loading it can never stop the function from starting.
 async function shrink(jpeg: Uint8Array): Promise<Uint8Array> {
   try {
+    const { Image } = await import("https://deno.land/x/imagescript@1.3.0/mod.ts");
     const image = await Image.decode(jpeg);
     if (image.width <= AVATAR_SIZE) return jpeg;
     const small = await image.resize(AVATAR_SIZE, Image.RESIZE_AUTO).encodeJPEG(AVATAR_QUALITY);
