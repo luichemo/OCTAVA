@@ -206,6 +206,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: FilledButton.styleFrom(
               backgroundColor: colors.error,
               foregroundColor: colors.onError,
+              side: BorderSide(color: colors.error, width: 2),
             ),
             onPressed: () => Navigator.pop(context, true),
             child: Text(t.deleteAccountConfirm),

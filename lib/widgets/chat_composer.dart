@@ -158,8 +158,9 @@ class _ChatComposerState extends State<ChatComposer> {
     final t = context.t;
     final colors = Theme.of(context).colorScheme;
     final sendStyle = IconButton.styleFrom(
-      backgroundColor: OctavaColors.pink,
-      foregroundColor: OctavaColors.ink,
+      backgroundColor: buttonFill(context),
+      foregroundColor: buttonInk(context),
+      side: buttonBorder(context),
       minimumSize: const Size(48, 48),
     );
     if (_recording) {

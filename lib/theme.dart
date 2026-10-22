@@ -65,6 +65,35 @@ Color shadowInk(BuildContext context) =>
     ? OctavaColors.darkShadow
     : OctavaColors.ink;
 
+/// Main buttons are solid and calm (owner, 2026-10-22: bright pink on yellow
+/// pulled focus): navy with white text in light mode, and an off-white pill
+/// with navy text in dark mode, where navy would disappear.
+Color buttonFill(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? OctavaColors.darkInk
+    : OctavaColors.ink;
+
+Color buttonInk(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? OctavaColors.darkPaper
+    : Colors.white;
+
+/// The outline of a main button: navy (the same as its fill) in light mode,
+/// the dark background colour in dark mode, an inner edge around the
+/// off-white pill (owner, 2026-10-22).
+BorderSide buttonBorder(BuildContext context) => BorderSide(
+  color: Theme.of(context).brightness == Brightness.dark
+      ? OctavaColors.darkPaper
+      : OctavaColors.ink,
+  width: 2,
+);
+
+/// The soft offset shadow under a main button.
+Color buttonShadow(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? OctavaColors.darkShadow
+    : OctavaColors.ink.withValues(alpha: 0.3);
+
 /// A hard, unblurred offset shadow, like a misregistered second print pass.
 List<BoxShadow> hardShadow(Color color, {double offset = 4}) => [
   BoxShadow(color: color, offset: Offset(offset, offset)),
@@ -235,13 +264,18 @@ ThemeData octavaTheme(Brightness brightness) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: OctavaColors.pink,
-        foregroundColor: OctavaColors.ink,
+        // Solid and calm: see buttonFill.
+        backgroundColor: ink,
+        foregroundColor: dark ? OctavaColors.darkPaper : Colors.white,
         disabledBackgroundColor: scheme.outlineVariant,
         minimumSize: const Size(0, 56),
         padding: const EdgeInsets.symmetric(horizontal: 24),
+        // A background-coloured edge in dark mode: see buttonBorder.
         shape: StadiumBorder(
-          side: BorderSide(color: OctavaColors.ink, width: 2),
+          side: BorderSide(
+            color: dark ? OctavaColors.darkPaper : OctavaColors.ink,
+            width: 2,
+          ),
         ),
         textStyle: buttonText,
         iconSize: 22,
@@ -265,21 +299,26 @@ ThemeData octavaTheme(Brightness brightness) {
   );
 }
 
-/// A filled pill button sitting on a hard shadow, that presses down into it
-/// when tapped, like a mechanical key. Use it for a screen's main action.
+/// A solid pill button (navy, or off-white in dark mode) sitting on a soft
+/// offset shadow, that presses down into it when tapped, like a mechanical
+/// key. Use it for a screen's main action.
 class PrintButton extends StatefulWidget {
   const PrintButton({
     super.key,
     required this.onPressed,
     required this.child,
-    this.color = OctavaColors.pink,
-    this.shadowColor = OctavaColors.yellow,
+    this.color,
+    this.shadowColor,
   });
 
   final VoidCallback? onPressed;
   final Widget child;
-  final Color color;
-  final Color shadowColor;
+
+  /// Defaults to the theme's filled button ([buttonFill]).
+  final Color? color;
+
+  /// Defaults to [buttonShadow].
+  final Color? shadowColor;
 
   @override
   State<PrintButton> createState() => _PrintButtonState();
@@ -306,11 +345,16 @@ class _PrintButtonState extends State<PrintButton> {
         transform: Matrix4.translationValues(4 - lift, 4 - lift, 0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          boxShadow: hardShadow(widget.shadowColor, offset: lift),
+          boxShadow: hardShadow(
+            widget.shadowColor ?? buttonShadow(context),
+            offset: lift,
+          ),
         ),
         child: FilledButton(
           onPressed: widget.onPressed,
-          style: FilledButton.styleFrom(backgroundColor: widget.color),
+          style: widget.color == null
+              ? null
+              : FilledButton.styleFrom(backgroundColor: widget.color),
           child: widget.child,
         ),
       ),
