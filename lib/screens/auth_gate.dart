@@ -24,6 +24,7 @@ import '../data/repositories.dart';
 import '../widgets/splash.dart';
 import '../widgets/record_sheet.dart';
 import '../data/safety_repository.dart';
+import '../data/swipe_hint.dart';
 import '../models/chat.dart';
 import '../models/musician.dart';
 import '../widgets/live_banner.dart';
@@ -136,6 +137,7 @@ class _AuthGateState extends State<AuthGate> {
           push: FirebasePush(client),
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
+          hints: PrefsHintStore(user.id),
         );
       },
     );
@@ -154,6 +156,7 @@ class ProfileGate extends StatefulWidget {
     this.avatars,
     this.location,
     this.filterStore,
+    this.hints,
     this.bandNeeds,
     this.bands,
     this.rehearsals,
@@ -202,6 +205,9 @@ class ProfileGate extends StatefulWidget {
 
   /// Remembers swipe filters on this device.
   final FilterStore? filterStore;
+
+  /// Remembers the feed's first-time swipe hint for this account.
+  final HintStore? hints;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -426,6 +432,7 @@ class _ProfileGateState extends State<ProfileGate> {
                 avatars: widget.avatars,
                 location: widget.location,
                 filterStore: widget.filterStore,
+                hints: widget.hints,
                 bandNeeds: widget.bandNeeds,
                 live: _live,
                 bands: _bands,

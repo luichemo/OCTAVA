@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 import 'swipe_helpers.dart';
 
@@ -70,6 +72,21 @@ void main() {
     expect(find.text(_caption), findsNothing);
     expect(find.text('Nika, 24'), findsNothing);
     expect(find.text('Mariam, 27'), findsOneWidget);
+  });
+
+  test('every new account on a phone gets it once', () async {
+    // One phone's saved settings, shared by every account signed in on it.
+    SharedPreferencesAsyncPlatform.instance =
+        InMemorySharedPreferencesAsync.empty();
+
+    final first = PrefsHintStore('account-1');
+    expect(await first.seen(), isFalse);
+    await first.markSeen();
+    expect(await PrefsHintStore('account-1').seen(), isTrue);
+
+    // Someone else signs up on the same phone, or the person deletes their
+    // account and creates it again (a new account id): it plays again.
+    expect(await PrefsHintStore('account-2').seen(), isFalse);
   });
 
   testWidgets('it plays only once', (tester) async {

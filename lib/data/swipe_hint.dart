@@ -11,9 +11,13 @@ abstract class HintStore {
   Future<void> markSeen();
 }
 
-/// Once per device, saved with shared_preferences.
+/// Once per account on each device, saved with shared_preferences, so a
+/// new account (even one made again after deleting) sees it once too.
 class PrefsHintStore implements HintStore {
-  static const _key = 'swipe_hint_seen';
+  PrefsHintStore(this._userId);
+  final String _userId;
+
+  String get _key => 'swipe_hint_seen_$_userId';
 
   @override
   Future<bool> seen() async {

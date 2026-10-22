@@ -70,7 +70,8 @@ class SwipeScreen extends StatefulWidget {
   /// Remembers filters. Defaults to keeping them only while the app runs.
   final FilterStore? filterStore;
 
-  /// Remembers the first-time swipe hint; once per device by default.
+  /// Remembers the first-time swipe hint (per account: PrefsHintStore).
+  /// Without one the hint plays each time the screen opens.
   final HintStore? hints;
 
   /// Shows AI avatars on cards when set.
@@ -135,7 +136,7 @@ class _SwipeScreenState extends State<SwipeScreen>
 
   // The first-time hint: the top card nudges right (Jam) and left (Pass)
   // with a hand, like TikTok's first swipe-up hint. Any touch stops it.
-  late final HintStore _hints = widget.hints ?? PrefsHintStore();
+  late final HintStore _hints = widget.hints ?? MemoryHintStore();
   bool _hintChecked = false;
   bool _hinting = false;
   bool _hintShown = false; // stays true while the hint fades out
