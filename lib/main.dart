@@ -13,6 +13,7 @@ import 'l10n/l10n.dart';
 import 'screens/auth_gate.dart';
 import 'screens/public_band_screen.dart';
 import 'theme.dart';
+import 'widgets/responsive.dart';
 import 'widgets/splash.dart';
 
 // `async` + `await`: work like in TypeScript. Supabase and the saved language
@@ -155,7 +156,8 @@ class OctavaApp extends StatelessWidget {
                   dismissDirection: DismissDirection.up,
                 ),
               ),
-              child: child!,
+              // Wider than a phone but not wide: a centred phone column.
+              child: PhoneColumn(child: child!),
             );
             if (!georgianType) return themed;
             // Georgian letters read larger than Latin ones at the same size,
