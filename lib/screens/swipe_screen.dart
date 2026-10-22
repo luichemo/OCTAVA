@@ -16,6 +16,7 @@ import '../data/live_updates.dart';
 import '../data/location_repository.dart';
 import '../data/repositories.dart';
 import '../data/safety_repository.dart';
+import '../data/swipe_hint.dart';
 import '../data/theme_setting.dart';
 import '../models/band.dart';
 import '../models/band_card.dart';
@@ -46,6 +47,7 @@ class SwipeScreen extends StatefulWidget {
     this.avatars,
     this.location,
     this.filterStore,
+    this.hints,
     this.bandNeeds,
     this.live,
     this.bands,
@@ -67,6 +69,9 @@ class SwipeScreen extends StatefulWidget {
 
   /// Remembers filters. Defaults to keeping them only while the app runs.
   final FilterStore? filterStore;
+
+  /// Remembers the first-time swipe hint; once per device by default.
+  final HintStore? hints;
 
   /// Shows AI avatars on cards when set.
   final AvatarRepository? avatars;
@@ -128,6 +133,13 @@ class _SwipeScreenState extends State<SwipeScreen>
   late final AnimationController _anim = AnimationController(vsync: this);
   Animation<Offset>? _animOffset;
 
+  // The first-time hint: the top card nudges right (Jam) and left (Pass)
+  // with a hand, like TikTok's first swipe-up hint. Any touch stops it.
+  late final HintStore _hints = widget.hints ?? PrefsHintStore();
+  bool _hintChecked = false;
+  bool _hinting = false;
+  bool _hintShown = false; // stays true while the hint fades out
+
   late int _matchSetVersion = widget.live?.matchSetVersion ?? 0;
 
   void _onLive() {
@@ -187,6 +199,7 @@ class _SwipeScreenState extends State<SwipeScreen>
         _loading = false;
         _loadError = null;
       });
+      _maybeShowHint();
     } on ParallelWaitError catch (e) {
       final error = [
         e.errors.$1,
@@ -299,7 +312,65 @@ class _SwipeScreenState extends State<SwipeScreen>
       begin: _drag,
       end: target,
     ).animate(CurvedAnimation(parent: _anim, curve: curve));
-    await _anim.forward(from: 0);
+    try {
+      await _anim.forward(from: 0).orCancel;
+    } on TickerCanceled {
+      // Stopped early: the hint was interrupted, or the screen closed.
+    }
+  }
+
+  /// Plays the swipe hint once, the first time there's a card to swipe.
+  Future<void> _maybeShowHint() async {
+    if (!swipeHintEnabled || _hintChecked || _queue.isEmpty) return;
+    _hintChecked = true;
+    if (await _hints.seen()) return;
+    // Let the card land on screen first.
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (!mounted || _queue.isEmpty || _busy || _drag != Offset.zero) return;
+    // Remembered straight away, so closing the app mid-hint doesn't replay it.
+    await _hints.markSeen();
+    if (!mounted) return;
+    setState(() {
+      _hinting = true;
+      _hintShown = true;
+    });
+    if (MediaQuery.of(context).disableAnimations) {
+      // No movement: the caption alone, for a few seconds.
+      await Future<void>.delayed(const Duration(seconds: 4));
+    } else {
+      final nudge = min(80.0, _deckWidth * 0.22);
+      for (var round = 0; round < 2; round++) {
+        for (final step in [
+          (Offset(nudge, 0), 450, Curves.easeOut),
+          (Offset.zero, 350, Curves.easeInOut),
+          (Offset(-nudge, 0), 450, Curves.easeOut),
+          (Offset.zero, 350, Curves.easeInOut),
+        ]) {
+          if (!_hinting || !mounted) return;
+          await _animateTo(step.$1, Duration(milliseconds: step.$2), step.$3);
+        }
+        if (!_hinting || !mounted) return;
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+      }
+    }
+    _stopHint();
+  }
+
+  /// Ends the hint at once; the card stays where it is for the person's drag.
+  void _stopHint() {
+    if (!_hinting) return;
+    _anim.stop();
+    if (mounted) {
+      setState(() {
+        _hinting = false;
+      });
+    }
+  }
+
+  /// A touch on the card that didn't become a drag: put the card back.
+  void _onPanCancel() {
+    if (_busy || _drag == Offset.zero) return;
+    _animateTo(Offset.zero, const Duration(milliseconds: 200), Curves.easeOut);
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
@@ -323,6 +394,7 @@ class _SwipeScreenState extends State<SwipeScreen>
 
   Future<void> _decide(Decision decision) async {
     if (_busy || _queue.isEmpty) return;
+    _stopHint();
     _busy = true;
     widget.player?.stop();
     final item = _queue.first;
@@ -715,8 +787,10 @@ class _SwipeScreenState extends State<SwipeScreen>
                   _decide(Decision.pass),
             },
             child: GestureDetector(
+              onPanDown: (_) => _stopHint(),
               onPanUpdate: _onPanUpdate,
               onPanEnd: _onPanEnd,
+              onPanCancel: _onPanCancel,
               child: Transform.translate(
                 offset: _drag,
                 child: Transform.rotate(
@@ -727,6 +801,82 @@ class _SwipeScreenState extends State<SwipeScreen>
             ),
           ),
         ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: _hinting ? 1 : 0,
+              duration: const Duration(milliseconds: 250),
+              onEnd: () {
+                if (!_hinting && _hintShown) {
+                  setState(() {
+                    _hintShown = false;
+                  });
+                }
+              },
+              // Built only while the hint shows, so it never sits
+              // invisibly over the card afterwards.
+              child: _hintShown ? _SwipeHint(dx: _drag.dx) : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The first-time hint over the top card: a hand that moves with the card,
+/// and a caption saying which way is Jam and which is Pass.
+class _SwipeHint extends StatelessWidget {
+  const _SwipeHint({required this.dx});
+
+  /// The card's current offset; the hand follows it.
+  final double dx;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    BoxDecoration pill() => printBox(
+      context,
+      color: OctavaColors.yellow,
+      radius: 999,
+      shadow: 3,
+      borderColor: OctavaColors.ink,
+    );
+    return Column(
+      children: [
+        const Spacer(flex: 5),
+        ExcludeSemantics(
+          child: Transform.translate(
+            offset: Offset(dx, 0),
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: pill(),
+              child: const Icon(
+                Icons.touch_app_rounded,
+                size: 34,
+                color: OctavaColors.ink,
+              ),
+            ),
+          ),
+        ),
+        const Spacer(flex: 3),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: pill(),
+            child: Text(
+              t.swipeHint(t.stampJam, t.stampPass),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: OctavaColors.ink,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
       ],
     );
   }

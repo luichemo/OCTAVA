@@ -596,6 +596,12 @@ abstract class AppLocalizations {
   /// **'Pass'**
   String get stampPass;
 
+  /// First-time hint over the top card; jam and pass are the stamp words.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right to {jam}, left to {pass}'**
+  String swipeHint(String jam, String pass);
+
   /// No description provided for @actionJam.
   ///
   /// In en, this message translates to:

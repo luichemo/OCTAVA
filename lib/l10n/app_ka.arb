@@ -83,6 +83,7 @@
   "deckWithFilters": "{where}, {count} ფილტრი",
   "stampJam": "არ მეყო",
   "stampPass": "მეყო",
+  "swipeHint": "მარჯვნივ გასწიე — {jam}, მარცხნივ — {pass}",
   "actionJam": "არ მეყო",
   "actionPass": "მეყო",
   "passedOn": "{name} გამოტოვებულია.",

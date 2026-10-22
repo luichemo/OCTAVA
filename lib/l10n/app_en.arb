@@ -114,6 +114,18 @@
   },
   "stampJam": "Jam",
   "stampPass": "Pass",
+  "swipeHint": "Swipe right to {jam}, left to {pass}",
+  "@swipeHint": {
+    "description": "First-time hint over the top card; jam and pass are the stamp words.",
+    "placeholders": {
+      "jam": {
+        "type": "String"
+      },
+      "pass": {
+        "type": "String"
+      }
+    }
+  },
   "actionJam": "Jam",
   "actionPass": "Pass",
   "passedOn": "Passed on {name}.",

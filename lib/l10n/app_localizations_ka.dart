@@ -281,6 +281,11 @@ class AppLocalizationsKa extends AppLocalizations {
   String get stampPass => 'მეყო';
 
   @override
+  String swipeHint(String jam, String pass) {
+    return 'მარჯვნივ გასწიე — $jam, მარცხნივ — $pass';
+  }
+
+  @override
   String get actionJam => 'არ მეყო';
 
   @override

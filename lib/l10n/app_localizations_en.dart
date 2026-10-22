@@ -287,6 +287,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stampPass => 'Pass';
 
   @override
+  String swipeHint(String jam, String pass) {
+    return 'Swipe right to $jam, left to $pass';
+  }
+
+  @override
   String get actionJam => 'Jam';
 
   @override
