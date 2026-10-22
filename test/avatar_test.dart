@@ -5,7 +5,11 @@ import 'package:octava/data/avatar_repository.dart';
 import 'package:octava/data/repositories.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/musician.dart';
+import 'package:octava/models/profile_draft.dart';
+import 'package:octava/screens/auth_gate.dart';
 import 'package:octava/widgets/avatar_section.dart';
+
+import 'signup_flow_test.dart' show FakeProfileRepository;
 
 class FakeAvatarRepository implements AvatarRepository {
   FakeAvatarRepository({this.current, this.error});
@@ -92,5 +96,49 @@ void main() {
       'instruments': [],
     });
     expect(m.avatarPath, 'x/1.jpg');
+  });
+
+  group('an avatar by default', () {
+    Future<void> pumpHome(
+      WidgetTester tester,
+      FakeAvatarRepository avatars,
+    ) async {
+      final repo = FakeProfileRepository(hasBirthDate: true, hasProfile: true)
+        ..saved = const ProfileDraft(
+          displayName: 'Luka',
+          instruments: {'vocals': 'pro'},
+        );
+      await tester.pumpWidget(
+        OctavaApp(
+          home: ProfileGate(repository: repo, avatars: avatars),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('someone without one gets one made, once', (tester) async {
+      final avatars = FakeAvatarRepository();
+      await pumpHome(tester, avatars);
+      expect(avatars.generated, 1);
+      expect(avatars.current, isNotNull);
+
+      // Rebuilding the home doesn't make another.
+      await tester.pumpWidget(const SizedBox());
+      await pumpHome(tester, avatars);
+      expect(avatars.generated, 1);
+    });
+
+    testWidgets('someone who has one keeps it', (tester) async {
+      final avatars = FakeAvatarRepository(current: 'me/mine.jpg');
+      await pumpHome(tester, avatars);
+      expect(avatars.generated, 0);
+      expect(avatars.current, 'me/mine.jpg');
+    });
+
+    testWidgets('a failure is quiet', (tester) async {
+      await pumpHome(tester, FakeAvatarRepository(error: 'Try tomorrow.'));
+      expect(find.text('Try tomorrow.'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

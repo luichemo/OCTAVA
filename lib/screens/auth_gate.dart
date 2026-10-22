@@ -388,7 +388,29 @@ class _ProfileGateState extends State<ProfileGate> {
 
   Widget _withPush(Widget child) {
     _startPush();
+    _ensureAvatar();
     return child;
+  }
+
+  bool _avatarChecked = false;
+
+  /// Everyone gets an avatar (owner, 2026-10-22), so feed cards don't show
+  /// only a coloured background: once per session, someone with a finished
+  /// profile and no avatar gets one made in the background. That covers new
+  /// accounts right after setup and older ones that never made one. Any
+  /// failure (the daily limit, the AI service down) is left for next time;
+  /// they can still make one themselves in Profile → Avatar.
+  void _ensureAvatar() {
+    final avatars = widget.avatars;
+    if (_avatarChecked || avatars == null) return;
+    _avatarChecked = true;
+    () async {
+      try {
+        if (await avatars.myAvatarPath() == null) await avatars.generate();
+      } catch (_) {
+        // Quietly: this is a nicety, not something to interrupt them with.
+      }
+    }();
   }
 
   @override
