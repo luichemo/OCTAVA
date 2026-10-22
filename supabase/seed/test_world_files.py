@@ -12,7 +12,8 @@ environment variable, never on the command line or in a file.
 
 Usage: OCTAVA_TEST_PASSWORD=... python -I supabase/seed/test_world_files.py <supabase_url> <publishable_key>
 
-With --remove at the end it deletes all 12 test accounts instead, through the
+With --remove at the end it deletes all 12 test accounts instead (or only the
+names listed after it, e.g. --remove levan nino), through the
 delete-account Edge Function: their files go, and bands left empty are
 deleted with their files too. That's the way to remove the test world.
 """
@@ -219,7 +220,9 @@ def main():
 
 
 def remove():
-    for name in PEOPLE:
+    # Names after --remove pick some of them; none means all 12.
+    names = sys.argv[sys.argv.index('--remove') + 1:] or list(PEOPLE)
+    for name in names:
         try:
             token, _ = sign_in(name)
         except SystemExit as e:
