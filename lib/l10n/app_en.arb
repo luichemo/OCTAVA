@@ -53,8 +53,8 @@
   },
   "confirmBirthDateNo": "Change it",
   "confirmBirthDateYes": "Yes, it's right",
-  "fieldArea": "Area (optional)",
-  "fieldAreaHint": "e.g. Vake, Tbilisi",
+  "fieldArea": "Neighbourhood or city (optional)",
+  "fieldAreaHint": "Where you live or rehearse, as you'd tell a friend",
   "instrumentMain": "{instrument} (main)",
   "@instrumentMain": {
     "placeholders": {
@@ -1107,7 +1107,7 @@
     }
   },
   "rehearsalPlace": "Place (optional)",
-  "rehearsalPlaceHint": "e.g. Studio 4, Rustaveli 12",
+  "rehearsalPlaceHint": "A studio, an address, or someone's place",
   "rehearsalNotes": "Notes (optional)",
   "rehearsalNotesHint": "What to bring, what to practise…",
   "rehearsalWeekly": "Repeat every week",

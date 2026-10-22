@@ -377,13 +377,13 @@ abstract class AppLocalizations {
   /// No description provided for @fieldArea.
   ///
   /// In en, this message translates to:
-  /// **'Area (optional)'**
+  /// **'Neighbourhood or city (optional)'**
   String get fieldArea;
 
   /// No description provided for @fieldAreaHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Vake, Tbilisi'**
+  /// **'Where you live or rehearse, as you\'d tell a friend'**
   String get fieldAreaHint;
 
   /// No description provided for @instrumentMain.
@@ -3209,7 +3209,7 @@ abstract class AppLocalizations {
   /// No description provided for @rehearsalPlaceHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. Studio 4, Rustaveli 12'**
+  /// **'A studio, an address, or someone\'s place'**
   String get rehearsalPlaceHint;
 
   /// No description provided for @rehearsalNotes.

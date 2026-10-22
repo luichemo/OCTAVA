@@ -158,10 +158,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmBirthDateYes => 'Yes, it\'s right';
 
   @override
-  String get fieldArea => 'Area (optional)';
+  String get fieldArea => 'Neighbourhood or city (optional)';
 
   @override
-  String get fieldAreaHint => 'e.g. Vake, Tbilisi';
+  String get fieldAreaHint =>
+      'Where you live or rehearse, as you\'d tell a friend';
 
   @override
   String instrumentMain(String instrument) {
@@ -1835,7 +1836,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rehearsalPlace => 'Place (optional)';
 
   @override
-  String get rehearsalPlaceHint => 'e.g. Studio 4, Rustaveli 12';
+  String get rehearsalPlaceHint => 'A studio, an address, or someone\'s place';
 
   @override
   String get rehearsalNotes => 'Notes (optional)';

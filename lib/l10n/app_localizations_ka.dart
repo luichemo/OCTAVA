@@ -158,10 +158,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String get confirmBirthDateYes => 'დიახ, სწორია';
 
   @override
-  String get fieldArea => 'უბანი (არასავალდებულო)';
+  String get fieldArea => 'უბანი ან ქალაქი (არასავალდებულო)';
 
   @override
-  String get fieldAreaHint => 'მაგ. ვაკე, თბილისი';
+  String get fieldAreaHint => 'სად ცხოვრობ ან სად აკეთებ რეპეტიციას';
 
   @override
   String instrumentMain(String instrument) {
@@ -1820,7 +1820,7 @@ class AppLocalizationsKa extends AppLocalizations {
   String get rehearsalPlace => 'ადგილი (არასავალდებულო)';
 
   @override
-  String get rehearsalPlaceHint => 'მაგ. სტუდია 4, რუსთაველის 12';
+  String get rehearsalPlaceHint => 'სტუდია, მისამართი ან ვინმეს სახლი';
 
   @override
   String get rehearsalNotes => 'შენიშვნები (არასავალდებულო)';
