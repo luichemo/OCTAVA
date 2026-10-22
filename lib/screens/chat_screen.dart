@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/l10n.dart';
 
+import '../data/avatar_repository.dart';
 import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../data/voice_recorder.dart';
@@ -12,6 +13,7 @@ import '../data/safety_repository.dart';
 import '../widgets/safety_sheet.dart';
 import '../models/chat.dart';
 import '../theme.dart';
+import 'match_card_screen.dart';
 
 /// One-on-one chat with a match. New messages arrive live.
 class ChatScreen extends StatefulWidget {
@@ -26,10 +28,14 @@ class ChatScreen extends StatefulWidget {
     this.live,
     this.player,
     this.recorder,
+    this.avatars,
   });
 
   /// Plays voice messages.
   final ClipPlayer? player;
+
+  /// Shows their picture on their card (tap the name at the top).
+  final AvatarRepository? avatars;
 
   /// Makes the voice recorder (tests pass a fake).
   final VoiceRecorder Function()? recorder;
@@ -110,6 +116,20 @@ class _ChatScreenState extends State<ChatScreen> {
     if (mounted) Navigator.of(context).pop();
   }
 
+  void _openCard() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MatchCardScreen(
+          repository: widget.repository,
+          personId: widget.otherUserId,
+          name: widget.name,
+          player: widget.player,
+          avatars: widget.avatars,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -137,22 +157,33 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ],
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.name,
-              style: displayStyle(
-                size: 28,
-                color: colors.onSurface,
-                latin: !hasGeorgian(widget.name),
-              ),
+        // Tapping their name opens their card.
+        title: Tooltip(
+          message: context.t.seeTheirCard,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: _openCard,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.name,
+                  style: displayStyle(
+                    size: 28,
+                    color: colors.onSurface,
+                    latin: !hasGeorgian(widget.name),
+                  ),
+                ),
+                Text(
+                  widget.instrument,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              widget.instrument,
-              style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
-            ),
-          ],
+          ),
         ),
       ),
       body: SafeArea(

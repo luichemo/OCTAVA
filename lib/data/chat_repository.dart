@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/chat.dart';
+import '../models/musician.dart';
 import 'clip_repository.dart';
 import 'profile_options.dart';
 import 'repositories.dart';
@@ -16,6 +17,11 @@ abstract interface class ChatRepository {
 
   /// Your matches, newest activity first.
   Future<List<MatchSummary>> loadMatches();
+
+  /// A match's swipe card, or null if it's no longer available (unmatched,
+  /// blocked or suspended). The `match_card` database function checks that
+  /// you share a match.
+  Future<Musician?> matchCard(String personId);
 
   /// All messages in a match, oldest first, updated live as new ones arrive.
   Stream<List<ChatMessage>> messages(String matchId);
@@ -54,6 +60,18 @@ class SupabaseChatRepository implements ChatRepository {
 
   @override
   String get myId => _client.auth.currentUser!.id;
+
+  @override
+  Future<Musician?> matchCard(String personId) async {
+    try {
+      final row = await _client.rpc('match_card', params: {'person': personId});
+      return row == null
+          ? null
+          : Musician.fromDeckRow(row as Map<String, dynamic>);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errMatchCard);
+    }
+  }
 
   @override
   Future<List<MatchSummary>> loadMatches() async {

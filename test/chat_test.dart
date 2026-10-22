@@ -9,8 +9,11 @@ import 'swipe_helpers.dart';
 
 import 'package:octava/data/chat_repository.dart';
 import 'package:octava/data/repositories.dart';
+import 'package:octava/data/sample_musicians.dart';
+import 'package:octava/widgets/musician_card.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/chat.dart';
+import 'package:octava/models/musician.dart';
 import 'package:octava/screens/chat_screen.dart';
 import 'package:octava/screens/matches_screen.dart';
 import 'package:octava/screens/swipe_screen.dart';
@@ -36,6 +39,12 @@ class FakeChatRepository implements ChatRepository {
 
   @override
   String get myId => 'me';
+
+  /// Cards for matched people, by id; anyone else gets null.
+  final cards = <String, Musician>{};
+
+  @override
+  Future<Musician?> matchCard(String personId) async => cards[personId];
 
   @override
   Future<List<MatchSummary>> loadMatches() async => [
@@ -214,6 +223,50 @@ void main() {
     await tester.pumpWidget(OctavaApp(home: home));
     await tester.pumpAndSettle();
   }
+
+  group("a match's card", () {
+    testWidgets('opens from their name at the top of the chat', (tester) async {
+      final chat = FakeChatRepository(matches: [nika])
+        ..cards['nika'] = sampleMusicians.first;
+      await pump(tester, MatchesScreen(repository: chat));
+      await tester.tap(find.text('New match. Say hi!'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('See their card'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MusicianCard), findsOneWidget);
+      expect(find.text('Open chat'), findsNothing); // Back goes to the chat
+    });
+
+    testWidgets('opens from their picture in Matches, with Open chat', (
+      tester,
+    ) async {
+      final chat = FakeChatRepository(matches: [nika])
+        ..cards['nika'] = sampleMusicians.first;
+      await pump(tester, MatchesScreen(repository: chat));
+
+      await tester.tap(find.byTooltip('See their card'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MusicianCard), findsOneWidget);
+
+      await tester.tap(find.text('Open chat'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MusicianCard), findsNothing);
+      expect(
+        find.textContaining('You and Nika both want to jam'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('says so when the card is gone', (tester) async {
+      // Unmatched or blocked since the list loaded: no card comes back.
+      final chat = FakeChatRepository(matches: [nika]);
+      await pump(tester, MatchesScreen(repository: chat));
+      await tester.tap(find.byTooltip('See their card'));
+      await tester.pumpAndSettle();
+      expect(find.text("This card isn't available any more."), findsOneWidget);
+    });
+  });
 
   testWidgets('lists matches and opens a chat', (tester) async {
     final chat = FakeChatRepository(matches: [nika]);

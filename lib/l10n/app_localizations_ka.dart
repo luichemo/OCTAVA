@@ -1152,6 +1152,19 @@ class AppLocalizationsKa extends AppLocalizations {
   String get chatMore => 'მეტი';
 
   @override
+  String get seeTheirCard => 'ბარათის ნახვა';
+
+  @override
+  String get openChat => 'ჩატის გახსნა';
+
+  @override
+  String get matchCardGone => 'ეს ბარათი აღარ არის ხელმისაწვდომი.';
+
+  @override
+  String get errMatchCard =>
+      'ბარათი ვერ ჩაიტვირთა. შეამოწმე კავშირი და სცადე თავიდან.';
+
+  @override
   String get unmatch => 'დაკავშირების გაუქმება';
 
   @override

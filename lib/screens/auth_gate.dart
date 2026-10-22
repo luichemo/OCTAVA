@@ -381,6 +381,7 @@ class _ProfileGateState extends State<ProfileGate> {
           name: name,
           instrument: instrument,
           player: _player,
+          avatars: widget.avatars,
         ),
       ),
     );

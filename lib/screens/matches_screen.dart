@@ -18,6 +18,7 @@ import '../theme.dart';
 import '../widgets/person_avatar.dart';
 import 'band_chat_screen.dart';
 import 'chat_screen.dart';
+import 'match_card_screen.dart';
 
 /// Your bands and band invites (with [bands]), then everyone you've matched
 /// with, newest activity first, updated live. Tap a match to chat.
@@ -82,12 +83,31 @@ class _MatchesScreenState extends State<MatchesScreen> {
           name: match.name,
           instrument: match.instrument,
           player: widget.player,
+          avatars: widget.avatars,
         ),
       ),
     );
     // Blocking in the chat removes it from the list.
     if (mounted) _live.refresh();
   }
+
+  /// Their card, with Open chat underneath.
+  Future<void> _openCard(MatchSummary match) =>
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (cardContext) => MatchCardScreen(
+            repository: widget.repository,
+            personId: match.otherUserId,
+            name: match.name,
+            player: widget.player,
+            avatars: widget.avatars,
+            onChat: () {
+              Navigator.of(cardContext).pop();
+              _open(match);
+            },
+          ),
+        ),
+      );
 
   Future<void> _openBand(String bandId) => Navigator.of(context).push(
     MaterialPageRoute<void>(
@@ -239,6 +259,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 match: m,
                 avatars: widget.avatars,
                 onTap: () => _open(m),
+                onCard: () => _openCard(m),
               ),
             ],
         ],
@@ -293,6 +314,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     match: matches[i],
                     avatars: widget.avatars,
                     onTap: () => _open(matches[i]),
+                    onCard: () => _openCard(matches[i]),
                   ),
                 ),
               );
@@ -305,11 +327,19 @@ class _MatchesScreenState extends State<MatchesScreen> {
 }
 
 class _MatchTile extends StatelessWidget {
-  const _MatchTile({required this.match, required this.onTap, this.avatars});
+  const _MatchTile({
+    required this.match,
+    required this.onTap,
+    required this.onCard,
+    this.avatars,
+  });
 
   final MatchSummary match;
   final AvatarRepository? avatars;
   final VoidCallback onTap;
+
+  /// Tapping their picture opens their card.
+  final VoidCallback onCard;
 
   @override
   Widget build(BuildContext context) {
@@ -323,10 +353,17 @@ class _MatchTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      leading: PersonAvatar(
-        name: match.name,
-        avatarPath: match.avatarPath,
-        avatars: avatars,
+      leading: Tooltip(
+        message: context.t.seeTheirCard,
+        child: InkResponse(
+          onTap: onCard,
+          radius: 28,
+          child: PersonAvatar(
+            name: match.name,
+            avatarPath: match.avatarPath,
+            avatars: avatars,
+          ),
+        ),
       ),
       title: Row(
         children: [

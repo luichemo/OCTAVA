@@ -632,6 +632,10 @@
   "seen": "Seen",
   "today": "Today",
   "chatMore": "More",
+  "seeTheirCard": "See their card",
+  "openChat": "Open chat",
+  "matchCardGone": "This card isn't available any more.",
+  "errMatchCard": "Couldn't load the card. Check your connection and try again.",
   "unmatch": "Unmatch",
   "unmatchTitle": "Unmatch {name}?",
   "@unmatchTitle": {

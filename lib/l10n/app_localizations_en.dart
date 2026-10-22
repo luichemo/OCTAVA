@@ -1163,6 +1163,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatMore => 'More';
 
   @override
+  String get seeTheirCard => 'See their card';
+
+  @override
+  String get openChat => 'Open chat';
+
+  @override
+  String get matchCardGone => 'This card isn\'t available any more.';
+
+  @override
+  String get errMatchCard =>
+      'Couldn\'t load the card. Check your connection and try again.';
+
+  @override
   String get unmatch => 'Unmatch';
 
   @override

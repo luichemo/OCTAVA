@@ -2102,6 +2102,30 @@ abstract class AppLocalizations {
   /// **'More'**
   String get chatMore;
 
+  /// No description provided for @seeTheirCard.
+  ///
+  /// In en, this message translates to:
+  /// **'See their card'**
+  String get seeTheirCard;
+
+  /// No description provided for @openChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Open chat'**
+  String get openChat;
+
+  /// No description provided for @matchCardGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This card isn\'t available any more.'**
+  String get matchCardGone;
+
+  /// No description provided for @errMatchCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the card. Check your connection and try again.'**
+  String get errMatchCard;
+
   /// No description provided for @unmatch.
   ///
   /// In en, this message translates to:
