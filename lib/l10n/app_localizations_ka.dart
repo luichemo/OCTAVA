@@ -1204,6 +1204,24 @@ class AppLocalizationsKa extends AppLocalizations {
   String get themeDark => 'მუქი';
 
   @override
+  String get themeColours => 'ფერები';
+
+  @override
+  String get paletteOctava => 'OCTAVA';
+
+  @override
+  String get paletteSunset => 'მზის ჩასვლა';
+
+  @override
+  String get paletteGarage => 'გარაჟი';
+
+  @override
+  String get paletteSynthwave => 'სინთვეივი';
+
+  @override
+  String get paletteMono => 'მონო';
+
+  @override
   String get themeInfo =>
       '„მოწყობილობის“ ნიშნავს ტელეფონის ან ბრაუზერის პარამეტრს.';
 

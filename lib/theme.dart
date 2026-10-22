@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 
-/// OCTAVA's screen-print palette (design/stitch DESIGN.md: "Screenprint Gig
-/// Poster Neo-Brutalist"): flat spot inks on paper, outlined in navy ink.
+import 'data/palette.dart';
+
+/// The current colour theme's inks (see OctavaPalette in data/palette.dart).
+/// They're getters, not constants, so the whole app repaints when the theme
+/// changes; that's also why code using them can't be `const`.
 class OctavaColors {
-  static const ink = Color(0xFF22328C);
-  static const inkSoft = Color(0xFF56619E);
-  static const paper = Color(0xFFEEF0EC);
-  static const card = Color(0xFFFAFBF8);
-  static const line = Color(0xFFC5CBE0);
-  static const pink = Color(0xFFFF4FA3);
-  static const pinkTint = Color(0xFFFFC9E2);
-  static const yellow = Color(0xFFFFE14D);
-  static const aqua = Color(0xFF74D3EA);
-
-  // Dark mode ("backstage"): the paper becomes deep blue and the ink light.
-  static const darkPaper = Color(0xFF10173A);
-  static const darkCard = Color(0xFF18214D);
-  static const darkInk = Color(0xFFE8EBF8);
-  static const darkInkSoft = Color(0xFFA7B0DA);
-  static const darkLine = Color(0xFF33407A);
-  static const darkPinkTint = Color(0xFF5A2A57);
-
-  /// Hard shadows in dark mode: darker than the paper, so cards still lift.
-  static const darkShadow = Color(0xFF05081C);
+  static Color get ink => appPalette.value.ink;
+  static Color get inkSoft => appPalette.value.inkSoft;
+  static Color get paper => appPalette.value.paper;
+  static Color get card => appPalette.value.card;
+  static Color get line => appPalette.value.line;
+  static Color get pink => appPalette.value.pink;
+  static Color get pinkTint => appPalette.value.pinkTint;
+  static Color get yellow => appPalette.value.yellow;
+  static Color get aqua => appPalette.value.aqua;
+  static Color get darkPaper => appPalette.value.darkPaper;
+  static Color get darkCard => appPalette.value.darkCard;
+  static Color get darkInk => appPalette.value.darkInk;
+  static Color get darkInkSoft => appPalette.value.darkInkSoft;
+  static Color get darkLine => appPalette.value.darkLine;
+  static Color get darkPinkTint => appPalette.value.darkPinkTint;
+  static Color get darkShadow => appPalette.value.darkShadow;
 }
 
 /// Neither main font has Georgian letters; Noto Sans Georgian fills in.
@@ -216,7 +215,7 @@ ThemeData octavaTheme(Brightness brightness) {
             ? OctavaColors.pink
             : Colors.transparent,
       ),
-      checkColor: const WidgetStatePropertyAll(OctavaColors.ink),
+      checkColor: WidgetStatePropertyAll(OctavaColors.ink),
     ),
     radioTheme: RadioThemeData(fillColor: WidgetStatePropertyAll(ink)),
     sliderTheme: SliderThemeData(
@@ -224,7 +223,7 @@ ThemeData octavaTheme(Brightness brightness) {
       inactiveTrackColor: scheme.outlineVariant,
       thumbColor: ink,
     ),
-    badgeTheme: const BadgeThemeData(
+    badgeTheme: BadgeThemeData(
       backgroundColor: OctavaColors.pink,
       textColor: OctavaColors.ink,
     ),

@@ -1213,6 +1213,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeDark => 'Dark';
 
   @override
+  String get themeColours => 'Colours';
+
+  @override
+  String get paletteOctava => 'OCTAVA';
+
+  @override
+  String get paletteSunset => 'Sunset';
+
+  @override
+  String get paletteGarage => 'Garage';
+
+  @override
+  String get paletteSynthwave => 'Synthwave';
+
+  @override
+  String get paletteMono => 'Mono';
+
+  @override
   String get themeInfo => '\"Device\" follows your phone or browser setting.';
 
   @override

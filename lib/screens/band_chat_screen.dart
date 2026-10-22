@@ -428,9 +428,9 @@ class _ClosedNotice extends StatelessWidget {
     child: Row(
       spacing: 12,
       children: [
-        const Icon(Icons.lock_outline_rounded, color: OctavaColors.ink),
+        Icon(Icons.lock_outline_rounded, color: OctavaColors.ink),
         Expanded(
-          child: Text(text, style: const TextStyle(color: OctavaColors.ink)),
+          child: Text(text, style: TextStyle(color: OctavaColors.ink)),
         ),
         TextButton(
           onPressed: onAction,

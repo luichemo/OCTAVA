@@ -173,7 +173,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       for (final request in bands.requests)
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          leading: const CircleAvatar(
+          leading: CircleAvatar(
             radius: 24,
             backgroundColor: OctavaColors.yellow,
             foregroundColor: OctavaColors.ink,
@@ -472,7 +472,7 @@ class _InviteCard extends StatelessWidget {
             listJoin([
               for (final m in invite.members) '${m.name} (${m.instrument})',
             ]),
-            style: const TextStyle(color: OctavaColors.ink),
+            style: TextStyle(color: OctavaColors.ink),
           ),
           const SizedBox(height: 4),
           Wrap(
@@ -524,7 +524,7 @@ class _BandTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: const CircleAvatar(
+      leading: CircleAvatar(
         radius: 24,
         backgroundColor: OctavaColors.aqua,
         foregroundColor: OctavaColors.ink,

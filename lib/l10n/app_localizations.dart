@@ -2186,6 +2186,42 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get themeDark;
 
+  /// No description provided for @themeColours.
+  ///
+  /// In en, this message translates to:
+  /// **'Colours'**
+  String get themeColours;
+
+  /// No description provided for @paletteOctava.
+  ///
+  /// In en, this message translates to:
+  /// **'OCTAVA'**
+  String get paletteOctava;
+
+  /// No description provided for @paletteSunset.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset'**
+  String get paletteSunset;
+
+  /// No description provided for @paletteGarage.
+  ///
+  /// In en, this message translates to:
+  /// **'Garage'**
+  String get paletteGarage;
+
+  /// No description provided for @paletteSynthwave.
+  ///
+  /// In en, this message translates to:
+  /// **'Synthwave'**
+  String get paletteSynthwave;
+
+  /// No description provided for @paletteMono.
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get paletteMono;
+
   /// No description provided for @themeInfo.
   ///
   /// In en, this message translates to:

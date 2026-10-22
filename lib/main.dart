@@ -7,6 +7,7 @@ import 'config/supabase_config.dart';
 import 'data/clip_repository.dart';
 import 'data/crash_reports.dart';
 import 'data/public_band_repository.dart';
+import 'data/palette.dart';
 import 'data/theme_setting.dart';
 import 'l10n/l10n.dart';
 import 'screens/auth_gate.dart';
@@ -36,6 +37,7 @@ Future<void> main() async {
   );
   await appLanguage.load();
   await appTheme.load();
+  await appPalette.load();
   // A public band link (`?band=<id>`) opens that band's page, no sign-in.
   final bandId = kIsWeb ? bandIdFromLink(Uri.base) : null;
   // A password-reset email links to `?reset=<code>`.
@@ -104,7 +106,7 @@ class OctavaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Rebuilds the whole app when someone picks another language or theme.
     return ListenableBuilder(
-      listenable: Listenable.merge([appLanguage, appTheme]),
+      listenable: Listenable.merge([appLanguage, appTheme, appPalette]),
       builder: (context, _) {
         // Set before the themes are built, since they use heading styles.
         georgianType =

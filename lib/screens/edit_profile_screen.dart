@@ -12,6 +12,7 @@ import '../data/location_repository.dart';
 import '../data/moderation_repository.dart';
 import '../data/profile_options.dart';
 import '../data/repositories.dart';
+import '../data/palette.dart';
 import '../data/theme_setting.dart';
 import '../models/profile_draft.dart';
 import '../theme.dart';
@@ -357,11 +358,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         languageName(context, appLanguage.value),
         () => _openPage('language', const LanguageSection()),
       ),
-      _RowData('theme', Icons.contrast_rounded, switch (appTheme.value) {
-        ThemeMode.light => t.themeLight,
-        ThemeMode.dark => t.themeDark,
-        ThemeMode.system => t.languageDevice,
-      }, () => _openPage('theme', const ThemeSection())),
+      _RowData(
+        'theme',
+        Icons.palette_outlined,
+        // "Sunset · Dark"
+        '${paletteName(context, appPalette.value)} · ${switch (appTheme.value) {
+          ThemeMode.light => t.themeLight,
+          ThemeMode.dark => t.themeDark,
+          ThemeMode.system => t.languageDevice,
+        }}',
+        () => _openPage('theme', const ThemeSection()),
+      ),
     ];
 
     return Scaffold(

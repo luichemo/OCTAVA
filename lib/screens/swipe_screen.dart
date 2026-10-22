@@ -297,11 +297,8 @@ class _SwipeScreenState extends State<SwipeScreen>
     _reload();
   }
 
-  Color _toneFor(Musician m) => const [
-    OctavaColors.pink,
-    OctavaColors.yellow,
-    OctavaColors.aqua,
-  ][m.toneIndex];
+  Color _toneFor(Musician m) =>
+      [OctavaColors.pink, OctavaColors.yellow, OctavaColors.aqua][m.toneIndex];
 
   Future<void> _animateTo(Offset target, Duration duration, Curve curve) async {
     if (MediaQuery.of(context).disableAnimations) {
@@ -853,7 +850,7 @@ class _SwipeHint extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: pill(),
-              child: const Icon(
+              child: Icon(
                 Icons.touch_app_rounded,
                 size: 34,
                 color: OctavaColors.ink,
@@ -870,7 +867,7 @@ class _SwipeHint extends StatelessWidget {
             child: Text(
               t.swipeHint(t.stampJam, t.stampPass),
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: OctavaColors.ink,
                 fontWeight: FontWeight.w700,
               ),
@@ -1165,17 +1162,13 @@ class _FilterPill extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: 6,
               children: [
-                const Icon(
-                  Icons.tune_rounded,
-                  size: 18,
-                  color: OctavaColors.ink,
-                ),
+                Icon(Icons.tune_rounded, size: 18, color: OctavaColors.ink),
                 Flexible(
                   child: Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: OctavaColors.ink,

@@ -247,7 +247,7 @@ class _ClipsSectionState extends State<ClipsSection> {
                         isSelected: clip.featured,
                         onPressed: () => _toggleSong(clip),
                         icon: const Icon(Icons.star_outline_rounded),
-                        selectedIcon: const Icon(
+                        selectedIcon: Icon(
                           Icons.star_rounded,
                           color: OctavaColors.pink,
                         ),

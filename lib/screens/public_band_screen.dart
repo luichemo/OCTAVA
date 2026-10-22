@@ -157,12 +157,12 @@ class _PublicBandScreenState extends State<PublicBandScreen> {
           if ((band.description ?? '').isNotEmpty)
             Text(
               band.description!,
-              style: const TextStyle(color: OctavaColors.ink, height: 1.35),
+              style: TextStyle(color: OctavaColors.ink, height: 1.35),
             ),
           if (band.openRoles.isNotEmpty)
             Text(
               t.bandLookingFor(band.openRoles.map(instrumentLabel).join(', ')),
-              style: const TextStyle(
+              style: TextStyle(
                 color: OctavaColors.ink,
                 fontWeight: FontWeight.w700,
               ),
@@ -189,10 +189,7 @@ class _PublicBandScreenState extends State<PublicBandScreen> {
                 foregroundImage: m.avatarUrl == null
                     ? null
                     : NetworkImage(m.avatarUrl!),
-                child: const Icon(
-                  Icons.music_note_rounded,
-                  color: OctavaColors.ink,
-                ),
+                child: Icon(Icons.music_note_rounded, color: OctavaColors.ink),
               ),
               title: Text(
                 m.name ?? instrumentLabel(m.instrument),
@@ -272,7 +269,7 @@ class _ClipRow extends StatelessWidget {
           if (seconds != null)
             Text(
               clipLength(seconds!),
-              style: const TextStyle(
+              style: TextStyle(
                 color: OctavaColors.ink,
                 fontWeight: FontWeight.w600,
               ),

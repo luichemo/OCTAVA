@@ -585,10 +585,7 @@ class _ProposalCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       spacing: 6,
                       children: [
-                        const Icon(
-                          Icons.check_circle,
-                          color: OctavaColors.pink,
-                        ),
+                        Icon(Icons.check_circle, color: OctavaColors.pink),
                         Text(
                           t.bandYouApproved,
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -611,7 +608,7 @@ class _ProposalCard extends StatelessWidget {
                 child: Row(
                   spacing: 6,
                   children: [
-                    const Icon(Icons.check_circle, color: OctavaColors.pink),
+                    Icon(Icons.check_circle, color: OctavaColors.pink),
                     Text(
                       t.bandYouApproved,
                       style: const TextStyle(fontWeight: FontWeight.w600),

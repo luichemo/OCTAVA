@@ -482,9 +482,8 @@ class _ModProfileScreenState extends State<ModProfileScreen> {
                           if (p.joinedAt != null)
                             _Tag(
                               text: t.modJoined(
-                                DateFormat.yMMMd(
-                                  L10n.current.localeName,
-                                ).format(p.joinedAt!),
+                                DateFormat.yMMMd(L10n.current.localeName)
+                                    .format(p.joinedAt!),
                               ),
                               color: OctavaColors.yellow,
                             ),
@@ -498,7 +497,7 @@ class _ModProfileScreenState extends State<ModProfileScreen> {
                       Expanded(
                         child: MusicianCard(
                           musician: p.card,
-                          tone: const [
+                          tone: [
                             OctavaColors.pink,
                             OctavaColors.yellow,
                             OctavaColors.aqua,
@@ -535,7 +534,7 @@ class _Tag extends StatelessWidget {
     ),
     child: Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
         color: OctavaColors.ink,

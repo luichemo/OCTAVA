@@ -543,7 +543,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 ? null
                                 : () => setState(() => _makeMain(id)),
                             icon: const Icon(Icons.star_outline_rounded),
-                            selectedIcon: const Icon(
+                            selectedIcon: Icon(
                               Icons.star_rounded,
                               color: OctavaColors.pink,
                             ),
@@ -982,10 +982,7 @@ class NoClipsWarning extends StatelessWidget {
           Row(
             spacing: 8,
             children: [
-              const Icon(
-                Icons.visibility_off_outlined,
-                color: OctavaColors.ink,
-              ),
+              Icon(Icons.visibility_off_outlined, color: OctavaColors.ink),
               Expanded(
                 child: Text(
                   context.t.noClipsTitle,
@@ -996,7 +993,7 @@ class NoClipsWarning extends StatelessWidget {
           ),
           Text(
             context.t.noClipsBody,
-            style: const TextStyle(color: OctavaColors.ink, height: 1.5),
+            style: TextStyle(color: OctavaColors.ink, height: 1.5),
           ),
           FilledButton.icon(
             onPressed: onRecord,

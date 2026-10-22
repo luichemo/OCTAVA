@@ -48,9 +48,7 @@ class BandCard extends StatelessWidget {
               flex: 4,
               child: Stack(
                 children: [
-                  const Positioned.fill(
-                    child: ColoredBox(color: OctavaColors.aqua),
-                  ),
+                  Positioned.fill(child: ColoredBox(color: OctavaColors.aqua)),
                   Positioned(
                     top: 14,
                     left: 14,
@@ -71,7 +69,7 @@ class BandCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         spacing: 6,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.groups_rounded,
                             size: 18,
                             color: OctavaColors.ink,
@@ -111,7 +109,7 @@ class BandCard extends StatelessWidget {
                             t.bandCardNeedsYou,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 12,
                               color: OctavaColors.ink,
@@ -265,7 +263,7 @@ class _ClipRow extends StatelessWidget {
         backgroundColor: OctavaColors.pink,
         foregroundColor: OctavaColors.ink,
         disabledBackgroundColor: colors.outlineVariant,
-        side: const BorderSide(color: OctavaColors.ink, width: 2),
+        side: BorderSide(color: OctavaColors.ink, width: 2),
       ),
       icon: Icon(playing ? Icons.stop_rounded : Icons.play_arrow_rounded),
     );

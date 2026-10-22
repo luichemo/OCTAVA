@@ -44,7 +44,7 @@ void main() {
   ) async {
     await pump(
       tester,
-      const Scaffold(
+      Scaffold(
         body: SizedBox(
           height: 640,
           child: MusicianCard(

@@ -135,7 +135,7 @@ class MusicianCard extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 spacing: 4,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.star_rounded,
                                     size: 16,
                                     color: OctavaColors.ink,
@@ -147,7 +147,7 @@ class MusicianCard extends StatelessWidget {
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
                                         color: OctavaColors.ink,
@@ -320,7 +320,7 @@ class MusicianCard extends StatelessWidget {
                                       ),
                                       decoration: printBox(
                                         context,
-                                        color: const [
+                                        color: [
                                           OctavaColors.yellow,
                                           OctavaColors.aqua,
                                           OctavaColors.pinkTint,
@@ -331,7 +331,7 @@ class MusicianCard extends StatelessWidget {
                                       ),
                                       child: Text(
                                         genreLabel(g),
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700,
                                           color: OctavaColors.ink,
@@ -722,7 +722,7 @@ class _ClipState extends State<_Clip> {
               backgroundColor: OctavaColors.pink,
               foregroundColor: OctavaColors.ink,
               disabledBackgroundColor: colors.outlineVariant,
-              side: const BorderSide(color: OctavaColors.ink, width: 2),
+              side: BorderSide(color: OctavaColors.ink, width: 2),
             ),
             onPressed: canSeek ? _toggle : null,
             tooltip: !canSeek

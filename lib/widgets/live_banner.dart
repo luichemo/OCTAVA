@@ -96,7 +96,7 @@ class _LiveBannerListenerState extends State<LiveBannerListener> {
         key: r,
         title: L10n.current.rehearsalReminder(r.bandName, time),
         body: L10n.current.rehearsalReminderBody,
-        leading: const CircleAvatar(
+        leading: CircleAvatar(
           backgroundColor: OctavaColors.yellow,
           foregroundColor: OctavaColors.ink,
           child: Icon(Icons.event_rounded, size: 20),
@@ -174,7 +174,7 @@ class _BannerData {
           key: banner,
           title: L10n.current.matchTitle(match.name),
           body: L10n.current.bannerNewMatch,
-          leading: const CircleAvatar(
+          leading: CircleAvatar(
             backgroundColor: OctavaColors.pink,
             foregroundColor: OctavaColors.ink,
             child: Icon(Icons.favorite_rounded, size: 20),
@@ -221,7 +221,7 @@ class _BannerCard extends StatelessWidget {
                 elevation: 6,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: OctavaColors.pink, width: 2),
+                  side: BorderSide(color: OctavaColors.pink, width: 2),
                 ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),

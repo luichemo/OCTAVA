@@ -79,7 +79,7 @@ class _CardPreviewScreenState extends State<CardPreviewScreen> {
                       Expanded(
                         child: MusicianCard(
                           musician: me,
-                          tone: const [
+                          tone: [
                             OctavaColors.pink,
                             OctavaColors.yellow,
                             OctavaColors.aqua,
