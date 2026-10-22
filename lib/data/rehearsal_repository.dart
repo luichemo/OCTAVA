@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../l10n/l10n.dart';
@@ -133,17 +134,33 @@ class SupabaseRehearsalRepository implements RehearsalRepository {
     }
   }
 
-  Map<String, dynamic> _row(RehearsalDraft d) => {
-    'starts_at': d.startsAt.toUtc().toIso8601String(),
-    'duration_minutes': d.durationMinutes,
-    'place': d.place.trim().isEmpty ? null : d.place.trim(),
-    'notes': d.notes.trim().isEmpty ? null : d.notes.trim(),
-    'weekly': d.weekly,
-    'repeat_until': d.weekly && d.repeatUntil != null
-        ? dayKey(d.repeatUntil!)
-        : null,
-    'setlist_id': d.setlistId,
-  };
+  /// This device's time zone ("Europe/Berlin"), saved with each rehearsal
+  /// so the reminder notifications work out its days, weekly repeats and
+  /// clock time the way the band sees them. Null if it can't be read; the
+  /// server then falls back to Tbilisi time.
+  static Future<String?> _timeZone() async {
+    try {
+      return (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> _row(RehearsalDraft d) async {
+    final zone = await _timeZone();
+    return {
+      'starts_at': d.startsAt.toUtc().toIso8601String(),
+      'duration_minutes': d.durationMinutes,
+      'place': d.place.trim().isEmpty ? null : d.place.trim(),
+      'notes': d.notes.trim().isEmpty ? null : d.notes.trim(),
+      'weekly': d.weekly,
+      'repeat_until': d.weekly && d.repeatUntil != null
+          ? dayKey(d.repeatUntil!)
+          : null,
+      'setlist_id': d.setlistId,
+      'time_zone': ?zone,
+    };
+  }
 
   Future<void> _write(Future<void> Function() action) async {
     try {
@@ -160,16 +177,19 @@ class SupabaseRehearsalRepository implements RehearsalRepository {
 
   @override
   Future<void> add(String bandId, RehearsalDraft draft) => _write(
-    () => _client.from('rehearsals').insert({
+    () async => _client.from('rehearsals').insert({
       'band_id': bandId,
       'created_by': myId,
-      ..._row(draft),
+      ...await _row(draft),
     }),
   );
 
   @override
   Future<void> update(String rehearsalId, RehearsalDraft draft) => _write(
-    () => _client.from('rehearsals').update(_row(draft)).eq('id', rehearsalId),
+    () async => _client
+        .from('rehearsals')
+        .update(await _row(draft))
+        .eq('id', rehearsalId),
   );
 
   @override

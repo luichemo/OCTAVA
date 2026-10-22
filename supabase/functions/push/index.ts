@@ -196,24 +196,88 @@ async function plan(admin: SupabaseClient, e: Record<string, string>): Promise<N
   return [];
 }
 
-/** Rehearsals starting in 50–60 minutes, once per date. Georgia has no
- *  daylight saving, so a weekly date is exactly 7 days later. */
+// ------------------------------------------------------------ time zones
+// Each rehearsal keeps the time zone it was set in (rehearsals.time_zone,
+// from the device; migration 20261022125407). Older rows have none: they
+// were all made in Georgia.
+
+const FALLBACK_ZONE = "Asia/Tbilisi";
+const WEEK = 7 * 86_400_000;
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** A usable IANA zone name, or the fallback. */
+function zoneOf(name: string | null): string {
+  if (!name) return FALLBACK_ZONE;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: name });
+    return name;
+  } catch {
+    return FALLBACK_ZONE;
+  }
+}
+
+/** What a clock in [zone] shows at instant [t]. */
+function wallClock(t: number, zone: string) {
+  const f = new Intl.DateTimeFormat("en-US", {
+    timeZone: zone, hourCycle: "h23",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  });
+  const o: Record<string, string> = {};
+  for (const p of f.formatToParts(new Date(t))) o[p.type] = p.value;
+  return { y: +o.year, m: +o.month, d: +o.day, h: +o.hour % 24, mi: +o.minute, s: +o.second };
+}
+
+/** The instant when a clock in [zone] shows that date and time (day may
+ *  run past the month's end; Date.UTC rolls it over). */
+function atWallClock(y: number, m: number, d: number, h: number, mi: number, zone: string): number {
+  const wanted = Date.UTC(y, m - 1, d, h, mi);
+  const offsetAt = (t: number) => {
+    const w = wallClock(t, zone);
+    return Date.UTC(w.y, w.m - 1, w.d, w.h, w.mi, w.s) - Math.floor(t / 1000) * 1000;
+  };
+  // Twice, so a guess on the other side of a clock change settles.
+  const first = wanted - offsetAt(wanted);
+  return wanted - offsetAt(first);
+}
+
+const dayIn = (t: number, zone: string) => {
+  const w = wallClock(t, zone);
+  return `${w.y}-${pad(w.m)}-${pad(w.d)}`;
+};
+const timeIn = (t: number, zone: string) => {
+  const w = wallClock(t, zone);
+  return `${pad(w.h)}:${pad(w.mi)}`;
+};
+
+/** Rehearsals starting in 50–60 minutes, once per date. Weekly ones repeat
+ *  at the same local time in the band's zone, so they stay on time across
+ *  daylight-saving changes (as the app shows them). */
 async function reminders(admin: SupabaseClient): Promise<Note[]> {
   const now = Date.now();
   const from = now + 50 * 60_000;
   const until = now + 60 * 60_000;
   const { data: rows } = await admin.from("rehearsals")
-    .select("id, band_id, starts_at, place, weekly, repeat_until");
+    .select("id, band_id, starts_at, place, weekly, repeat_until, time_zone");
   const notes: Note[] = [];
   for (const r of rows ?? []) {
-    let start = Date.parse(r.starts_at);
-    if (r.weekly && start < from) {
-      const weeks = Math.ceil((from - start) / (7 * 86_400_000));
-      start += weeks * 7 * 86_400_000;
+    const zone = zoneOf(r.time_zone);
+    const first = Date.parse(r.starts_at);
+    let start = first;
+    if (r.weekly && first < from) {
+      // The same weekday and local time, k weeks on; a clock change can
+      // move it an hour either way, so try the neighbouring weeks too.
+      const w = wallClock(first, zone);
+      const k = Math.ceil((from - first) / WEEK);
+      start = NaN;
+      for (const weeks of [k - 1, k, k + 1]) {
+        if (weeks < 0) continue;
+        const t = atWallClock(w.y, w.m, w.d + 7 * weeks, w.h, w.mi, zone);
+        if (t >= from && t < until) start = t;
+      }
     }
-    if (start < from || start >= until) continue;
-    const local = new Date(start + 4 * 3_600_000); // Asia/Tbilisi, UTC+4
-    const day = local.toISOString().slice(0, 10);
+    if (!(start >= from && start < until)) continue;
+    const day = dayIn(start, zone); // the day the app saved answers under
     if (r.weekly && r.repeat_until && day > r.repeat_until) continue;
     const { data: cancelled } = await admin.from("rehearsal_cancellations")
       .select("rehearsal_id").eq("rehearsal_id", r.id).eq("occurs_on", day).maybeSingle();
@@ -227,7 +291,7 @@ async function reminders(admin: SupabaseClient): Promise<Note[]> {
     const out = new Set((cant ?? []).map((a) => a.member_id as string));
     const to = (await members(admin, r.band_id)).filter((m) => !out.has(m));
     const band = await bandName(admin, r.band_id);
-    const time = local.toISOString().slice(11, 16);
+    const time = timeIn(start, zone);
     const where = r.place ? ` · ${r.place}` : "";
     notes.push({
       to,
