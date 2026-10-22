@@ -2157,11 +2157,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t load this band. Check your connection.';
 
   @override
-  String kmDistance(String distance) {
-    return '$distance km';
-  }
-
-  @override
   String get profileGroup => 'Profile';
 
   @override

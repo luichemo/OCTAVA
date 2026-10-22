@@ -81,9 +81,9 @@ void main() {
     });
 
     expect(m.instrument, 'Vocals');
-    expect(m.whereText, 'Mtatsminda, 3 km away');
-    // The pill beside the instrument heading: the distance first.
-    expect(m.whereShort, '3 km · Mtatsminda');
+    // A known distance wins over the area: never both.
+    expect(m.whereText, '3 km away');
+    expect(m.whereShort, '3 km away');
     expect(m.clipSeconds, isNull);
     expect(m.lookingFor, isNull);
   });

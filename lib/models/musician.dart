@@ -99,29 +99,18 @@ class Musician {
   /// Stable identity for widget keys.
   String get key => id ?? name;
 
-  /// "Vera, 3 km away", "3 km away", "Vera", or "".
+  /// Where they are (owner, 2026-10-22): "3 km away" when the distance is
+  /// known (both of you shared a location), otherwise the area they wrote
+  /// ("Vake"), otherwise "". Never both.
   String get whereText {
-    final distance = km == null
-        ? null
-        : L10n.current.kmAway('${km! % 1 == 0 ? km!.toInt() : km}');
-    return [
-      area,
-      distance,
-    ].whereType<String>().where((s) => s.isNotEmpty).join(', ');
+    if (km != null) {
+      return L10n.current.kmAway('${km! % 1 == 0 ? km!.toInt() : km}');
+    }
+    return area?.trim() ?? '';
   }
 
-  /// The same, shorter, for the pill beside the instrument heading:
-  /// "1.2 km · Vake" (the distance first, so it survives when the place is
-  /// cut short next to a long instrument name).
-  String get whereShort {
-    final distance = km == null
-        ? null
-        : L10n.current.kmDistance('${km! % 1 == 0 ? km!.toInt() : km}');
-    return [
-      distance,
-      area,
-    ].whereType<String>().where((s) => s.isNotEmpty).join(' · ');
-  }
+  /// The pill beside the instrument heading shows the same.
+  String get whereShort => whereText;
 
   // A stable seed from the id or name, so each card's artwork looks the same
   // on every run and platform (String.hashCode isn't guaranteed to be stable).

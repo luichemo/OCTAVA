@@ -2140,11 +2140,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get errPublicBandLoad => 'ბენდი ვერ ჩაიტვირთა. შეამოწმე კავშირი.';
 
   @override
-  String kmDistance(String distance) {
-    return '$distance კმ';
-  }
-
-  @override
   String get profileGroup => 'პროფილი';
 
   @override

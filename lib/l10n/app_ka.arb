@@ -610,7 +610,6 @@
   "publicBandJoin": "შემოუერთდი OCTAVA-ს",
   "publicBandJoinHint": "OCTAVA-ზე მუსიკოსები ერთმანეთს პოულობენ და ბენდებს ქმნიან.",
   "errPublicBandLoad": "ბენდი ვერ ჩაიტვირთა. შეამოწმე კავშირი.",
-  "kmDistance": "{distance} კმ",
   "profileGroup": "პროფილი",
   "settingsGroup": "პარამეტრები",
   "summaryEmpty": "ჯერ არ არის",

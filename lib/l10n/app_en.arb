@@ -1286,14 +1286,6 @@
   "publicBandJoin": "Join OCTAVA",
   "publicBandJoinHint": "Musicians find each other and form bands on OCTAVA.",
   "errPublicBandLoad": "Couldn't load this band. Check your connection.",
-  "kmDistance": "{distance} km",
-  "@kmDistance": {
-    "placeholders": {
-      "distance": {
-        "type": "String"
-      }
-    }
-  },
   "profileGroup": "Profile",
   "settingsGroup": "Settings",
   "summaryEmpty": "Not set yet",

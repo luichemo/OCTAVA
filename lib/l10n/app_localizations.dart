@@ -3758,12 +3758,6 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load this band. Check your connection.'**
   String get errPublicBandLoad;
 
-  /// No description provided for @kmDistance.
-  ///
-  /// In en, this message translates to:
-  /// **'{distance} km'**
-  String kmDistance(String distance);
-
   /// No description provided for @profileGroup.
   ///
   /// In en, this message translates to:
