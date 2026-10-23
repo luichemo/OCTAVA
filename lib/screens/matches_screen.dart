@@ -96,8 +96,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (cardContext) => MatchCardScreen(
-            repository: widget.repository,
-            personId: match.otherUserId,
+            load: () => widget.repository.matchCard(match.otherUserId),
             name: match.name,
             player: widget.player,
             avatars: widget.avatars,

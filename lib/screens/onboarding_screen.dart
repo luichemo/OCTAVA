@@ -201,7 +201,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       initialDate: _birthDate ?? DateTime(now.year - 20, now.month, now.day),
       firstDate: DateTime(1900),
       lastDate: latest,
-      initialEntryMode: DatePickerEntryMode.input,
+      // Calendar only (owner, 2026-10-23): people typed dates by hand and got
+      // the format wrong. It opens on the years, so a birth year is one tap.
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      initialDatePickerMode: DatePickerMode.year,
       helpText: context.t.birthDatePickerTitle,
     );
     if (picked != null) {

@@ -8,6 +8,7 @@ import 'audio_length.dart';
 import '../l10n/l10n.dart';
 import '../models/band_group.dart';
 import '../models/chat.dart';
+import '../models/musician.dart';
 import 'chat_repository.dart' show editMessageRpc, uploadVoice;
 import 'clip_repository.dart';
 import 'repositories.dart';
@@ -73,6 +74,12 @@ abstract interface class BandsRepository {
 
   /// A temporary link for playing a band clip.
   Future<String> clipUrl(String path);
+
+  /// The swipe card of a bandmate, or of someone voted on in one of your
+  /// bands; null when it's not available (left, blocked or suspended). The
+  /// `band_person_card` database function checks that, and leaves out clips,
+  /// links and distance across age groups.
+  Future<Musician?> personCard(String personId);
 
   /// A band's messages, oldest first, updated live.
   Stream<List<ChatMessage>> messages(String bandId);
@@ -506,6 +513,21 @@ class SupabaseBandsRepository implements BandsRepository {
       return row['clip_path'] as String?;
     } catch (_) {
       return null;
+    }
+  }
+
+  @override
+  Future<Musician?> personCard(String personId) async {
+    try {
+      final row = await _client.rpc(
+        'band_person_card',
+        params: {'person': personId},
+      );
+      return row == null
+          ? null
+          : Musician.fromDeckRow(row as Map<String, dynamic>);
+    } catch (_) {
+      throw UserFacingException(L10n.current.errMatchCard);
     }
   }
 

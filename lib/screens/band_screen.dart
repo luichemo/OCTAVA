@@ -21,6 +21,7 @@ import '../widgets/rehearsals_section.dart';
 import '../widgets/setlists_section.dart';
 import '../widgets/songs_section.dart';
 import 'band_profile_screen.dart';
+import 'match_card_screen.dart';
 
 /// One of your bands: its public profile (Edit band, the band clip), its
 /// members, the people proposed to join (with your vote), Add member and
@@ -87,6 +88,14 @@ class _BandScreenState extends State<BandScreen> {
       }
     }
   }
+
+  void _openCard(BandPerson person) => showBandPersonCard(
+    context,
+    repository: widget.bands.repository,
+    person: person,
+    player: widget.player,
+    avatars: widget.avatars,
+  );
 
   Future<void> _addMember(MyBand band) async {
     final t = context.t;
@@ -372,6 +381,7 @@ class _BandScreenState extends State<BandScreen> {
                             _PersonTile(
                               person: m,
                               avatars: widget.avatars,
+                              onTap: m.id == _me ? null : () => _openCard(m),
                               trailing: m.id == _me
                                   ? Text(
                                       t.bandYou,
@@ -416,6 +426,7 @@ class _BandScreenState extends State<BandScreen> {
                                 needed: r.neededIn(band.members.length),
                                 me: _me,
                                 avatars: widget.avatars,
+                                onSeeCard: () => _openCard(r.target),
                                 onVote: (yes) => _run(
                                   () => widget.bands.repository.voteRemoval(
                                     r.id,
@@ -446,6 +457,7 @@ class _BandScreenState extends State<BandScreen> {
                                 memberCount: band.members.length,
                                 me: _me,
                                 avatars: widget.avatars,
+                                onSeeCard: () => _openCard(p.candidate),
                                 onVote: (approve) => _vote(p, approve: approve),
                               ),
                           ],
@@ -460,6 +472,7 @@ class _BandScreenState extends State<BandScreen> {
                                 memberCount: band.members.length,
                                 me: _me,
                                 avatars: widget.avatars,
+                                onSeeCard: () => _openCard(p.candidate),
                                 onVote: (approve) => _vote(p, approve: approve),
                                 // Yours, or left behind by someone who left.
                                 onCancel:
@@ -497,15 +510,49 @@ class _Heading extends StatelessWidget {
   );
 }
 
+/// Opens [person]'s swipe card (owner, 2026-10-23): a bandmate's, from the
+/// band chat or the member list, or a candidate's, before voting on them.
+Future<void> showBandPersonCard(
+  BuildContext context, {
+  required BandsRepository repository,
+  required BandPerson person,
+  ClipPlayer? player,
+  AvatarRepository? avatars,
+}) => Navigator.of(context).push<void>(
+  MaterialPageRoute<void>(
+    builder: (_) => MatchCardScreen(
+      load: () => repository.personCard(person.id),
+      name: person.name,
+      player: player,
+      avatars: avatars,
+    ),
+  ),
+);
+
 class _PersonTile extends StatelessWidget {
-  const _PersonTile({required this.person, this.avatars, this.trailing});
+  const _PersonTile({
+    required this.person,
+    this.avatars,
+    this.trailing,
+    this.onTap,
+  });
 
   final BandPerson person;
   final AvatarRepository? avatars;
   final Widget? trailing;
 
+  /// Opens their card.
+  final VoidCallback? onTap;
+
+  // Inside printBox cards the tap ripple needs its own transparent Material.
   @override
-  Widget build(BuildContext context) => ListTile(
+  Widget build(BuildContext context) => Material(
+    type: MaterialType.transparency,
+    child: _tile(),
+  );
+
+  Widget _tile() => ListTile(
+    onTap: onTap,
     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
     leading: PersonAvatar(
       name: person.name,
@@ -533,10 +580,14 @@ class _ProposalCard extends StatelessWidget {
     required this.onVote,
     this.onCancel,
     this.avatars,
+    this.onSeeCard,
   });
 
   /// Shown as Cancel request when you may withdraw it.
   final VoidCallback? onCancel;
+
+  /// Opens the candidate's card, to see who they are before voting.
+  final VoidCallback? onSeeCard;
 
   final BandProposal proposal;
   final int memberCount;
@@ -559,7 +610,11 @@ class _ProposalCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _PersonTile(person: p.candidate, avatars: avatars),
+          _PersonTile(
+            person: p.candidate,
+            avatars: avatars,
+            onTap: onSeeCard,
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Text(
@@ -573,6 +628,15 @@ class _ProposalCard extends StatelessWidget {
               style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
             ),
           ),
+          if (onSeeCard != null)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: onSeeCard,
+                icon: const Icon(Icons.style_outlined),
+                label: Text(t.seeTheirCard),
+              ),
+            ),
           if (onCancel != null && (p.invited || p.approvedBy.contains(me)))
             Padding(
               padding: const EdgeInsets.only(left: 4, top: 6),
@@ -838,8 +902,10 @@ class _RemovalCard extends StatelessWidget {
     required this.onVote,
     this.onCancel,
     this.avatars,
+    this.onSeeCard,
   });
 
+  final VoidCallback? onSeeCard;
   final BandRemoval removal;
   final int needed;
   final String me;
@@ -860,7 +926,7 @@ class _RemovalCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _PersonTile(person: r.target, avatars: avatars),
+          _PersonTile(person: r.target, avatars: avatars, onTap: onSeeCard),
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Text(

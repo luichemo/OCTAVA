@@ -1,29 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../data/avatar_repository.dart';
-import '../data/chat_repository.dart';
 import '../data/clip_repository.dart';
 import '../l10n/l10n.dart';
 import '../models/musician.dart';
 import '../theme.dart';
 import '../widgets/musician_card.dart';
 
-/// A match's swipe card (owner, 2026-10-22), from the chat header or a
-/// match's picture in Matches. [onChat] adds an Open chat button (from
-/// Matches); from the chat itself, Back goes back to it.
+/// Someone's swipe card: a match's (owner, 2026-10-22), from the chat header
+/// or a match's picture in Matches, or a bandmate's or candidate's
+/// (2026-10-23), from the band chat or a vote. [load] fetches it (null = not
+/// available). [onChat] adds an Open chat button (from Matches); from a chat
+/// itself, Back goes back to it.
 class MatchCardScreen extends StatefulWidget {
   const MatchCardScreen({
     super.key,
-    required this.repository,
-    required this.personId,
+    required this.load,
     required this.name,
     this.player,
     this.avatars,
     this.onChat,
   });
 
-  final ChatRepository repository;
-  final String personId;
+  final Future<Musician?> Function() load;
   final String name;
   final ClipPlayer? player;
   final AvatarRepository? avatars;
@@ -34,7 +33,7 @@ class MatchCardScreen extends StatefulWidget {
 }
 
 class _MatchCardScreenState extends State<MatchCardScreen> {
-  late Future<Musician?> _card = widget.repository.matchCard(widget.personId);
+  late Future<Musician?> _card = widget.load();
 
   @override
   void dispose() {
@@ -45,7 +44,7 @@ class _MatchCardScreenState extends State<MatchCardScreen> {
 
   void _retry() {
     setState(() {
-      _card = widget.repository.matchCard(widget.personId);
+      _card = widget.load();
     });
   }
 
@@ -79,7 +78,7 @@ class _MatchCardScreenState extends State<MatchCardScreen> {
               );
             }
             final card = snap.data;
-            // Unmatched, blocked or suspended since the list was loaded.
+            // Unmatched, left the band, blocked or suspended since the list loaded.
             if (card == null) return _Message(text: t.matchCardGone);
             return Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),

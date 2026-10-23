@@ -268,9 +268,9 @@ class _BandChatScreenState extends State<BandChatScreen> {
                       label: senderName,
                       child: InkWell(
                         customBorder: const CircleBorder(),
-                        onTap: sender == null || band == null
+                        onTap: sender == null
                             ? null
-                            : () => _showPerson(sender, band),
+                            : () => _showPerson(sender),
                         child: ExcludeSemantics(
                           child: PersonAvatar(
                             name: senderName,
@@ -302,48 +302,14 @@ class _BandChatScreenState extends State<BandChatScreen> {
     );
   }
 
-  /// A pop-up about a bandmate: their picture, name and role in the band.
-  Future<void> _showPerson(BandPerson person, MyBand band) =>
-      showModalBottomSheet<void>(
-        context: context,
-        showDragHandle: true,
-        builder: (context) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                PersonAvatar(
-                  name: person.name,
-                  avatarPath: person.avatarPath,
-                  avatars: widget.avatars,
-                  radius: 44,
-                  zoom: 1.4,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  person.name,
-                  textAlign: TextAlign.center,
-                  style: displayStyle(
-                    size: 34,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    latin: !hasGeorgian(person.name),
-                  ),
-                ),
-                Text(
-                  context.t.bandMemberRole(person.instrument, band.name),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+  /// Opens a bandmate's swipe card (owner, 2026-10-23).
+  Future<void> _showPerson(BandPerson person) => showBandPersonCard(
+    context,
+    repository: widget.bands.repository,
+    person: person,
+    player: widget.player,
+    avatars: widget.avatars,
+  );
 
   Widget _composer() => ChatComposer(
     onSendText: (text) =>

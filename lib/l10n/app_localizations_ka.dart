@@ -1495,11 +1495,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get errBandSendClosed => 'ბენდის ჩატი ახლა დახურულია.';
 
   @override
-  String bandMemberRole(String instrument, String band) {
-    return '$instrument · $band';
-  }
-
-  @override
   String get reportMessage => 'საჩივარი ამ შეტყობინებაზე';
 
   @override

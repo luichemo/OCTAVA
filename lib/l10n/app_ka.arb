@@ -425,7 +425,6 @@
   "bandMembersButton": "წევრები",
   "bandMessagePreview": "{name}: {message}",
   "errBandSendClosed": "ბენდის ჩატი ახლა დახურულია.",
-  "bandMemberRole": "{instrument} · {band}",
   "reportMessage": "საჩივარი ამ შეტყობინებაზე",
   "errBandProfile": "ზოგიერთი ჟანრი ან როლი სიაში არაა.",
   "bandEditTitle": "ბენდის რედაქტირება",

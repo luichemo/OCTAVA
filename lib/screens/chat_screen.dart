@@ -120,8 +120,7 @@ class _ChatScreenState extends State<ChatScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => MatchCardScreen(
-          repository: widget.repository,
-          personId: widget.otherUserId,
+          load: () => widget.repository.matchCard(widget.otherUserId),
           name: widget.name,
           player: widget.player,
           avatars: widget.avatars,

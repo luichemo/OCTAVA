@@ -2648,12 +2648,6 @@ abstract class AppLocalizations {
   /// **'The band chat is closed right now.'**
   String get errBandSendClosed;
 
-  /// In the pop-up about a bandmate: their role, e.g. 'Drums in Riot'.
-  ///
-  /// In en, this message translates to:
-  /// **'{instrument} in {band}'**
-  String bandMemberRole(String instrument, String band);
-
   /// No description provided for @reportMessage.
   ///
   /// In en, this message translates to:

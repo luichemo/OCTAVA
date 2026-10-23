@@ -1504,11 +1504,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errBandSendClosed => 'The band chat is closed right now.';
 
   @override
-  String bandMemberRole(String instrument, String band) {
-    return '$instrument in $band';
-  }
-
-  @override
   String get reportMessage => 'Report this message';
 
   @override

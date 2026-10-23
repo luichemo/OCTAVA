@@ -12,10 +12,13 @@ import 'package:octava/l10n/l10n.dart';
 import 'package:octava/main.dart';
 import 'package:octava/models/band_group.dart';
 import 'package:octava/models/chat.dart';
+import 'package:octava/models/musician.dart';
 import 'package:octava/screens/band_chat_screen.dart';
 import 'package:octava/screens/band_screen.dart';
 import 'package:octava/screens/matches_screen.dart';
+import 'package:octava/widgets/musician_card.dart';
 import 'package:octava/widgets/live_banner.dart';
+import 'package:octava/data/sample_musicians.dart';
 
 import 'chat_test.dart' show FakeChatRepository;
 import 'profile_edit_test.dart' show FakeClipPlayer;
@@ -317,6 +320,12 @@ class FakeBandsRepository implements BandsRepository {
 
   @override
   Future<String> clipUrl(String path) async => 'https://example.invalid/$path';
+
+  /// Cards by person id; anyone missing isn't available.
+  final cards = <String, Musician>{};
+
+  @override
+  Future<Musician?> personCard(String personId) async => cards[personId];
 
   @override
   Future<void> setPublic(String bandId, {required bool public}) async {
@@ -1112,6 +1121,18 @@ void main() {
       );
       expect(find.text('Asked to join'), findsOneWidget);
       expect(find.textContaining('1 of 2 approved'), findsOneWidget);
+
+      // Their card first, to see who's asking.
+      repo.cards['dato'] = sampleMusicians.first;
+      final seeCard = find.text('See their card');
+      await tester.ensureVisible(seeCard);
+      await tester.pumpAndSettle();
+      await tester.tap(seeCard);
+      await tester.pumpAndSettle();
+      expect(find.byType(MusicianCard), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
       final approve = find.text('Approve');
       await tester.ensureVisible(approve);
       await tester.pumpAndSettle();
@@ -1173,16 +1194,19 @@ void main() {
       repo.receive('b1', 'nika', 'I\'m in');
       repo.receive('b1', 'nika', 'bringing my snare');
       await tester.pumpAndSettle();
-      // No names: one avatar for Nika's run; tapping it shows who she is.
+      // No names: one avatar for Nika's run; tapping it opens her card.
       expect(find.text('Nika'), findsNothing);
+      repo.cards['nika'] = sampleMusicians.first;
       final avatar = find.byWidgetPredicate(
         (w) => w is Semantics && w.properties.label == 'Nika',
       );
       expect(avatar, findsOneWidget);
       await tester.tap(avatar);
       await tester.pumpAndSettle();
-      expect(find.text('Nika'), findsOneWidget);
-      expect(find.text('Drums in Riot'), findsOneWidget);
+      expect(find.text('Nika'), findsOneWidget); // the card's title
+      expect(find.byType(MusicianCard), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
       expect(find.text('bringing my snare'), findsOneWidget);
     });
 

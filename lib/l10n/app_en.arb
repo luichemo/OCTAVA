@@ -865,18 +865,6 @@
     }
   },
   "errBandSendClosed": "The band chat is closed right now.",
-  "bandMemberRole": "{instrument} in {band}",
-  "@bandMemberRole": {
-    "description": "In the pop-up about a bandmate: their role, e.g. 'Drums in Riot'.",
-    "placeholders": {
-      "instrument": {
-        "type": "String"
-      },
-      "band": {
-        "type": "String"
-      }
-    }
-  },
   "reportMessage": "Report this message",
   "errBandProfile": "Some of those genres or roles aren't on the list.",
   "bandEditTitle": "Edit band",
