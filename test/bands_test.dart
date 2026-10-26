@@ -16,6 +16,7 @@ import 'package:octava/models/musician.dart';
 import 'package:octava/screens/band_chat_screen.dart';
 import 'package:octava/screens/band_screen.dart';
 import 'package:octava/screens/matches_screen.dart';
+import 'package:octava/screens/swipe_screen.dart';
 import 'package:octava/widgets/musician_card.dart';
 import 'package:octava/widgets/live_banner.dart';
 import 'package:octava/data/sample_musicians.dart';
@@ -589,11 +590,12 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// The Matches screen as the app shows it: bands above matches.
+  /// One of the inbox pages as the app shows it (Bands by default).
   Future<(FakeBandsRepository, LiveBands)> pumpMatches(
     WidgetTester tester, {
     List<MyBand>? bands,
     List<BandInvite>? invites,
+    InboxPage page = InboxPage.bands,
   }) async {
     final repo = FakeBandsRepository(bands: bands, invites: invites);
     final live = LiveBands(repo)..start();
@@ -603,7 +605,7 @@ void main() {
     addTearDown(matches.dispose);
     await pump(
       tester,
-      MatchesScreen(repository: chat, live: matches, bands: live),
+      MatchesScreen(repository: chat, live: matches, bands: live, page: page),
     );
     return (repo, live);
   }
@@ -693,6 +695,7 @@ void main() {
   testWidgets('accepting an invite puts the band in your list', (tester) async {
     final (repo, _) = await pumpMatches(
       tester,
+      page: InboxPage.requests,
       invites: [
         const BandInvite(
           proposalId: 'p1',
@@ -710,7 +713,8 @@ void main() {
     expect(repo.invites, isEmpty);
     expect(find.text('Riot wants you to join'), findsNothing);
     expect(find.text('You joined Riot!'), findsOneWidget);
-    expect(find.text('3 members'), findsOneWidget);
+    expect(repo.bands.single.name, 'Riot');
+    expect(find.textContaining('Nothing waiting for you'), findsOneWidget);
   });
 
   testWidgets('your pending request shows, and can be withdrawn', (
@@ -728,8 +732,14 @@ void main() {
     addTearDown(matches.dispose);
     await pump(
       tester,
-      MatchesScreen(repository: chat, live: matches, bands: live),
+      MatchesScreen(
+        repository: chat,
+        live: matches,
+        bands: live,
+        page: InboxPage.requests,
+      ),
     );
+    expect(find.text('You asked to join'), findsOneWidget);
     expect(find.text('Riot'), findsOneWidget);
     expect(find.textContaining('waiting for the band'), findsOneWidget);
 
@@ -762,6 +772,78 @@ void main() {
       ],
     );
     expect(find.text('1 vote waiting for you'), findsOneWidget);
+  });
+
+  testWidgets('Requests lists the votes waiting for you; one opens the band', (
+    tester,
+  ) async {
+    await pumpMatches(
+      tester,
+      page: InboxPage.requests,
+      bands: [
+        const MyBand(
+          id: 'b1',
+          name: 'Riot',
+          members: [me, nika],
+          proposals: [
+            BandProposal(
+              id: 'p1',
+              candidate: tamar,
+              proposedBy: nika,
+              invited: false,
+              approvedBy: {'nika'},
+            ),
+            BandProposal(
+              id: 'p2',
+              candidate: dato,
+              invited: false,
+              requested: true,
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(find.text('Your vote'), findsOneWidget);
+    expect(find.text('Proposed for Riot by Nika'), findsOneWidget);
+    expect(find.text('Asked to join Riot'), findsOneWidget);
+
+    await tester.tap(find.text('Tamar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BandScreen), findsOneWidget);
+    expect(find.text('Approve'), findsWidgets);
+  });
+
+  testWidgets('the bottom bar opens Messages, Requests and Bands', (
+    tester,
+  ) async {
+    final repo = FakeBandsRepository(
+      bands: [const MyBand(id: 'b1', name: 'Riot', members: [me, nika])],
+      invites: [
+        const BandInvite(
+          proposalId: 'p9',
+          bandId: 'b9',
+          bandName: 'Loud',
+          members: [nika],
+        ),
+      ],
+    );
+    final live = LiveBands(repo)..start();
+    addTearDown(live.dispose);
+    await live.refresh();
+    final opened = <InboxPage>[];
+    await pump(tester, SwipeScreen(bands: live, onOpenInbox: opened.add));
+    // The invite is a badge on Requests.
+    expect(
+      find.descendant(
+        of: find.byTooltip('Requests'),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byTooltip('Messages'));
+    await tester.tap(find.byTooltip('Requests'));
+    await tester.tap(find.byTooltip('Bands'));
+    expect(opened, InboxPage.values);
   });
 
   group('band page', () {
@@ -1428,6 +1510,40 @@ void main() {
     setUp(() => appLanguage.value = const Locale('ka'));
     tearDown(() => appLanguage.value = null);
 
+    testWidgets('the Requests page fits', (tester) async {
+      await pumpMatches(
+        tester,
+        page: InboxPage.requests,
+        bands: [
+          const MyBand(
+            id: 'b1',
+            name: 'Riot',
+            members: [me, nika],
+            proposals: [
+              BandProposal(
+                id: 'p1',
+                candidate: tamar,
+                proposedBy: nika,
+                invited: false,
+                approvedBy: {'nika'},
+              ),
+            ],
+          ),
+        ],
+        invites: [
+          const BandInvite(
+            proposalId: 'p2',
+            bandId: 'b2',
+            bandName: 'Night Shift',
+            members: [dato],
+          ),
+        ],
+      );
+      expect(find.text('მოთხოვნები'), findsOneWidget);
+      expect(find.text('მიღება'), findsOneWidget);
+      expect(find.text('შენი ხმა'), findsOneWidget);
+    });
+
     testWidgets('the band page and an invite fit', (tester) async {
       await pumpMatches(
         tester,
@@ -1457,7 +1573,6 @@ void main() {
         ],
       );
       expect(find.text('ბენდები'), findsOneWidget);
-      expect(find.text('მიღება'), findsOneWidget);
 
       await tester.tap(find.text('Riot'));
       await tester.pumpAndSettle();

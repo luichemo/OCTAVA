@@ -17,15 +17,32 @@ import '../models/musician.dart' show listJoin;
 import '../theme.dart';
 import '../widgets/person_avatar.dart';
 import 'band_chat_screen.dart';
+import 'band_screen.dart';
 import 'chat_screen.dart';
 import 'match_card_screen.dart';
 
-/// Your bands and band invites (with [bands]), then everyone you've matched
-/// with, newest activity first, updated live. Tap a match to chat.
+/// The pages behind the bottom bar's buttons (owner, 2026-10-26: separate
+/// pages instead of one long list).
+enum InboxPage {
+  /// One-on-one chats with your matches.
+  messages,
+
+  /// Everything waiting for your answer: band invites, votes in your bands,
+  /// and your own requests to join.
+  requests,
+
+  /// Your bands, and Create a band.
+  bands,
+}
+
+/// One of the [InboxPage]s, updated live: your matches (newest activity
+/// first; tap one to chat), your requests, or your bands ([bands] is needed
+/// for the last two).
 class MatchesScreen extends StatefulWidget {
   const MatchesScreen({
     super.key,
     required this.repository,
+    this.page = InboxPage.messages,
     this.live,
     this.safety,
     this.avatars,
@@ -42,7 +59,9 @@ class MatchesScreen extends StatefulWidget {
   /// Plays band clips on band pages.
   final ClipPlayer? player;
 
-  /// Your bands and invites, shown above the matches. Without it, matches only.
+  final InboxPage page;
+
+  /// Your bands, invites and requests, for the Requests and Bands pages.
   final LiveBands? bands;
 
   /// Shows people's AI avatars. Without it, their initial.
@@ -170,111 +189,201 @@ class _MatchesScreenState extends State<MatchesScreen> {
     }
   }
 
-  /// The Bands section: Create a band, invites and your bands.
-  List<Widget> _bandItems(LiveBands bands) {
-    final t = context.t;
-    final me = bands.repository.myId;
-    final error = bands.error;
-    return [
-      _SectionHeading(
-        t.bandsTitle,
-        action: TextButton.icon(
-          onPressed: _createBand,
-          icon: const Icon(Icons.add),
-          label: Text(t.bandCreate),
-        ),
+  /// Opens a band's page, where its votes are.
+  Future<void> _openBandPage(String bandId) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => BandScreen(
+        bands: widget.bands!,
+        bandId: bandId,
+        matches: _live,
+        avatars: widget.avatars,
+        player: widget.player,
+        rehearsals: widget.rehearsals,
+        songs: widget.songs,
       ),
-      for (final invite in bands.invites)
-        _InviteCard(
-          invite: invite,
-          onAnswer: (accept) => _answer(invite, accept: accept),
-        ),
-      for (final request in bands.requests)
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          leading: CircleAvatar(
-            radius: 24,
-            backgroundColor: OctavaColors.yellow,
-            foregroundColor: OctavaColors.ink,
-            child: Icon(Icons.hourglass_top_rounded),
-          ),
-          title: Text(
-            request.bandName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-          subtitle: Text(t.bandRequestWaiting),
-          trailing: TextButton(
-            onPressed: () => _withdraw(request),
-            child: Text(t.bandWithdraw),
-          ),
-        ),
-      for (final band in bands.bands ?? const <MyBand>[])
-        _BandTile(
-          band: band,
-          votesWaiting: band.votesWaitingFor(me),
-          onTap: () => _openBand(band.id),
-        ),
-      if (bands.bands == null && error is UserFacingException)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(error.message),
-        ),
-      _SectionHeading(t.navMatches),
-    ];
+    ),
+  );
+
+  /// Loading and error states while [bands] has nothing yet, else null.
+  Widget? _bandsNotReady(LiveBands bands) {
+    if (bands.bands != null) return null;
+    final error = bands.error;
+    if (error != null) {
+      return _Message(
+        text: error is UserFacingException
+            ? error.message
+            : context.t.errBandAction,
+        action: context.t.tryAgain,
+        onAction: bands.refresh,
+      );
+    }
+    return const Center(child: CircularProgressIndicator());
   }
 
-  /// Bands first, then matches, in one scrolling list.
-  Widget _withBands(LiveBands bands) {
-    final colors = Theme.of(context).colorScheme;
-    final matches = _live.matches;
-    final error = _live.error;
+  /// Requests: invites to you, votes waiting in your bands, then the bands
+  /// you asked to join.
+  Widget _requestsPage(LiveBands bands) {
+    final t = context.t;
+    final notReady = _bandsNotReady(bands);
+    if (notReady != null) return notReady;
+    final me = bands.repository.myId;
+    final votes = [
+      for (final band in bands.bands!) ...[
+        for (final p in band.proposals)
+          if (!p.invited && !p.approvedBy.contains(me))
+            _VoteTile(
+              person: p.candidate,
+              line: p.requested || p.proposedBy == null
+                  ? t.requestVoteAsked(band.name)
+                  : t.requestVoteProposed(band.name, p.proposedBy!.name),
+              avatars: widget.avatars,
+              onTap: () => _openBandPage(band.id),
+            ),
+        for (final r in band.removals)
+          if (!r.votedBy.contains(me))
+            _VoteTile(
+              person: r.target,
+              line: t.requestVoteRemoval(band.name),
+              avatars: widget.avatars,
+              onTap: () => _openBandPage(band.id),
+            ),
+      ],
+    ];
+    if (bands.invites.isEmpty && votes.isEmpty && bands.requests.isEmpty) {
+      return _Message(text: t.requestsEmpty);
+    }
     return RefreshIndicator(
-      onRefresh: () => Future.wait([_live.refresh(), bands.refresh()]),
+      onRefresh: bands.refresh,
       child: ListView(
         padding: const EdgeInsets.only(bottom: 16),
         children: [
-          ..._bandItems(bands),
-          if (matches == null && error != null)
-            _Message(
-              text: error is UserFacingException
-                  ? error.message
-                  : context.t.errLoadMatches,
-              action: context.t.tryAgain,
-              onAction: _live.refresh,
-            )
-          else if (matches == null)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (matches.isEmpty)
-            _Message(text: context.t.matchesEmpty)
-          else
-            for (final (i, m) in matches.indexed) ...[
-              if (i > 0) Divider(height: 1, color: colors.outlineVariant),
-              _MatchTile(
-                match: m,
-                avatars: widget.avatars,
-                onTap: () => _open(m),
-                onCard: () => _openCard(m),
+          if (bands.invites.isNotEmpty) ...[
+            _SectionHeading(t.requestsInvites),
+            for (final invite in bands.invites)
+              _InviteCard(
+                invite: invite,
+                onAnswer: (accept) => _answer(invite, accept: accept),
               ),
-            ],
+          ],
+          if (votes.isNotEmpty) ...[
+            _SectionHeading(t.requestsVotes),
+            ...votes,
+          ],
+          if (bands.requests.isNotEmpty) ...[
+            _SectionHeading(t.requestsMine),
+            for (final request in bands.requests)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                leading: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: OctavaColors.yellow,
+                  foregroundColor: OctavaColors.ink,
+                  child: Icon(Icons.hourglass_top_rounded),
+                ),
+                title: Text(
+                  request.bandName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(t.bandRequestWaiting),
+                trailing: TextButton(
+                  onPressed: () => _withdraw(request),
+                  child: Text(t.bandWithdraw),
+                ),
+              ),
+          ],
         ],
+      ),
+    );
+  }
+
+  /// Bands: Create a band, then one row per band.
+  Widget _bandsPage(LiveBands bands) {
+    final t = context.t;
+    final notReady = _bandsNotReady(bands);
+    if (notReady != null) return notReady;
+    final me = bands.repository.myId;
+    final mine = bands.bands!;
+    return RefreshIndicator(
+      onRefresh: bands.refresh,
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 16),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: OutlinedButton.icon(
+              onPressed: _createBand,
+              icon: const Icon(Icons.add),
+              label: Text(t.bandCreate),
+            ),
+          ),
+          if (mine.isEmpty)
+            _Message(text: t.bandsEmpty)
+          else
+            for (final band in mine)
+              _BandTile(
+                band: band,
+                votesWaiting: band.votesWaitingFor(me),
+                onTap: () => _openBand(band.id),
+              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _messagesPage() {
+    final colors = Theme.of(context).colorScheme;
+    final matches = _live.matches;
+    final error = _live.error;
+    if (error != null && matches == null) {
+      return _Message(
+        text: error is UserFacingException
+            ? error.message
+            : context.t.errLoadMatches,
+        action: context.t.tryAgain,
+        onAction: _live.refresh,
+      );
+    }
+    if (matches == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (matches.isEmpty) {
+      return _Message(text: context.t.matchesEmpty);
+    }
+    return RefreshIndicator(
+      onRefresh: _live.refresh,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: matches.length,
+        separatorBuilder: (_, _) =>
+            Divider(height: 1, color: colors.outlineVariant),
+        itemBuilder: (context, i) => _MatchTile(
+          match: matches[i],
+          avatars: widget.avatars,
+          onTap: () => _open(matches[i]),
+          onCard: () => _openCard(matches[i]),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final colors = Theme.of(context).colorScheme;
     final bands = widget.bands;
+    // Requests and Bands need bands; without them, Messages.
+    final page = bands == null ? InboxPage.messages : widget.page;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.surface,
         title: Text(
-          context.t.navMatches,
+          switch (page) {
+            InboxPage.messages => t.navMessages,
+            InboxPage.requests => t.navRequests,
+            InboxPage.bands => t.bandsTitle,
+          },
           style: displayStyle(size: 32, color: colors.onSurface),
         ),
       ),
@@ -283,46 +392,51 @@ class _MatchesScreenState extends State<MatchesScreen> {
           constraints: const BoxConstraints(maxWidth: 480),
           child: ListenableBuilder(
             listenable: Listenable.merge([_live, ?bands]),
-            builder: (context, _) {
-              if (bands != null) return _withBands(bands);
-              final matches = _live.matches;
-              final error = _live.error;
-              if (error != null && matches == null) {
-                return _Message(
-                  text: error is UserFacingException
-                      ? error.message
-                      : context.t.errLoadMatches,
-                  action: context.t.tryAgain,
-                  onAction: _live.refresh,
-                );
-              }
-              if (matches == null) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (matches.isEmpty) {
-                return _Message(text: context.t.matchesEmpty);
-              }
-              return RefreshIndicator(
-                onRefresh: _live.refresh,
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: matches.length,
-                  separatorBuilder: (_, _) =>
-                      Divider(height: 1, color: colors.outlineVariant),
-                  itemBuilder: (context, i) => _MatchTile(
-                    match: matches[i],
-                    avatars: widget.avatars,
-                    onTap: () => _open(matches[i]),
-                    onCard: () => _openCard(matches[i]),
-                  ),
-                ),
-              );
+            builder: (context, _) => switch (page) {
+              InboxPage.messages => _messagesPage(),
+              InboxPage.requests => _requestsPage(bands!),
+              InboxPage.bands => _bandsPage(bands!),
             },
           ),
         ),
       ),
     );
   }
+}
+
+/// A vote waiting for you in one of your bands; opens the band's page,
+/// where you vote (and can see their card).
+class _VoteTile extends StatelessWidget {
+  const _VoteTile({
+    required this.person,
+    required this.line,
+    required this.onTap,
+    this.avatars,
+  });
+
+  final BandPerson person;
+  final String line;
+  final VoidCallback onTap;
+  final AvatarRepository? avatars;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    onTap: onTap,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+    leading: PersonAvatar(
+      name: person.name,
+      avatarPath: person.avatarPath,
+      avatars: avatars,
+    ),
+    title: Text(
+      person.name,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontWeight: FontWeight.w700),
+    ),
+    subtitle: Text(line, maxLines: 2, overflow: TextOverflow.ellipsis),
+    trailing: const Icon(Icons.chevron_right_rounded),
+  );
 }
 
 class _MatchTile extends StatelessWidget {
@@ -450,10 +564,9 @@ class _Message extends StatelessWidget {
 }
 
 class _SectionHeading extends StatelessWidget {
-  const _SectionHeading(this.text, {this.action});
+  const _SectionHeading(this.text);
 
   final String text;
-  final Widget? action;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -471,7 +584,6 @@ class _SectionHeading extends StatelessWidget {
             ),
           ),
         ),
-        ?action,
       ],
     ),
   );

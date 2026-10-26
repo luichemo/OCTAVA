@@ -28,9 +28,6 @@ class AppLocalizationsKa extends AppLocalizations {
   String get navProfile => 'პროფილი';
 
   @override
-  String get navMatches => 'მეჩები';
-
-  @override
   String get errOffline =>
       'OCTAVA-სთან დაკავშირება ვერ მოხერხდა. შეამოწმე ინტერნეტი და სცადე თავიდან.';
 
@@ -2486,4 +2483,52 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get heardOther => 'სხვაგან';
+
+  @override
+  String get navMessages => 'შეტყობინებები';
+
+  @override
+  String get navRequests => 'მოთხოვნები';
+
+  @override
+  String get requestsInvites => 'მოწვევები';
+
+  @override
+  String get requestsVotes => 'შენი ხმა';
+
+  @override
+  String get requestsMine => 'შენი მოთხოვნები';
+
+  @override
+  String get requestsEmpty =>
+      'არაფერი გელოდება. აქ გამოჩნდება ბენდებში მოწვევები, ხმის მიცემა შენს ბენდებში და შენი მოთხოვნები გაწევრიანებაზე.';
+
+  @override
+  String get bandsEmpty =>
+      'ჯერ ბენდში არ ხარ. შექმენი ახალი, ან ფიდში ბენდის ბარათზე დააჭირე Jam-ს.';
+
+  @override
+  String requestVoteAsked(String band) {
+    return 'ითხოვს $band-ში გაწევრიანებას';
+  }
+
+  @override
+  String requestVoteProposed(String band, String name) {
+    return '$band-ისთვის შესთავაზა $name-მ';
+  }
+
+  @override
+  String requestVoteRemoval(String band) {
+    return 'ხმის მიცემა $band-დან მის გარიცხვაზე';
+  }
+
+  @override
+  String get lineupEdit => 'შეცვლა';
+
+  @override
+  String get lineupEditLabel => 'აირჩიე, ვინ სჭირდება შენს ბენდს';
+
+  @override
+  String get lineupHint =>
+      'დააჭირე აქ და აირჩიე, რომელი მუსიკოსები სჭირდება შენს ბენდს';
 }

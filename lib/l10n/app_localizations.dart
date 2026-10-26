@@ -134,12 +134,6 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
-  /// No description provided for @navMatches.
-  ///
-  /// In en, this message translates to:
-  /// **'Matches'**
-  String get navMatches;
-
   /// No description provided for @errOffline.
   ///
   /// In en, this message translates to:
@@ -4309,6 +4303,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Somewhere else'**
   String get heardOther;
+
+  /// Bottom bar button and page title: one-on-one chats with matches.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get navMessages;
+
+  /// Bottom bar button and page title: band invites, votes and your requests to join.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get navRequests;
+
+  /// Requests page heading: bands inviting you.
+  ///
+  /// In en, this message translates to:
+  /// **'Invites'**
+  String get requestsInvites;
+
+  /// Requests page heading: people waiting for your vote in your bands.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vote'**
+  String get requestsVotes;
+
+  /// Requests page heading: bands you asked to join.
+  ///
+  /// In en, this message translates to:
+  /// **'You asked to join'**
+  String get requestsMine;
+
+  /// Requests page when empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting for you. Band invites, votes in your bands and your requests to join show up here.'**
+  String get requestsEmpty;
+
+  /// Bands page when you have none.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not in a band yet. Create one, or Jam on a band card in the feed.'**
+  String get bandsEmpty;
+
+  /// Requests page: someone asked to join one of your bands.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked to join {band}'**
+  String requestVoteAsked(String band);
+
+  /// Requests page: a bandmate proposed someone.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed for {band} by {name}'**
+  String requestVoteProposed(String band, String name);
+
+  /// Requests page: an open vote on removing a member.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote on removing them from {band}'**
+  String requestVoteRemoval(String band);
+
+  /// The pill at the end of the feed's band row; opens the role chooser.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get lineupEdit;
+
+  /// What screen readers say for the band row's Edit pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the roles your band needs'**
+  String get lineupEditLabel;
+
+  /// First-time hint under the feed's band row.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap here to choose which musicians your band needs'**
+  String get lineupHint;
 }
 
 class _AppLocalizationsDelegate

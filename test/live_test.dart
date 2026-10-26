@@ -68,7 +68,7 @@ void main() {
         child: SwipeScreen(
           source: deck ?? const SampleDeck(),
           live: live,
-          onOpenMatches: () {},
+          onOpenInbox: (_) {},
         ),
       ),
     );

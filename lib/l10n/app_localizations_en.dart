@@ -28,9 +28,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get navMatches => 'Matches';
-
-  @override
   String get errOffline =>
       'Couldn\'t reach OCTAVA. Check your connection and try again.';
 
@@ -2506,4 +2503,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get heardOther => 'Somewhere else';
+
+  @override
+  String get navMessages => 'Messages';
+
+  @override
+  String get navRequests => 'Requests';
+
+  @override
+  String get requestsInvites => 'Invites';
+
+  @override
+  String get requestsVotes => 'Your vote';
+
+  @override
+  String get requestsMine => 'You asked to join';
+
+  @override
+  String get requestsEmpty =>
+      'Nothing waiting for you. Band invites, votes in your bands and your requests to join show up here.';
+
+  @override
+  String get bandsEmpty =>
+      'You\'re not in a band yet. Create one, or Jam on a band card in the feed.';
+
+  @override
+  String requestVoteAsked(String band) {
+    return 'Asked to join $band';
+  }
+
+  @override
+  String requestVoteProposed(String band, String name) {
+    return 'Proposed for $band by $name';
+  }
+
+  @override
+  String requestVoteRemoval(String band) {
+    return 'Vote on removing them from $band';
+  }
+
+  @override
+  String get lineupEdit => 'Edit';
+
+  @override
+  String get lineupEditLabel => 'Choose the roles your band needs';
+
+  @override
+  String get lineupHint => 'Tap here to choose which musicians your band needs';
 }

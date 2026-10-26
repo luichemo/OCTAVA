@@ -6,7 +6,6 @@
   "add": "Add",
   "signOut": "Sign out",
   "navProfile": "Profile",
-  "navMatches": "Matches",
   "errOffline": "Couldn't reach OCTAVA. Check your connection and try again.",
   "authTagline": "Find people to make music with.",
   "authEmail": "Email",
@@ -1484,5 +1483,75 @@
   "heardPoster": "Poster or flyer",
   "heardJamNight": "Jam night",
   "heardSearch": "Search or app store",
-  "heardOther": "Somewhere else"
+  "heardOther": "Somewhere else",
+  "navMessages": "Messages",
+  "@navMessages": {
+    "description": "Bottom bar button and page title: one-on-one chats with matches."
+  },
+  "navRequests": "Requests",
+  "@navRequests": {
+    "description": "Bottom bar button and page title: band invites, votes and your requests to join."
+  },
+  "requestsInvites": "Invites",
+  "@requestsInvites": {
+    "description": "Requests page heading: bands inviting you."
+  },
+  "requestsVotes": "Your vote",
+  "@requestsVotes": {
+    "description": "Requests page heading: people waiting for your vote in your bands."
+  },
+  "requestsMine": "You asked to join",
+  "@requestsMine": {
+    "description": "Requests page heading: bands you asked to join."
+  },
+  "requestsEmpty": "Nothing waiting for you. Band invites, votes in your bands and your requests to join show up here.",
+  "@requestsEmpty": {
+    "description": "Requests page when empty."
+  },
+  "bandsEmpty": "You're not in a band yet. Create one, or Jam on a band card in the feed.",
+  "@bandsEmpty": {
+    "description": "Bands page when you have none."
+  },
+  "requestVoteAsked": "Asked to join {band}",
+  "@requestVoteAsked": {
+    "description": "Requests page: someone asked to join one of your bands.",
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "requestVoteProposed": "Proposed for {band} by {name}",
+  "@requestVoteProposed": {
+    "description": "Requests page: a bandmate proposed someone.",
+    "placeholders": {
+      "band": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "requestVoteRemoval": "Vote on removing them from {band}",
+  "@requestVoteRemoval": {
+    "description": "Requests page: an open vote on removing a member.",
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "lineupEdit": "Edit",
+  "@lineupEdit": {
+    "description": "The pill at the end of the feed's band row; opens the role chooser."
+  },
+  "lineupEditLabel": "Choose the roles your band needs",
+  "@lineupEditLabel": {
+    "description": "What screen readers say for the band row's Edit pill."
+  },
+  "lineupHint": "Tap here to choose which musicians your band needs",
+  "@lineupHint": {
+    "description": "First-time hint under the feed's band row."
+  }
 }

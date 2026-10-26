@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ import '../widgets/musician_card.dart';
 import '../widgets/octava_logo.dart';
 import '../widgets/safety_sheet.dart';
 import 'filters_screen.dart';
+import 'matches_screen.dart' show InboxPage;
 
 /// The main screen: your band lineup, a deck of musician cards to drag or
 /// tap through, and Pass / Jam buttons.
@@ -39,7 +41,7 @@ class SwipeScreen extends StatefulWidget {
     super.key,
     this.source = const SampleDeck(),
     this.onRecord,
-    this.onOpenMatches,
+    this.onOpenInbox,
     this.onOpenChat,
     this.safety,
     this.player,
@@ -48,6 +50,7 @@ class SwipeScreen extends StatefulWidget {
     this.location,
     this.filterStore,
     this.hints,
+    this.lineupHints,
     this.bandNeeds,
     this.live,
     this.bands,
@@ -74,6 +77,9 @@ class SwipeScreen extends StatefulWidget {
   /// Without one the hint plays each time the screen opens.
   final HintStore? hints;
 
+  /// Remembers the band row's first-time tap hint, like [hints].
+  final HintStore? lineupHints;
+
   /// Shows AI avatars on cards when set.
   final AvatarRepository? avatars;
 
@@ -93,8 +99,9 @@ class SwipeScreen extends StatefulWidget {
   /// Block and report from a card. Without it cards have no flag button.
   final SafetyRepository? safety;
 
-  /// Shows a Matches button when set.
-  final VoidCallback? onOpenMatches;
+  /// Opens Messages, Requests or Bands from the bottom bar. Without it there
+  /// are no such buttons; Requests and Bands also need [bands].
+  final void Function(InboxPage page)? onOpenInbox;
 
   /// Opens the chat for a new match ("Say hi"). Without it, "Say hi" only
   /// shows a confirmation.
@@ -140,6 +147,14 @@ class _SwipeScreenState extends State<SwipeScreen>
   bool _hintChecked = false;
   bool _hinting = false;
   bool _hintShown = false; // stays true while the hint fades out
+
+  // After the swipe hint (owner, 2026-10-26: people didn't notice the band
+  // row could be changed): the row lights up yellow with a "tap here" bubble
+  // under it for a few seconds. Tapping the row, or swiping, ends it.
+  late final HintStore _lineupHints = widget.lineupHints ?? MemoryHintStore();
+  bool _lineupChecked = false;
+  bool _lineupHinting = false;
+  Timer? _lineupTimer;
 
   late int _matchSetVersion = widget.live?.matchSetVersion ?? 0;
 
@@ -262,6 +277,7 @@ class _SwipeScreenState extends State<SwipeScreen>
   @override
   void dispose() {
     widget.live?.removeListener(_onLive);
+    _lineupTimer?.cancel();
     _anim.dispose();
     super.dispose();
   }
@@ -276,6 +292,7 @@ class _SwipeScreenState extends State<SwipeScreen>
   bool _fitsOpenSlot(Musician m) => _openSlotFor(m) >= 0;
 
   Future<void> _editBand() async {
+    _stopLineupHint();
     final chosen = await showBandRolesSheet(
       context,
       needs: _needs ?? defaultBandNeeds(_myRole),
@@ -321,7 +338,10 @@ class _SwipeScreenState extends State<SwipeScreen>
   Future<void> _maybeShowHint() async {
     if (!swipeHintEnabled || _hintChecked || _queue.isEmpty) return;
     _hintChecked = true;
-    if (await _hints.seen()) return;
+    if (await _hints.seen()) {
+      _maybeShowLineupHint();
+      return;
+    }
     // Let the card land on screen first.
     await Future<void>.delayed(const Duration(milliseconds: 700));
     if (!mounted || _queue.isEmpty || _busy || _drag != Offset.zero) return;
@@ -355,12 +375,81 @@ class _SwipeScreenState extends State<SwipeScreen>
   }
 
   /// Ends the hint at once; the card stays where it is for the person's drag.
+  /// The band row's hint follows.
   void _stopHint() {
     if (!_hinting) return;
     _anim.stop();
     if (mounted) {
       setState(() {
         _hinting = false;
+      });
+    }
+    _maybeShowLineupHint();
+  }
+
+  /// The card deck, or the loading, error and empty states.
+  Widget _deckArea() => LayoutBuilder(
+    builder: (context, constraints) {
+      _deckWidth = constraints.maxWidth;
+      if (_loading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (_loadError != null) {
+        return _DeckMessage(
+          title: context.t.loadErrorTitle,
+          body: _loadError!,
+          action: context.t.tryAgain,
+          onAction: _reload,
+        );
+      }
+      if (_queue.isEmpty && _filters.activeCount > 0) {
+        return _DeckMessage(
+          title: context.t.noMatchTitle,
+          body: context.t.noMatchBody,
+          action: context.t.changeFilters,
+          onAction: _openFilters,
+        );
+      }
+      if (_queue.isEmpty) {
+        // Seen everyone: the best fix for an empty
+        // feed is bringing friends in.
+        return _DeckMessage(
+          title: context.t.heardEveryoneTitle,
+          body: context.t.heardEveryoneBody,
+          main: context.t.inviteMusicians,
+          onMain: inviteMusicians,
+          action: context.t.changeFilters,
+          onAction: _openFilters,
+          extra: context.t.checkAgain,
+          onExtra: _reload,
+        );
+      }
+      return _buildDeck();
+    },
+  );
+
+  /// Points out, once, that the band row opens the role chooser.
+  Future<void> _maybeShowLineupHint() async {
+    if (!swipeHintEnabled || _lineupChecked || _band.isEmpty) return;
+    _lineupChecked = true;
+    if (await _lineupHints.seen() || !mounted) return;
+    // A moment after the swipe hint, so they don't run together.
+    _lineupTimer = Timer(const Duration(milliseconds: 600), () async {
+      if (!mounted) return;
+      await _lineupHints.markSeen();
+      if (!mounted) return;
+      setState(() {
+        _lineupHinting = true;
+      });
+      _lineupTimer = Timer(const Duration(seconds: 6), _stopLineupHint);
+    });
+  }
+
+  void _stopLineupHint() {
+    _lineupTimer?.cancel();
+    if (_lineupHinting && mounted) {
+      setState(() {
+        _lineupHinting = false;
       });
     }
   }
@@ -393,6 +482,7 @@ class _SwipeScreenState extends State<SwipeScreen>
   Future<void> _decide(Decision decision) async {
     if (_busy || _queue.isEmpty) return;
     _stopHint();
+    _stopLineupHint();
     _busy = true;
     widget.player?.stop();
     final item = _queue.first;
@@ -642,6 +732,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                         band: _band,
                         justFilled: _justFilled,
                         onEdit: _editBand,
+                        highlight: _lineupHinting,
                       ),
                       if (widget.location != null &&
                           !_loading &&
@@ -654,50 +745,29 @@ class _SwipeScreenState extends State<SwipeScreen>
                       ],
                       const SizedBox(height: 14),
                       Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            _deckWidth = constraints.maxWidth;
-                            if (_loading) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (_loadError != null) {
-                              return _DeckMessage(
-                                title: context.t.loadErrorTitle,
-                                body: _loadError!,
-                                action: context.t.tryAgain,
-                                onAction: _reload,
-                              );
-                            }
-                            if (_queue.isEmpty && _filters.activeCount > 0) {
-                              return _DeckMessage(
-                                title: context.t.noMatchTitle,
-                                body: context.t.noMatchBody,
-                                action: context.t.changeFilters,
-                                onAction: _openFilters,
-                              );
-                            }
-                            if (_queue.isEmpty) {
-                              // Seen everyone: the best fix for an empty
-                              // feed is bringing friends in.
-                              return _DeckMessage(
-                                title: context.t.heardEveryoneTitle,
-                                body: context.t.heardEveryoneBody,
-                                main: context.t.inviteMusicians,
-                                onMain: inviteMusicians,
-                                action: context.t.changeFilters,
-                                onAction: _openFilters,
-                                extra: context.t.checkAgain,
-                                onExtra: _reload,
-                              );
-                            }
-                            return _buildDeck();
-                          },
+                        child: Stack(
+                          children: [
+                            Positioned.fill(child: _deckArea()),
+                            // The band row's hint, over the top of the card,
+                            // so nothing below it moves.
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: IgnorePointer(
+                                ignoring: !_lineupHinting,
+                                child: AnimatedOpacity(
+                                  opacity: _lineupHinting ? 1 : 0,
+                                  duration: const Duration(milliseconds: 250),
+                                  child: _LineupHint(onTap: _editBand),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       if (widget.onOpenProfile != null ||
-                          widget.onOpenMatches != null ||
+                          widget.onOpenInbox != null ||
                           widget.onRecord != null) ...[
                         // The bar floats in the middle of the space between
                         // the card and the screen's bottom: 10 px of clear
@@ -712,7 +782,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                                   await widget.onOpenProfile!();
                                   if (mounted) _reload();
                                 },
-                          onMatches: widget.onOpenMatches,
+                          onInbox: widget.onOpenInbox,
                           live: widget.live,
                           bands: widget.bands,
                           onRecord: widget.onRecord == null
@@ -818,6 +888,66 @@ class _SwipeScreenState extends State<SwipeScreen>
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The band row's first-time hint: a yellow bubble pointing up at the row.
+class _LineupHint extends StatelessWidget {
+  const _LineupHint({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          children: [
+            ExcludeSemantics(
+              child: Icon(
+                Icons.arrow_drop_up_rounded,
+                size: 34,
+                color: OctavaColors.ink,
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, -12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: printBox(
+                  context,
+                  color: OctavaColors.yellow,
+                  radius: 16,
+                  shadow: 3,
+                  borderColor: OctavaColors.ink,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10,
+                  children: [
+                    Icon(Icons.touch_app_rounded, color: OctavaColors.ink),
+                    Flexible(
+                      child: Text(
+                        context.t.lineupHint,
+                        style: TextStyle(
+                          color: OctavaColors.ink,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1033,75 +1163,94 @@ class _LocationPrompt extends StatelessWidget {
   }
 }
 
-/// Bottom navigation as a floating pill, like Instagram's: Profile, a pink
-/// ➕ (record a clip) and Matches, icons only. Their names are tooltips
+/// Bottom navigation as a floating pill, like Instagram's: Profile,
+/// Messages, a pink 🎤 (record a clip), Requests and Bands, icons only, each
+/// with its own badge (owner, 2026-10-26). Their names are tooltips
 /// (long-press) and what screen readers say.
 class _BottomBar extends StatelessWidget {
   const _BottomBar({
     this.onProfile,
-    this.onMatches,
+    this.onInbox,
     this.onRecord,
     this.live,
     this.bands,
   });
 
-  /// For band invites, votes and unread band messages, also on Matches.
+  /// Band invites and votes (Requests) and unread band messages (Bands).
+  /// Without it there are no Requests and Bands buttons.
   final LiveBands? bands;
 
-  /// For the unread count on Matches.
+  /// For the unread count on Messages.
   final LiveUpdates? live;
   final VoidCallback? onProfile;
-  final VoidCallback? onMatches;
+  final void Function(InboxPage page)? onInbox;
   final VoidCallback? onRecord;
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
+    final inbox = onInbox;
+    final bands = this.bands;
     // As wide as the card above it, with room around it so it floats.
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: printBox(context, radius: 999, shadow: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          if (onProfile != null)
-            _BarButton(
-              icon: Icons.person_outline_rounded,
-              label: context.t.navProfile,
-              onTap: onProfile!,
-            ),
-          if (onRecord != null)
-            // Pink on a yellow hard shadow, like the design's main key.
-            DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                boxShadow: hardShadow(OctavaColors.yellow, offset: 2),
+      child: ListenableBuilder(
+        listenable: Listenable.merge([?live, ?bands]),
+        builder: (context, _) => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            if (onProfile != null)
+              _BarButton(
+                icon: Icons.person_outline_rounded,
+                label: t.navProfile,
+                onTap: onProfile!,
               ),
-              child: Tooltip(
-                message: context.t.navAdd,
-                child: FilledButton(
-                  onPressed: onRecord,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: OctavaColors.pink,
-                    foregroundColor: OctavaColors.ink,
-                    minimumSize: const Size(60, 36),
-                    padding: EdgeInsets.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            if (inbox != null)
+              _BarButton(
+                icon: Icons.chat_bubble_outline_rounded,
+                label: t.navMessages,
+                onTap: () => inbox(InboxPage.messages),
+                badge: live?.unreadTotal ?? 0,
+              ),
+            if (onRecord != null)
+              // Pink on a yellow hard shadow, like the design's main key.
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: hardShadow(OctavaColors.yellow, offset: 2),
+                ),
+                child: Tooltip(
+                  message: t.navAdd,
+                  child: FilledButton(
+                    onPressed: onRecord,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: OctavaColors.pink,
+                      foregroundColor: OctavaColors.ink,
+                      minimumSize: const Size(60, 36),
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Icon(Icons.mic_rounded, size: 24),
                   ),
-                  child: const Icon(Icons.mic_rounded, size: 24),
                 ),
               ),
-            ),
-          if (onMatches != null)
-            ListenableBuilder(
-              listenable: Listenable.merge([?live, ?bands]),
-              builder: (context, _) => _BarButton(
-                icon: Icons.headphones_outlined,
-                label: context.t.navMatches,
-                onTap: onMatches!,
-                badge: (live?.unreadTotal ?? 0) + (bands?.badgeCount ?? 0),
+            if (inbox != null && bands != null) ...[
+              _BarButton(
+                icon: Icons.mark_email_unread_outlined,
+                label: t.navRequests,
+                onTap: () => inbox(InboxPage.requests),
+                badge: bands.actionCount,
               ),
-            ),
-        ],
+              _BarButton(
+                icon: Icons.groups_outlined,
+                label: t.bandsTitle,
+                onTap: () => inbox(InboxPage.bands),
+                badge: bands.unreadTotal,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

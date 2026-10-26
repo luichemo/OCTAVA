@@ -35,7 +35,7 @@ void main() {
         location: FakeLocation(),
         filterStore: MemoryFilterStore(),
         onOpenProfile: () async {},
-        onOpenMatches: () {},
+        onOpenInbox: (_) {},
         onRecord: () {},
       ),
     );

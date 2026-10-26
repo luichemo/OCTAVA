@@ -14,14 +14,20 @@ export '../models/band.dart' show youMarker;
 /// and a chevron. Four segments share the width; more scroll sideways.
 /// Screen readers hear each slot ("Drums: Nika" / "Bass: Open"). The slot at
 /// index [justFilled] flashes yellow when a match fills it. Tapping the strip
-/// calls [onEdit].
+/// calls [onEdit]; it ends in a yellow Edit pill so that's easy to see
+/// (owner, 2026-10-26), and [highlight] lights the whole strip up for the
+/// first-time hint.
 class BandLineup extends StatelessWidget {
   const BandLineup({
     super.key,
     required this.band,
     this.justFilled,
     this.onEdit,
+    this.highlight = false,
   });
+
+  /// Outlines the strip in yellow (the first-time "tap here" hint).
+  final bool highlight;
 
   /// Display order; see [buildLineup].
   final List<BandSlot> band;
@@ -122,21 +128,60 @@ class BandLineup extends StatelessWidget {
               style: small.copyWith(color: colors.onSurface),
             ),
           ),
-          if (onEdit != null)
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: colors.onSurfaceVariant,
+          if (onEdit != null) ...[
+            const SizedBox(width: 8),
+            Semantics(
+              button: true,
+              label: t.lineupEditLabel,
+              child: ExcludeSemantics(
+                child: Container(
+                  height: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: OctavaColors.yellow,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: OctavaColors.ink, width: 1.2),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 3,
+                    children: [
+                      Icon(
+                        Icons.edit_rounded,
+                        size: 13,
+                        color: OctavaColors.ink,
+                      ),
+                      Text(
+                        t.lineupEdit,
+                        style: small.copyWith(color: OctavaColors.ink),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
+          ],
         ],
       ),
     );
     final edit = onEdit;
-    if (edit == null) return strip;
+    final lit = AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: highlight ? OctavaColors.yellow : Colors.transparent,
+          width: 2.5,
+        ),
+      ),
+      child: strip,
+    );
+    if (edit == null) return lit;
     return GestureDetector(
       onTap: edit,
       behavior: HitTestBehavior.opaque,
-      child: strip,
+      child: lit,
     );
   }
 }

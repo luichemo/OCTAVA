@@ -1,11 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Whether the first-time swipe hint can play. Switched off for all tests
-/// (test/flutter_test_config.dart), like the spinning logo; the hint's own
-/// test switches it back on.
+/// Whether the first-time hints (the swipe hint and the band row's tap hint)
+/// can play. Switched off for all tests (test/flutter_test_config.dart), like
+/// the spinning logo; the hints' own tests switch it back on.
 bool swipeHintEnabled = true;
 
-/// Remembers that the swipe hint has been shown, so it plays only once.
+/// Remembers that a first-time hint has been shown, so it plays only once.
 abstract class HintStore {
   Future<bool> seen();
   Future<void> markSeen();
@@ -14,10 +14,14 @@ abstract class HintStore {
 /// Once per account on each device, saved with shared_preferences, so a
 /// new account (even one made again after deleting) sees it once too.
 class PrefsHintStore implements HintStore {
-  PrefsHintStore(this._userId);
+  PrefsHintStore(this._userId, {this.name = 'swipe_hint'});
   final String _userId;
 
-  String get _key => 'swipe_hint_seen_$_userId';
+  /// Which hint: `swipe_hint` (the feed's swipe hint) or `lineup_hint` (the
+  /// band row's tap hint).
+  final String name;
+
+  String get _key => '${name}_seen_$_userId';
 
   @override
   Future<bool> seen() async {

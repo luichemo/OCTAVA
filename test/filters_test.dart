@@ -142,7 +142,7 @@ void main() {
     });
   });
 
-  testWidgets('the bottom bar holds profile, record and matches', (
+  testWidgets('the bottom bar holds profile, record and messages', (
     tester,
   ) async {
     var opened = <String>[];
@@ -150,7 +150,7 @@ void main() {
       tester,
       SwipeScreen(
         onOpenProfile: () async => opened.add('profile'),
-        onOpenMatches: () => opened.add('matches'),
+        onOpenInbox: (page) => opened.add(page.name),
         onRecord: () => opened.add('record'),
       ),
     );
@@ -162,8 +162,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Record a clip'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Matches'));
-    expect(opened, ['profile', 'record', 'matches']);
+    await tester.tap(find.byTooltip('Messages'));
+    expect(opened, ['profile', 'record', 'messages']);
     opened = [];
   });
 }

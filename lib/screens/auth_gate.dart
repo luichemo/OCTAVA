@@ -138,6 +138,7 @@ class _AuthGateState extends State<AuthGate> {
           location: DeviceLocationRepository(client),
           filterStore: PrefsFilterStore(user.id),
           hints: PrefsHintStore(user.id),
+          lineupHints: PrefsHintStore(user.id, name: 'lineup_hint'),
         );
       },
     );
@@ -157,6 +158,7 @@ class ProfileGate extends StatefulWidget {
     this.location,
     this.filterStore,
     this.hints,
+    this.lineupHints,
     this.bandNeeds,
     this.bands,
     this.rehearsals,
@@ -208,6 +210,9 @@ class ProfileGate extends StatefulWidget {
 
   /// Remembers the feed's first-time swipe hint for this account.
   final HintStore? hints;
+
+  /// Remembers the band row's first-time tap hint for this account.
+  final HintStore? lineupHints;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -274,7 +279,7 @@ class _ProfileGateState extends State<ProfileGate> {
       case 'band' when _bands != null && data['band_id'] is String:
         _openBandChat(data['band_id'] as String);
       case 'bands' when widget.chat != null:
-        _openMatches();
+        _openInbox(InboxPage.requests);
     }
   }
 
@@ -314,11 +319,12 @@ class _ProfileGateState extends State<ProfileGate> {
     _status = widget.repository.myStatus();
   });
 
-  void _openMatches() {
+  void _openInbox(InboxPage page) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => MatchesScreen(
           repository: widget.chat!,
+          page: page,
           live: _live,
           safety: widget.safety,
           avatars: widget.avatars,
@@ -447,7 +453,7 @@ class _ProfileGateState extends State<ProfileGate> {
                 onRecord: widget.clips == null
                     ? null
                     : () => showRecordSheet(context, clips: widget.clips!),
-                onOpenMatches: widget.chat == null ? null : _openMatches,
+                onOpenInbox: widget.chat == null ? null : _openInbox,
                 onOpenChat: widget.chat == null ? null : _openChat,
                 safety: widget.safety,
                 player: _player,
@@ -456,6 +462,7 @@ class _ProfileGateState extends State<ProfileGate> {
                 location: widget.location,
                 filterStore: widget.filterStore,
                 hints: widget.hints,
+                lineupHints: widget.lineupHints,
                 bandNeeds: widget.bandNeeds,
                 live: _live,
                 bands: _bands,

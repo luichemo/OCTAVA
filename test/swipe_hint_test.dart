@@ -16,11 +16,19 @@ void main() {
   setUp(() => swipeHintEnabled = true);
   tearDown(() => swipeHintEnabled = false);
 
-  Future<void> pumpFeed(WidgetTester tester, HintStore hints) async {
+  Future<void> pumpFeed(
+    WidgetTester tester,
+    HintStore hints, {
+    HintStore? lineupHints,
+  }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(OctavaApp(home: SwipeScreen(hints: hints)));
+    await tester.pumpWidget(
+      OctavaApp(
+        home: SwipeScreen(hints: hints, lineupHints: lineupHints),
+      ),
+    );
     await tester.pump(); // the deck loads
     await tester.pump();
   }
@@ -90,10 +98,88 @@ void main() {
   });
 
   testWidgets('it plays only once', (tester) async {
-    await pumpFeed(tester, MemoryHintStore(wasSeen: true));
+    await pumpFeed(
+      tester,
+      MemoryHintStore(wasSeen: true),
+      lineupHints: MemoryHintStore(wasSeen: true),
+    );
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.text(_caption), findsNothing);
     expect(cardOffset(tester), 0);
+  });
+
+  group('the band row hint', () {
+    const lineupCaption = 'Tap here to choose which musicians your band needs';
+
+    testWidgets('follows the swipe hint, then goes by itself', (tester) async {
+      final lineup = MemoryHintStore();
+      await pumpFeed(tester, MemoryHintStore(), lineupHints: lineup);
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump();
+      expect(find.text(_caption), findsOneWidget);
+      expect(lineup.wasSeen, isFalse); // not yet: the swipe hint is first
+
+      // The swipe hint plays through (about 4 s), then the row's hint.
+      for (var i = 0; i < 50; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pumpAndSettle();
+      expect(lineup.wasSeen, isTrue);
+      expect(find.text(lineupCaption), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<AnimatedOpacity>(
+              find.ancestor(
+                of: find.text(lineupCaption),
+                matching: find.byType(AnimatedOpacity),
+              ),
+            )
+            .opacity,
+        0,
+      );
+    });
+
+    testWidgets('tapping it opens the role chooser', (tester) async {
+      await pumpFeed(
+        tester,
+        MemoryHintStore(wasSeen: true),
+        lineupHints: MemoryHintStore(),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(lineupCaption));
+      await tester.pumpAndSettle();
+      expect(find.text('Who does your band need?'), findsOneWidget);
+    });
+
+    testWidgets('plays only once', (tester) async {
+      await pumpFeed(
+        tester,
+        MemoryHintStore(wasSeen: true),
+        lineupHints: MemoryHintStore(wasSeen: true),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      final opacity = find.ancestor(
+        of: find.text(lineupCaption),
+        matching: find.byType(AnimatedOpacity),
+      );
+      expect(tester.widget<AnimatedOpacity>(opacity).opacity, 0);
+    });
+  });
+
+  testWidgets('the band row has an Edit pill that opens the role chooser', (
+    tester,
+  ) async {
+    swipeHintEnabled = false;
+    await pumpFeed(tester, MemoryHintStore());
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    expect(find.text('Who does your band need?'), findsOneWidget);
   });
 }
