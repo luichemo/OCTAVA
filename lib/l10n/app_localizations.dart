@@ -4358,12 +4358,6 @@ abstract class AppLocalizations {
   /// **'Proposed for {band} by {name}'**
   String requestVoteProposed(String band, String name);
 
-  /// Requests page: an open vote on removing a member.
-  ///
-  /// In en, this message translates to:
-  /// **'Vote on removing them from {band}'**
-  String requestVoteRemoval(String band);
-
   /// The pill at the end of the feed's band row; opens the role chooser.
   ///
   /// In en, this message translates to:

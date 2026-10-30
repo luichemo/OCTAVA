@@ -1128,34 +1128,41 @@ void main() {
       await tester.tap(find.text('Start the vote'));
       await tester.pumpAndSettle();
 
-      // 3 members: both others must agree; your yes is the first of 2.
       expect(find.text('Vote started on removing Tamar.'), findsOneWidget);
-      expect(find.text('Removing members'), findsOneWidget);
-      expect(find.textContaining('1 of 2 needed'), findsOneWidget);
-      expect(find.text('You agreed'), findsOneWidget);
+      expect(repo.bands.single.removals, hasLength(1));
       expect(repo.bands.single.members, hasLength(3));
+      // The vote itself is in Requests now.
+      expect(find.text('Removing members'), findsNothing);
+      expect(find.byTooltip('Options for Tamar'), findsNothing);
     });
 
-    testWidgets('a removal passes with a majority of the others', (
+    testWidgets('a removal is voted on in Requests and passes by majority', (
       tester,
     ) async {
-      final repo = await pumpBand(
+      final (repo, _) = await pumpMatches(
         tester,
-        const MyBand(
-          id: 'b1',
-          name: 'Riot',
-          members: [me, nika, tamar],
-          removals: [
-            BandRemoval(
-              id: 'r1',
-              target: tamar,
-              proposedBy: nika,
-              yesBy: {'nika'},
-              votedBy: {'nika'},
-            ),
-          ],
-        ),
+        page: InboxPage.requests,
+        bands: [
+          const MyBand(
+            id: 'b1',
+            name: 'Riot',
+            members: [me, nika, tamar],
+            removals: [
+              BandRemoval(
+                id: 'r1',
+                target: tamar,
+                proposedBy: nika,
+                yesBy: {'nika'},
+                votedBy: {'nika'},
+              ),
+            ],
+          ),
+        ],
       );
+      // 3 members: both others must agree; Nika's yes is the first of 2.
+      expect(find.text('Removing members'), findsOneWidget);
+      expect(find.textContaining('Riot · Proposed by Nika'), findsOneWidget);
+      expect(find.textContaining('1 of 2 needed'), findsOneWidget);
       final remove = find.widgetWithText(FilledButton, 'Remove');
       await tester.ensureVisible(remove);
       await tester.pumpAndSettle();
@@ -1163,6 +1170,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.removalVotes, ['r1:true']);
       expect(repo.bands.single.members.map((m) => m.id), ['me', 'nika']);
+      expect(find.text('Tamar was removed from the band.'), findsOneWidget);
       expect(find.text('Removing members'), findsNothing);
     });
 

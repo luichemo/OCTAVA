@@ -398,34 +398,6 @@ class _BandScreenState extends State<BandScreen> {
                               ),
                             ),
                           ],
-                          if (band.removals.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            _Heading(t.bandRemovalsHeading),
-                            for (final r in band.removals)
-                              _RemovalCard(
-                                removal: r,
-                                needed: r.neededIn(band.members.length),
-                                me: _me,
-                                avatars: widget.avatars,
-                                onSeeCard: () => _openCard(r.target),
-                                onVote: (yes) => _run(
-                                  () => widget.bands.repository.voteRemoval(
-                                    r.id,
-                                    approve: yes,
-                                  ),
-                                ),
-                                // Yours, or left by someone who left.
-                                onCancel:
-                                    r.proposedBy?.id == _me ||
-                                        !band.hasMember(r.proposedBy?.id ?? '')
-                                    ? () => _run(
-                                        () => widget.bands.repository
-                                            .cancelRemoval(r.id),
-                                        done: t.bandRemovalCancelled,
-                                      )
-                                    : null,
-                              ),
-                          ],
                           if (band.proposals.any((p) => !p.requested)) ...[
                             const SizedBox(height: 16),
                             _Heading(t.bandWaiting),
@@ -883,8 +855,10 @@ class _BandProfileCard extends StatelessWidget {
 
 /// A vote on removing a member: how many have agreed out of how many are
 /// needed, and your Remove / Keep (or Cancel vote, if you started it).
-class _RemovalCard extends StatelessWidget {
-  const _RemovalCard({
+/// Shown in Requests (owner, 2026-10-30), where [bandName] says which band.
+class RemovalCard extends StatelessWidget {
+  const RemovalCard({
+    super.key,
     required this.removal,
     required this.needed,
     required this.me,
@@ -892,7 +866,11 @@ class _RemovalCard extends StatelessWidget {
     this.onCancel,
     this.avatars,
     this.onSeeCard,
+    this.bandName,
   });
+
+  /// Which band.
+  final String? bandName;
 
   final VoidCallback? onSeeCard;
   final BandRemoval removal;
@@ -920,6 +898,7 @@ class _RemovalCard extends StatelessWidget {
             padding: const EdgeInsets.only(left: 12),
             child: Text(
               [
+                ?bandName,
                 if (r.proposedBy case final by?) t.bandProposedBy(by.name),
                 t.bandRemovalCount(r.yesBy.length, needed),
               ].join(' · '),

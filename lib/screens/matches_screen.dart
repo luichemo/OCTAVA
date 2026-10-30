@@ -230,6 +230,42 @@ class _MatchesScreenState extends State<MatchesScreen> {
     }
   }
 
+  /// A vote on removing a member; says so when it removes them.
+  Future<void> _voteOnRemoval(
+    MyBand band,
+    BandRemoval r, {
+    required bool approve,
+  }) async {
+    final bands = widget.bands!;
+    final messenger = ScaffoldMessenger.of(context);
+    final t = context.t;
+    try {
+      await bands.repository.voteRemoval(r.id, approve: approve);
+      await bands.refresh();
+      final still = bands.bandById(band.id)?.hasMember(r.target.id) ?? false;
+      if (approve && !still) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(t.bandRemovedNow(r.target.name))),
+        );
+      }
+    } on UserFacingException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  Future<void> _cancelRemoval(BandRemoval r) async {
+    final bands = widget.bands!;
+    final messenger = ScaffoldMessenger.of(context);
+    final t = context.t;
+    try {
+      await bands.repository.cancelRemoval(r.id);
+      await bands.refresh();
+      messenger.showSnackBar(SnackBar(content: Text(t.bandRemovalCancelled)));
+    } on UserFacingException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   /// Loading and error states while [bands] has nothing yet, else null.
   Widget? _bandsNotReady(LiveBands bands) {
     if (bands.bands != null) return null;
@@ -265,14 +301,6 @@ class _MatchesScreenState extends State<MatchesScreen> {
               avatars: widget.avatars,
               onTap: () => _openBandPage(band.id),
             ),
-        for (final r in band.removals)
-          if (!r.votedBy.contains(me))
-            _VoteTile(
-              person: r.target,
-              line: t.requestVoteRemoval(band.name),
-              avatars: widget.avatars,
-              onTap: () => _openBandPage(band.id),
-            ),
       ],
     ];
     // Requests to join your bands (Jams on their cards), voted on right here
@@ -297,8 +325,36 @@ class _MatchesScreenState extends State<MatchesScreen> {
               onVote: (approve) => _voteOnRequest(band, p, approve: approve),
             ),
     ];
+    // Votes on removing a member, also voted on right here (owner,
+    // 2026-10-30). The person being removed never sees them.
+    final removals = [
+      for (final band in bands.bands!)
+        for (final r in band.removals)
+          RemovalCard(
+            removal: r,
+            needed: r.neededIn(band.members.length),
+            me: me,
+            avatars: widget.avatars,
+            bandName: band.name,
+            onSeeCard: () => showBandPersonCard(
+              context,
+              repository: bands.repository,
+              person: r.target,
+              player: widget.player,
+              avatars: widget.avatars,
+            ),
+            onVote: (yes) => _voteOnRemoval(band, r, approve: yes),
+            // Yours, or left by someone who left.
+            onCancel:
+                r.proposedBy?.id == me ||
+                    !band.hasMember(r.proposedBy?.id ?? '')
+                ? () => _cancelRemoval(r)
+                : null,
+          ),
+    ];
     if (bands.invites.isEmpty &&
         asked.isEmpty &&
+        removals.isEmpty &&
         votes.isEmpty &&
         bands.requests.isEmpty) {
       return _Message(text: t.requestsEmpty);
@@ -321,6 +377,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(children: asked),
+            ),
+          ],
+          if (removals.isNotEmpty) ...[
+            _SectionHeading(t.bandRemovalsHeading),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(children: removals),
             ),
           ],
           if (votes.isNotEmpty) ...[_SectionHeading(t.requestsVotes), ...votes],

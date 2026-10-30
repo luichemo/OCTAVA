@@ -2538,11 +2538,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String requestVoteRemoval(String band) {
-    return 'Vote on removing them from $band';
-  }
-
-  @override
   String get lineupEdit => 'Edit';
 
   @override

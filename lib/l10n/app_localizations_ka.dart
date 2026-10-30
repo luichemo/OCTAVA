@@ -2518,11 +2518,6 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String requestVoteRemoval(String band) {
-    return 'ხმის მიცემა $band-დან მის გარიცხვაზე';
-  }
-
-  @override
   String get lineupEdit => 'შეცვლა';
 
   @override

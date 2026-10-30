@@ -172,11 +172,12 @@ class MyBand {
       proposals.where((p) => !p.invited && !p.approvedBy.contains(me)).length +
       removals.where((r) => !r.votedBy.contains(me)).length;
 
-  /// The votes waiting for [me] on the band page: [votesWaitingFor] without
-  /// the requests to join, which are voted on in Requests (owner, 2026-10-30).
-  int bandPageVotesFor(String me) =>
-      votesWaitingFor(me) -
-      proposals.where((p) => p.requested && !p.approvedBy.contains(me)).length;
+  /// The votes waiting for [me] on the band page: new members proposed by
+  /// a bandmate. Requests to join (owner, 2026-10-30) and removals are voted
+  /// on in Requests instead.
+  int bandPageVotesFor(String me) => proposals
+      .where((p) => !p.requested && !p.invited && !p.approvedBy.contains(me))
+      .length;
 }
 
 /// An invite for you to join a band.

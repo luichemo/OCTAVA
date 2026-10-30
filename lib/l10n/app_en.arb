@@ -1533,15 +1533,6 @@
       }
     }
   },
-  "requestVoteRemoval": "Vote on removing them from {band}",
-  "@requestVoteRemoval": {
-    "description": "Requests page: an open vote on removing a member.",
-    "placeholders": {
-      "band": {
-        "type": "String"
-      }
-    }
-  },
   "lineupEdit": "Edit",
   "@lineupEdit": {
     "description": "The pill at the end of the feed's band row; opens the role chooser."
