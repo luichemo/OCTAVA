@@ -101,7 +101,7 @@ class _BandChatScreenState extends State<BandChatScreen> {
       listenable: widget.bands,
       builder: (context, _) {
         final band = widget.bands.bandById(widget.bandId);
-        final votes = band?.votesWaitingFor(_me) ?? 0;
+        final votes = band?.bandPageVotesFor(_me) ?? 0;
         return Scaffold(
           appBar: AppBar(
             backgroundColor: colors.surface,

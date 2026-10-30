@@ -183,27 +183,8 @@ class _BandScreenState extends State<BandScreen> {
   }
 
   Future<void> _vote(BandProposal p, {required bool approve}) async {
-    if (!approve) {
-      final t = context.t;
-      final sure = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(t.bandRejectTitle(p.candidate.name)),
-          content: Text(t.bandRejectBody),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(t.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(t.bandReject),
-            ),
-          ],
-        ),
-      );
-      if (sure != true || !mounted) return;
-    }
+    if (!approve && !await confirmReject(context, p.candidate.name)) return;
+    if (!mounted) return;
     final t = context.t;
     final messenger = ScaffoldMessenger.of(context);
     await _run(() => widget.bands.repository.vote(p.id, approve: approve));
@@ -445,29 +426,13 @@ class _BandScreenState extends State<BandScreen> {
                                     : null,
                               ),
                           ],
-                          // People who asked to join (Jam on the band card).
-                          if (band.proposals.any((p) => p.requested)) ...[
-                            const SizedBox(height: 16),
-                            _Heading(t.bandRequestsHeading),
-                            for (final p in band.proposals.where(
-                              (p) => p.requested,
-                            ))
-                              _ProposalCard(
-                                proposal: p,
-                                memberCount: band.members.length,
-                                me: _me,
-                                avatars: widget.avatars,
-                                onSeeCard: () => _openCard(p.candidate),
-                                onVote: (approve) => _vote(p, approve: approve),
-                              ),
-                          ],
                           if (band.proposals.any((p) => !p.requested)) ...[
                             const SizedBox(height: 16),
                             _Heading(t.bandWaiting),
                             for (final p in band.proposals.where(
                               (p) => !p.requested,
                             ))
-                              _ProposalCard(
+                              ProposalCard(
                                 proposal: p,
                                 memberCount: band.members.length,
                                 me: _me,
@@ -529,6 +494,29 @@ Future<void> showBandPersonCard(
   ),
 );
 
+/// Asks before a Reject, which cancels the proposal or request at once.
+Future<bool> confirmReject(BuildContext context, String name) async {
+  final t = context.t;
+  final sure = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(t.bandRejectTitle(name)),
+      content: Text(t.bandRejectBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(t.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(t.bandReject),
+        ),
+      ],
+    ),
+  );
+  return sure == true;
+}
+
 class _PersonTile extends StatelessWidget {
   const _PersonTile({
     required this.person,
@@ -546,10 +534,8 @@ class _PersonTile extends StatelessWidget {
 
   // Inside printBox cards the tap ripple needs its own transparent Material.
   @override
-  Widget build(BuildContext context) => Material(
-    type: MaterialType.transparency,
-    child: _tile(),
-  );
+  Widget build(BuildContext context) =>
+      Material(type: MaterialType.transparency, child: _tile());
 
   Widget _tile() => ListTile(
     onTap: onTap,
@@ -570,10 +556,12 @@ class _PersonTile extends StatelessWidget {
   );
 }
 
-/// Someone proposed to join: who proposed them, how many approved, and your
-/// Approve / Reject (or where it stands).
-class _ProposalCard extends StatelessWidget {
-  const _ProposalCard({
+/// Someone proposed to join, or asking to: who proposed them, how many
+/// approved, and your Approve / Reject (or where it stands). Also used in
+/// Requests, where [bandName] says which band.
+class ProposalCard extends StatelessWidget {
+  const ProposalCard({
+    super.key,
     required this.proposal,
     required this.memberCount,
     required this.me,
@@ -581,7 +569,11 @@ class _ProposalCard extends StatelessWidget {
     this.onCancel,
     this.avatars,
     this.onSeeCard,
+    this.bandName,
   });
+
+  /// Which band, when shown outside the band's page.
+  final String? bandName;
 
   /// Shown as Cancel request when you may withdraw it.
   final VoidCallback? onCancel;
@@ -610,15 +602,12 @@ class _ProposalCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _PersonTile(
-            person: p.candidate,
-            avatars: avatars,
-            onTap: onSeeCard,
-          ),
+          _PersonTile(person: p.candidate, avatars: avatars, onTap: onSeeCard),
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Text(
               [
+                ?bandName,
                 if (p.requested)
                   t.bandAskedToJoinLabel
                 else if (p.proposedBy case final by?)

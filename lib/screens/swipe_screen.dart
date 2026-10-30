@@ -1164,7 +1164,7 @@ class _LocationPrompt extends StatelessWidget {
 }
 
 /// Bottom navigation as a floating pill, like Instagram's: Profile,
-/// Messages, a pink 🎤 (record a clip), Requests and Bands, icons only, each
+/// Requests, a pink 🎤 (record a clip), Messages and Bands, icons only, each
 /// with its own badge (owner, 2026-10-26). Their names are tooltips
 /// (long-press) and what screen readers say.
 class _BottomBar extends StatelessWidget {
@@ -1206,12 +1206,12 @@ class _BottomBar extends StatelessWidget {
                 label: t.navProfile,
                 onTap: onProfile!,
               ),
-            if (inbox != null)
+            if (inbox != null && bands != null)
               _BarButton(
-                icon: Icons.chat_bubble_outline_rounded,
-                label: t.navMessages,
-                onTap: () => inbox(InboxPage.messages),
-                badge: live?.unreadTotal ?? 0,
+                icon: Icons.mark_email_unread_outlined,
+                label: t.navRequests,
+                onTap: () => inbox(InboxPage.requests),
+                badge: bands.actionCount,
               ),
             if (onRecord != null)
               // Pink on a yellow hard shadow, like the design's main key.
@@ -1235,20 +1235,20 @@ class _BottomBar extends StatelessWidget {
                   ),
                 ),
               ),
-            if (inbox != null && bands != null) ...[
+            if (inbox != null)
               _BarButton(
-                icon: Icons.mark_email_unread_outlined,
-                label: t.navRequests,
-                onTap: () => inbox(InboxPage.requests),
-                badge: bands.actionCount,
+                icon: Icons.chat_bubble_outline_rounded,
+                label: t.navMessages,
+                onTap: () => inbox(InboxPage.messages),
+                badge: live?.unreadTotal ?? 0,
               ),
+            if (inbox != null && bands != null)
               _BarButton(
                 icon: Icons.groups_outlined,
                 label: t.bandsTitle,
                 onTap: () => inbox(InboxPage.bands),
                 badge: bands.unreadTotal,
               ),
-            ],
           ],
         ),
       ),

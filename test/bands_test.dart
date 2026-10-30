@@ -805,7 +805,8 @@ void main() {
     );
     expect(find.text('Your vote'), findsOneWidget);
     expect(find.text('Proposed for Riot by Nika'), findsOneWidget);
-    expect(find.text('Asked to join Riot'), findsOneWidget);
+    // Dato asked to join: voted on right here, with the band named.
+    expect(find.textContaining('Riot · Asked to join'), findsOneWidget);
 
     await tester.tap(find.text('Tamar'));
     await tester.pumpAndSettle();
@@ -817,7 +818,9 @@ void main() {
     tester,
   ) async {
     final repo = FakeBandsRepository(
-      bands: [const MyBand(id: 'b1', name: 'Riot', members: [me, nika])],
+      bands: [
+        const MyBand(id: 'b1', name: 'Riot', members: [me, nika]),
+      ],
       invites: [
         const BandInvite(
           proposalId: 'p9',
@@ -834,10 +837,7 @@ void main() {
     await pump(tester, SwipeScreen(bands: live, onOpenInbox: opened.add));
     // The invite is a badge on Requests.
     expect(
-      find.descendant(
-        of: find.byTooltip('Requests'),
-        matching: find.text('1'),
-      ),
+      find.descendant(of: find.byTooltip('Requests'), matching: find.text('1')),
       findsOneWidget,
     );
     await tester.tap(find.byTooltip('Messages'));
@@ -1181,10 +1181,10 @@ void main() {
       expect(repo.bands.single.members.single.id, 'me');
     });
 
-    testWidgets('a request to join is voted on, and joins when all agree', (
+    testWidgets('a request to join is voted on in Requests, not here', (
       tester,
     ) async {
-      final repo = await pumpBand(
+      await pumpBand(
         tester,
         const MyBand(
           id: 'b1',
@@ -1201,8 +1201,37 @@ void main() {
           ],
         ),
       );
-      expect(find.text('Asked to join'), findsOneWidget);
-      expect(find.textContaining('1 of 2 approved'), findsOneWidget);
+      expect(find.text('Dato'), findsNothing);
+      expect(find.text('Approve'), findsNothing);
+    });
+
+    testWidgets('a request to join is voted on, and joins when all agree', (
+      tester,
+    ) async {
+      final (repo, _) = await pumpMatches(
+        tester,
+        page: InboxPage.requests,
+        bands: [
+          const MyBand(
+            id: 'b1',
+            name: 'Riot',
+            members: [me, nika],
+            proposals: [
+              BandProposal(
+                id: 'req',
+                candidate: dato,
+                invited: false,
+                requested: true,
+                approvedBy: {'nika'},
+              ),
+            ],
+          ),
+        ],
+      );
+      expect(
+        find.text('Riot · Asked to join · 1 of 2 approved'),
+        findsOneWidget,
+      );
 
       // Their card first, to see who's asking.
       repo.cards['dato'] = sampleMusicians.first;

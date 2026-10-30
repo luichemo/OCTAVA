@@ -204,6 +204,32 @@ class _MatchesScreenState extends State<MatchesScreen> {
     ),
   );
 
+  /// A vote on a request to join (Reject asks first). The person joins as
+  /// soon as the last member approves.
+  Future<void> _voteOnRequest(
+    MyBand band,
+    BandProposal p, {
+    required bool approve,
+  }) async {
+    final bands = widget.bands!;
+    if (!approve && !await confirmReject(context, p.candidate.name)) return;
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final t = context.t;
+    try {
+      await bands.repository.vote(p.id, approve: approve);
+      await bands.refresh();
+      if (approve &&
+          (bands.bandById(band.id)?.hasMember(p.candidate.id) ?? false)) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(t.bandMemberJoined(p.candidate.name))),
+        );
+      }
+    } on UserFacingException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   /// Loading and error states while [bands] has nothing yet, else null.
   Widget? _bandsNotReady(LiveBands bands) {
     if (bands.bands != null) return null;
@@ -230,10 +256,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
     final votes = [
       for (final band in bands.bands!) ...[
         for (final p in band.proposals)
-          if (!p.invited && !p.approvedBy.contains(me))
+          if (!p.requested && !p.invited && !p.approvedBy.contains(me))
             _VoteTile(
               person: p.candidate,
-              line: p.requested || p.proposedBy == null
+              line: p.proposedBy == null
                   ? t.requestVoteAsked(band.name)
                   : t.requestVoteProposed(band.name, p.proposedBy!.name),
               avatars: widget.avatars,
@@ -249,7 +275,32 @@ class _MatchesScreenState extends State<MatchesScreen> {
             ),
       ],
     ];
-    if (bands.invites.isEmpty && votes.isEmpty && bands.requests.isEmpty) {
+    // Requests to join your bands (Jams on their cards), voted on right here
+    // (owner, 2026-10-30), until every member has said yes.
+    final asked = [
+      for (final band in bands.bands!)
+        for (final p in band.proposals)
+          if (p.requested && !p.invited)
+            ProposalCard(
+              proposal: p,
+              memberCount: band.members.length,
+              me: me,
+              avatars: widget.avatars,
+              bandName: band.name,
+              onSeeCard: () => showBandPersonCard(
+                context,
+                repository: bands.repository,
+                person: p.candidate,
+                player: widget.player,
+                avatars: widget.avatars,
+              ),
+              onVote: (approve) => _voteOnRequest(band, p, approve: approve),
+            ),
+    ];
+    if (bands.invites.isEmpty &&
+        asked.isEmpty &&
+        votes.isEmpty &&
+        bands.requests.isEmpty) {
       return _Message(text: t.requestsEmpty);
     }
     return RefreshIndicator(
@@ -265,10 +316,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 onAnswer: (accept) => _answer(invite, accept: accept),
               ),
           ],
-          if (votes.isNotEmpty) ...[
-            _SectionHeading(t.requestsVotes),
-            ...votes,
+          if (asked.isNotEmpty) ...[
+            _SectionHeading(t.bandRequestsHeading),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(children: asked),
+            ),
           ],
+          if (votes.isNotEmpty) ...[_SectionHeading(t.requestsVotes), ...votes],
           if (bands.requests.isNotEmpty) ...[
             _SectionHeading(t.requestsMine),
             for (final request in bands.requests)
@@ -324,7 +379,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
             for (final band in mine)
               _BandTile(
                 band: band,
-                votesWaiting: band.votesWaitingFor(me),
+                votesWaiting: band.bandPageVotesFor(me),
                 onTap: () => _openBand(band.id),
               ),
         ],
@@ -378,14 +433,11 @@ class _MatchesScreenState extends State<MatchesScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colors.surface,
-        title: Text(
-          switch (page) {
-            InboxPage.messages => t.navMessages,
-            InboxPage.requests => t.navRequests,
-            InboxPage.bands => t.bandsTitle,
-          },
-          style: displayStyle(size: 32, color: colors.onSurface),
-        ),
+        title: Text(switch (page) {
+          InboxPage.messages => t.navMessages,
+          InboxPage.requests => t.navRequests,
+          InboxPage.bands => t.bandsTitle,
+        }, style: displayStyle(size: 32, color: colors.onSurface)),
       ),
       body: Center(
         child: ConstrainedBox(
